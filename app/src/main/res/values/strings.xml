@@ -1,3 +1,35 @@
 <resources>
-    <string name="app_name">PersonalEventPlanner305App</string>
+    <string name="app_name">Personal Event Planner App</string>
+    <string name="menu_event_list">Event List</string>
+    <string name="menu_add_event">Add Event</string>
+    <string name="upcoming_events">Upcoming Events</string>
+    <string name="no_events">No upcoming events yet.</string>
+    <string name="add_event">Add Event</string>
+    <string name="edit_event">Edit Event</string>
+    <string name="title_hint">Event title</string>
+    <string name="location_hint">Location</string>
+    <string name="pick_datetime">Pick Date/Time</string>
+    <string name="save_event">Save Event</string>
+    <string name="update_event">Update Event</string>
+    <string name="delete_event">Delete Event</string>
+    <string name="no_datetime_selected">No date/time selected</string>
+    <string name="selected_datetime">Selected: %1$s</string>
+    <string name="category_format">Category: %1$s</string>
+    <string name="location_format">Location: %1$s</string>
+    <string name="datetime_format">Date/Time: %1$s</string>
+    <string name="error_title_empty">Title cannot be empty.</string>
+    <string name="error_datetime_empty">Date/time cannot be empty.</string>
+    <string name="error_datetime_past">Date/time cannot be in the past.</string>
+    <string name="error_event_not_found">Event not found.</string>
+    <string name="message_event_saved">Event saved successfully.</string>
+    <string name="message_event_updated">Event updated successfully.</string>
+    <string name="message_event_deleted">Event deleted successfully.</string>
+
+    <string-array name="event_categories">
+        <item>Work</item>
+        <item>Social</item>
+        <item>Travel</item>
+        <item>Study</item>
+        <item>Other</item>
+    </string-array>
 </resources>
