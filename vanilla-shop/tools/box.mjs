@@ -139,6 +139,57 @@ const ICONS = {
 const icon = (name, cx, cy, r = 6.3, scale = 1) =>
   `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" fill="${TINT}"/><g transform="translate(${n(cx)} ${n(cy)}) scale(${scale})">${ICONS[name]}</g>`;
 
+// Product and legal details, taken from the pack currently sold in the shop (Vanilla_Tea_P.pdf).
+const DISTRIBUTOR = {
+  intro: 'Marketed and distributed by',
+  name: 'Agro Ventures Exports (Pvt) Ltd',
+  address: ['No. 48, Sir Marcus Fernando Mawatha,', 'Colombo 07, Sri Lanka'],
+  web: 'www.agroventuresexports.com',
+  email: 'info@agroventuresexports.com',
+  hotline: '011 2 187 287',
+};
+// GTIN from the current 25-bag, 50 g pack. A new pack size needs its own GTIN from GS1 Sri Lanka.
+const GTIN = '4796034220229';
+
+// EAN-13 at 80% magnification: 0.264 mm modules, 11/7-module quiet zones, human-readable digits.
+function ean13(code, x, y, fill = C.ink) {
+  const L = ['0001101', '0011001', '0010011', '0111101', '0100011', '0110001', '0101111', '0111011', '0110111', '0001011'];
+  const G = ['0100111', '0110011', '0011011', '0100001', '0011101', '0111001', '0000101', '0010001', '0001001', '0010111'];
+  const R = ['1110010', '1100110', '1101100', '1000010', '1011100', '1001110', '1010000', '1000100', '1001000', '1110100'];
+  const PARITY = ['LLLLLL', 'LLGLGG', 'LLGGLG', 'LLGGGL', 'LGLLGG', 'LGGLLG', 'LGGGLL', 'LGLGLG', 'LGLGGL', 'LGGLGL'];
+  const dg = code.split('').map(Number);
+  const check = (10 - dg.slice(0, 12).reduce((a, v, i) => a + v * (i % 2 ? 3 : 1), 0) % 10) % 10;
+  if (dg.length !== 13 || check !== dg[12]) throw new Error('Invalid EAN-13: ' + code);
+  let bits = '101', guards = [0, 1, 2];
+  dg.slice(1, 7).forEach((d, i) => { bits += (PARITY[dg[0]][i] === 'L' ? L : G)[d]; });
+  guards.push(bits.length + 1, bits.length + 3); bits += '01010';
+  dg.slice(7).forEach((d) => { bits += R[d]; });
+  guards.push(bits.length, bits.length + 2); bits += '101';
+  const m = 0.264, qz = 11 * m, barH = 18.28, guardExtra = 1.32;
+  let d = '';
+  for (let i = 0; i < bits.length; i++) {
+    if (bits[i] !== '1') continue;
+    let j = i; while (bits[j + 1] === '1' && guards.includes(j + 1) === guards.includes(i)) j++;
+    const h = barH + (guards.includes(i) ? guardExtra : 0);
+    d += `M${n(x + qz + i * m)} ${n(y)}h${n((j - i + 1) * m)}v${n(h)}h${n(-(j - i + 1) * m)}Z`;
+    i = j;
+  }
+  const sz = 2.2, ty = y + barH + 0.35 + sz * 0.72; // digits sit just under the short bars
+  const digits = text('sans', code[0], sz, x + qz - 1.6 * m, ty, { anchor: 'end', fill }) +
+    text('sans', code.slice(1, 7), sz, x + qz + (3 + 21) * m, ty, { anchor: 'middle', fill, track: 0.06 }) +
+    text('sans', code.slice(7), sz, x + qz + (50 + 21) * m, ty, { anchor: 'middle', fill, track: 0.06 });
+  return `<path d="${d}" fill="${fill}"/>${digits}`;
+}
+const EAN_W = 113 * 0.264;
+
+// Sinhala and Tamil labels, shaped by tools/shape_labels.py (HarfBuzz) and stored as outlines.
+const SHAPED = JSON.parse(fs.readFileSync(path.join(root, 'brand', 'shaped-labels.json'), 'utf8'));
+const shaped = (s, sz, x, y, fill = C.soft) => {
+  const g = SHAPED[s];
+  if (!g) throw new Error('Label not shaped: ' + s);
+  return `<path d="${g.d}" fill="${fill}" transform="translate(${n(x)} ${n(y)}) scale(${n(sz, 4)})"/>`;
+};
+
 // ---------------------------------------------------------------------------
 // Faces
 const faces = {
@@ -197,7 +248,7 @@ const faces = {
   // Information panel: what is inside, then the details.
   sideB: (w, h) => {
     const out = [paper(w, h), text('display', 'What\u2019s inside', 6.2, M, 15)];
-    out.push(body(['Ceylon black tea with natural vanilla.', '12 tea bags of 2 g each, 24 g in total.'], M, 21.6, { size: 2.15, lead: 3.1 }));
+    out.push(body(['Ceylon black tea with natural vanilla, in 12 tagged,', 'unbleached tea bags of 2 g each.'], M, 21.6, { size: 2.15, lead: 3.1 }));
     const colW = (w - 2 * M) / 3;
     [['tea', 'Ceylon tea'], ['pod', 'Natural vanilla'], ['teabag', '12 tea bags']].forEach(([name, k], i) => {
       const cx = M + colW * (i + 0.5);
@@ -207,8 +258,8 @@ const faces = {
     const rows = [
       ['Ingredients', ['To be confirmed before print']],
       ['Net weight', ['24 g (12 tea bags \u00D7 2 g)']],
-      ['Packed for', ['The Vanilla Shop', '253 Koswatta Road, Battaramulla, Sri Lanka']],
       ['Storage', ['To be confirmed before print']],
+      ['Distributor', [DISTRIBUTOR.name + ' \u2014 see base']],
     ];
     let y = 48.6;
     rows.forEach(([k, vals]) => {
@@ -231,16 +282,32 @@ const faces = {
     ].join('');
   },
 
-  // Base: batch and date, the barcode (EAN-13 at 80% = 30 x 21 mm), the Agro Ventures logo.
+  // Base: trilingual batch block (stamped or inkjet-printed per batch), barcode, distributor.
   bottom: (w, h) => {
-    const cx = w / 2, out = [paper(w, h)];
-    out.push(text('display', 'Vanilla Tea', 6, cx, 15, { anchor: 'middle' }));
-    [['Batch', 25], ['Best before', 32]].forEach(([k, y]) => {
-      out.push(label(k, cx - 20, y, { fill: C.soft }));
-      out.push(hair(cx, y + 0.3, cx + 20, 0.15));
+    const out = [paper(w, h)];
+    const fields = [
+      ['\u0D9A\u0DCF.\u0D85.', 'B.N.', '\u0BA4\u0BCA\u0B95\u0BC1\u0BA4\u0BBF \u0B87\u0BB2'],
+      ['\u0DB1\u0DD2.\u0DAF\u0DD2.', 'MFD.', '\u0BAA\u0BCA.\u0B9A\u0BC6 \u0BA4\u0BBF\u0B95\u0BA4\u0BBF'],
+      ['\u0D9A\u0DCF.\u0D89.\u0DAF\u0DD2.', 'EXP.', '\u0BAE\u0BC1.\u0BA4\u0BBF\u0B95\u0BA4\u0BBF'],
+      ['\u0D8B.\u0DC3\u0DD2.\u0DB8\u0DD2.\u0DBB\u0DD4.', 'MRP Rs.', '\u0BB5\u0BBF\u0BB2\u0BC8 \u0BB0\u0BC2\u0BAA\u0BBE'],
+    ];
+    out.push(text('display', 'Vanilla Tea', 5.6, M, 13.5));
+    out.push(hair(M, 17, w - M));
+    fields.forEach(([si, en, ta], i) => {
+      const y = 22.4 + i * 8;
+      out.push(shaped(si, 1.75, M, y - 2.5));
+      out.push(label(en, M, y, { fill: C.ink, caps: false }));
+      out.push(shaped(ta, 1.6, M, y + 2.3));
+      out.push(hair(M + 14, y + 0.6, M + 38, 0.15));
     });
-    out.push(slot(cx - 15, 39, 30, 21, ['EAN-13 barcode', '30 \u00D7 21 mm (80%)']));
-    out.push(slot(cx - 9, 65, 18, 10, ['Agro Ventures', 'logo']));
+    const bx = w - M - EAN_W + 1.5;
+    out.push(ean13(GTIN, bx, 21));
+    out.push(hair(M, 55.5, w - M));
+    out.push(label(DISTRIBUTOR.intro, M, 60, { fill: C.soft }));
+    out.push(text('medium', DISTRIBUTOR.name, 2.5, M, 64.2));
+    out.push(body(DISTRIBUTOR.address, M, 67.8, { size: 2.1, lead: 2.9 }));
+    out.push(body([DISTRIBUTOR.web, DISTRIBUTOR.email], w / 2 + 6, 67.8, { size: 2.1, lead: 2.9 }));
+    out.push(text('medium', 'Hotline ' + DISTRIBUTOR.hotline, 2.3, w / 2 + 6, 64.2));
     return out.join('');
   },
 
