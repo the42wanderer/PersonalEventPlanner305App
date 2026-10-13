@@ -17,7 +17,8 @@ const C = { paper: '#FEF8E9', ink: '#143A1D', soft: '#5C6F5F', line: '#143A1D' }
 const M = 7; // outer margin on every face
 const font = (f) => opentype.loadSync(path.join(root, 'fonts', f));
 const F = {
-  display: font('fraunces-italic.ttf'),   // product name and headings
+  display: font('fraunces-italic.ttf'),   // headings
+  upright: font('fraunces-display.ttf'),  // product name (upright, same family, for hierarchy)
   sans: font('geist-regular.ttf'),        // body copy
   medium: font('geist-medium.ttf'),       // small-caps labels
 };
@@ -101,8 +102,9 @@ function fadeBand(id, from, to, h) {
   const x0 = Math.min(from, to), x1 = Math.max(from, to), opaqueLeft = from < to;
   return `<linearGradient id="fade-${id}" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="${C.paper}" stop-opacity="${opaqueLeft ? 1 : 0}"/><stop offset="1" stop-color="${C.paper}" stop-opacity="${opaqueLeft ? 0 : 1}"/></linearGradient>` +
     `<rect x="${n(x0)}" y="${n(h - TILE_H - 2)}" width="${n(x1 - x0)}" height="${n(TILE_H + 6)}" fill="url(#fade-${id})"/>` +
-    (opaqueLeft ? `<rect x="-10" y="${n(h - TILE_H - 2)}" width="${n(x0 + 10)}" height="${n(TILE_H + 6)}" fill="${C.paper}"/>`
-                : `<rect x="${n(x1)}" y="${n(h - TILE_H - 2)}" width="20" height="${n(TILE_H + 6)}" fill="${C.paper}"/>`);
+    // Solid part overlaps the gradient by 0.4 mm so no anti-aliased seam shows where they meet.
+    (opaqueLeft ? `<rect x="-10" y="${n(h - TILE_H - 2)}" width="${n(x0 + 10.4)}" height="${n(TILE_H + 6)}" fill="${C.paper}"/>`
+                : `<rect x="${n(x1 - 0.4)}" y="${n(h - TILE_H - 2)}" width="20" height="${n(TILE_H + 6)}" fill="${C.paper}"/>`);
 }
 
 // Line icons, one style across the box: 0.32 mm forest stroke, drawn in a ±5.5 mm box around 0,0.
@@ -194,8 +196,8 @@ const faces = {
 
   // Information panel: what is inside, then the details.
   sideB: (w, h) => {
-    const out = [paper(w, h), text('display', 'Naturally aromatic', 6.2, M, 15)];
-    out.push(body(['A beautifully balanced infusion that celebrates the pure', 'essence of vanilla, creating a soothing, memorable', 'experience in every cup.'], M, 20.6, { size: 2.15, lead: 3.1 }));
+    const out = [paper(w, h), text('display', 'What\u2019s inside', 6.2, M, 15)];
+    out.push(body(['Ceylon black tea with natural vanilla.', '12 tea bags of 2 g each, 24 g in total.'], M, 21.6, { size: 2.15, lead: 3.1 }));
     const colW = (w - 2 * M) / 3;
     [['tea', 'Ceylon tea'], ['pod', 'Natural vanilla'], ['teabag', '12 tea bags']].forEach(([name, k], i) => {
       const cx = M + colW * (i + 0.5);
@@ -232,7 +234,7 @@ const faces = {
   // Base: batch and date, the barcode (EAN-13 at 80% = 30 x 21 mm), the Agro Ventures logo.
   bottom: (w, h) => {
     const cx = w / 2, out = [paper(w, h)];
-    out.push(text('display', 'Vanilla Tea', 6, cx, 15, { anchor: 'middle' }));
+    out.push(text('upright', 'Vanilla Tea', 6, cx, 15, { anchor: 'middle' }));
     [['Batch', 25], ['Best before', 32]].forEach(([k, y]) => {
       out.push(label(k, cx - 20, y, { fill: C.soft }));
       out.push(hair(cx, y + 0.3, cx + 20, 0.15));
@@ -268,9 +270,9 @@ const faces = {
   // Study v2: new illustration (vanilla + tea sprig), Ceylon tea hills behind, lion mark, tea cues.
   // Naming reads top to bottom as one phrase: [over] Vanilla Tea, [under].
   frontV2: (w, h, over = 'Natural', under = 'Pure Ceylon black tea') => {
-    const sz = 21.5 / width(F.display, 'Vanilla', 1), base = 63.5, lead = 0.9;
+    const sz = 26 / width(F.upright, 'Vanilla', 1), base = 64.5, lead = 0.92;
     const v2 = fs.readFileSync(path.join(root, 'plates', 'generated', 'v2-vanilla-tea.png'));
-    const vw = v2.readUInt32BE(16), vh = v2.readUInt32BE(20), vs = 82 / vh;
+    const vw = v2.readUInt32BE(16), vh = v2.readUInt32BE(20), vs = 72 / vh;
     const tag = (x, y) => `<g fill="none" stroke="${C.ink}" stroke-width="0.3" stroke-linejoin="round">` +
       `<path d="M${n(x + 2)} ${n(y - 3.4)}q-1.6 1.6 0 3.4"/>` +
       `<path d="M${n(x)} ${n(y + 0.9)}l1 -1h2l1 1v4.6h-4Z"/><circle cx="${n(x + 2)}" cy="${n(y + 1)}" r="0.35"/></g>`;
@@ -280,17 +282,17 @@ const faces = {
     return [
       paper(w, h),
       hillsBand('front', w, h),
-      fadeBand('front', 31, 47, h),
-      `<image href="data:image/png;base64,${v2.toString('base64')}" width="${vw}" height="${vh}" transform="translate(${n(w - 1 - vw * vs)} 1.5) scale(${n(vs, 6)})"/>`,
+      fadeBand('front', 35, 50, h),
+      `<image href="data:image/png;base64,${v2.toString('base64')}" width="${vw}" height="${vh}" transform="translate(${n(w - 1.5 - vw * vs)} 3) scale(${n(vs, 6)})"/>`,
       logo(M, 7, 17.5),
-      lion(M, 29, 11),
-      label(over, M, base - sz * lead - sz * 0.78 - 1.6),
-      text('display', 'Vanilla', sz, M - 0.3, base - sz * lead),
-      text('display', 'Tea', sz, M - 0.3, base),
-      text('sans', under, 2.2, M, base + 4.2, { fill: C.soft }),
-      hair(M, 71, 28.5),
-      tag(M, 72.8),
-      label('12 tea bags \u00B7 24 g', M + 6, 76),
+      lion(M, 30, 8.5),
+      label(over, M, base - sz * lead - sz * 0.72 - 2.4),
+      text('upright', 'Vanilla', sz, M - 0.4, base - sz * lead),
+      text('upright', 'Tea', sz, M - 0.4, base),
+      text('sans', under, 2.3, M, base + 4.6, { fill: C.soft }),
+      hair(M, 72.6, 33),
+      tag(M, 74.4),
+      label('12 tea bags \u00B7 24 g', M + 6, 77.6),
     ].join('');
   },
 

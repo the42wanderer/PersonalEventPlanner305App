@@ -1,0 +1,55 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Box mock-up</title>
+<style>html,body{margin:0;background:radial-gradient(120% 90% at 50% 35%,#efebe0 0%,#d9d3c3 75%)}canvas{display:block}</style>
+<!-- Folded-box mock-up: renders the exported faces on a box of the real dieline size.
+     Serve the vanilla-shop folder over http and open studies/mockup.html?view=front|side|back -->
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(async () => {
+  const view = new URLSearchParams(location.search).get('view') || 'front';
+  const W = 1600, H = 1100;
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setSize(W, H); renderer.setPixelRatio(1);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  document.body.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(22, W / H, 1, 400);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xd8cfb8, 0.78));
+  const key = new THREE.DirectionalLight(0xfff8ec, 0.55);
+  key.position.set(-14, 22, 16); key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 10;
+  Object.assign(key.shadow.camera, { left: -14, right: 14, top: 14, bottom: -14 });
+  scene.add(key);
+
+  // Box size in cm, from the dieline (mm / 10).
+  const BW = 8.766, BH = 8.474, BD = 8.457;
+  const load = (name, rotate) => new Promise((res) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = 2048; c.height = Math.round(2048 * img.height / img.width);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 8;
+      if (rotate) { t.center.set(0.5, 0.5); t.rotation = Math.PI; }
+      res(new THREE.MeshStandardMaterial({ map: t, roughness: 0.86, metalness: 0 }));
+    };
+    img.src = '../export/final/face-' + name + '.svg';
+  });
+  // BoxGeometry face order: +x, -x, +y, -y, +z, -z. The base panel hangs off the back panel
+  // in the dieline, so its image is turned 180 degrees to match the folded box.
+  const mats = await Promise.all([load('sideA'), load('sideB'), load('top'), load('bottom', true), load('front'), load('back')]);
+  const box = new THREE.Mesh(new THREE.BoxGeometry(BW, BH, BD), mats);
+  box.castShadow = true; box.position.y = BH / 2;
+  scene.add(box);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.ShadowMaterial({ opacity: 0.22 }));
+  ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+
+  box.rotation.y = { front: -0.5, side: -(Math.PI / 2 + 0.5), back: Math.PI - 0.5 }[view];
+  camera.position.set(0, 13.5, 30); camera.lookAt(0, BH * 0.46, 0);
+  renderer.render(scene, camera);
+  document.title = 'ready';
+})();
+</script>
