@@ -105,6 +105,38 @@ function fadeBand(id, from, to, h) {
                 : `<rect x="${n(x1)}" y="${n(h - TILE_H - 2)}" width="20" height="${n(TILE_H + 6)}" fill="${C.paper}"/>`);
 }
 
+// Line icons, one style across the box: 0.32 mm forest stroke, drawn in a ±5.5 mm box around 0,0.
+const TINT = '#E9ECDC';
+const STROKE = `fill="none" stroke="${C.ink}" stroke-width="0.32" stroke-linecap="round" stroke-linejoin="round"`;
+const ICONS = {
+  cup: `<path ${STROKE} d="M-5 4.3Q0 5.7 5 4.3"/>` +
+    `<path ${STROKE} d="M-3.8 -1.2H3.2Q3.2 3.9 -0.3 3.9Q-3.8 3.9 -3.8 -1.2Z"/>` +
+    `<path ${STROKE} d="M3.15 -0.3q2.1 0 2.1 1.3t-2.35 1.6"/>` +
+    `<path ${STROKE} d="M1.3 -1.2L2.5 -4.1"/><rect ${STROKE} x="1.75" y="-5.95" width="1.7" height="1.9" rx="0.2" transform="rotate(12 2.6 -5)"/>` +
+    `<path ${STROKE} d="M-2.1 -2.4q-0.8 -1 0 -2M-0.5 -2.4q-0.8 -1 0 -2"/>`,
+  timer: `<path d="M0 0.7L0 -3.2A3.9 3.9 0 0 1 1.95 -2.68Z" fill="${C.ink}" opacity="0.18"/>` +
+    `<circle ${STROKE} cx="0" cy="0.7" r="3.9"/><path ${STROKE} d="M-0.9 -4.6H0.9M0 -4.6V-3.2M3 -2.5l0.7 -0.7"/>` +
+    `<path ${STROKE} d="M0 0.7L1.6 -2.1"/><circle cx="0" cy="0.7" r="0.35" fill="${C.ink}"/>` +
+    `<path ${STROKE} d="M0 -2.6v0.5M3.3 0.7h-0.5M0 4v-0.5M-3.3 0.7h0.5"/>`,
+  ice: `<path ${STROKE} d="M-3.1 -4.4L-2.4 4.6H2.4L3.1 -4.4"/><path ${STROKE} d="M-2.85 -1.1H2.85"/>` +
+    `<rect ${STROKE} x="-2.3" y="-0.3" width="2.1" height="2.1" rx="0.3" transform="rotate(14 -1.25 0.75)"/>` +
+    `<rect ${STROKE} x="0.1" y="1.6" width="1.9" height="1.9" rx="0.3" transform="rotate(-10 1.05 2.55)"/>` +
+    `<path ${STROKE} d="M1 -1.1L2.3 -6.1"/>`,
+  // Two leaves and a bud: how Ceylon tea is plucked.
+  tea: `<path ${STROKE} d="M0 4.8C0 2 0.3 -0.5 0.6 -3.4"/>` +
+    `<path ${STROKE} d="M0.6 -3.4C-0.4 -4 -0.3 -5.3 0.6 -5.8C1.5 -5.3 1.6 -4 0.6 -3.4Z"/>` +
+    `<path ${STROKE} d="M0.3 -1C-1.4 -0.3 -3.8 -1 -4.4 -3.3C-2.2 -3.9 -0.4 -3 0.3 -1Z"/><path ${STROKE} d="M0.3 -1L-3.3 -2.9"/>` +
+    `<path ${STROKE} d="M0.1 2.2C1.8 3.2 4.3 2.6 5 0.2C2.7 -0.5 0.8 0.3 0.1 2.2Z"/><path ${STROKE} d="M0.1 2.2L3.9 0.6"/>`,
+  // The vanilla orchid: five narrow petals around the rolled, ruffled lip.
+  pod: [-90, -18, 54, 126, 198].map((a) => `<path ${STROKE} d="M0 -1.2C0.95 -2.2 1 -3.9 0 -5.4C-1 -3.9 -0.95 -2.2 0 -1.2Z" transform="rotate(${a + 90})"/>`).join('') +
+    `<circle ${STROKE} cx="0" cy="0" r="1.25"/><circle cx="0" cy="0" r="0.42" fill="${C.ink}"/>`,
+  // A tea bag on its string.
+  teabag: `<rect ${STROKE} x="-3.4" y="-1.2" width="5" height="6" rx="0.6"/><path ${STROKE} d="M-3.4 0.2H1.6"/>` +
+    `<path ${STROKE} d="M-0.9 -1.2C-0.9 -3.6 1.2 -4.6 2.6 -3.4"/><rect ${STROKE} x="2.3" y="-4.2" width="2.4" height="2.8" rx="0.3" transform="rotate(-14 3.5 -2.8)"/>`,
+};
+const icon = (name, cx, cy, r = 6.3, scale = 1) =>
+  `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" fill="${TINT}"/><g transform="translate(${n(cx)} ${n(cy)}) scale(${scale})">${ICONS[name]}</g>`;
+
 // ---------------------------------------------------------------------------
 // Faces
 const faces = {
@@ -125,24 +157,6 @@ const faces = {
 
   // Brewing: three steps as aligned columns, each with a line icon, label, value and note.
   sideA: (w, h) => {
-    const tint = '#E9ECDC';
-    const stroke = `fill="none" stroke="${C.ink}" stroke-width="0.32" stroke-linecap="round" stroke-linejoin="round"`;
-    // Icons drawn in a ±5.5 mm box around (0, 0).
-    const icons = {
-      cup: `<path ${stroke} d="M-5 4.3Q0 5.7 5 4.3"/>` +
-        `<path ${stroke} d="M-3.8 -1.2H3.2Q3.2 3.9 -0.3 3.9Q-3.8 3.9 -3.8 -1.2Z"/>` +
-        `<path ${stroke} d="M3.15 -0.3q2.1 0 2.1 1.3t-2.35 1.6"/>` +
-        `<path ${stroke} d="M1.3 -1.2L2.5 -4.1"/><rect ${stroke} x="1.75" y="-5.95" width="1.7" height="1.9" rx="0.2" transform="rotate(12 2.6 -5)"/>` +
-        `<path ${stroke} d="M-2.1 -2.4q-0.8 -1 0 -2M-0.5 -2.4q-0.8 -1 0 -2"/>`,
-      timer: `<path d="M0 0.7L0 -3.2A3.9 3.9 0 0 1 1.95 -2.68Z" fill="${C.ink}" opacity="0.18"/>` +
-        `<circle ${stroke} cx="0" cy="0.7" r="3.9"/><path ${stroke} d="M-0.9 -4.6H0.9M0 -4.6V-3.2M3 -2.5l0.7 -0.7"/>` +
-        `<path ${stroke} d="M0 0.7L1.6 -2.1"/><circle cx="0" cy="0.7" r="0.35" fill="${C.ink}"/>` +
-        `<path ${stroke} d="M0 -2.6v0.5M3.3 0.7h-0.5M0 4v-0.5M-3.3 0.7h0.5"/>`,
-      ice: `<path ${stroke} d="M-3.1 -4.4L-2.4 4.6H2.4L3.1 -4.4"/><path ${stroke} d="M-2.85 -1.1H2.85"/>` +
-        `<rect ${stroke} x="-2.3" y="-0.3" width="2.1" height="2.1" rx="0.3" transform="rotate(14 -1.25 0.75)"/>` +
-        `<rect ${stroke} x="0.1" y="1.6" width="1.9" height="1.9" rx="0.3" transform="rotate(-10 1.05 2.55)"/>` +
-        `<path ${stroke} d="M1 -1.1L2.3 -6.1"/>`,
-    };
     const steps = [
       ['cup', 'Water', '150 ml', ['One tea bag in', 'hot water']],
       ['timer', 'Steep', '5 minutes', ['Then lift the', 'bag out']],
@@ -153,11 +167,10 @@ const faces = {
       text('display', 'How to brew', 8, M, 16.5),
       label('2 g per tea bag', w - M, 16.5, { fill: C.soft, anchor: 'end' }),
       hair(M, top, w - M)];
-    steps.forEach(([icon, k, v, note], i) => {
+    steps.forEach(([name, k, v, note], i) => {
       const cx = M + colW * (i + 0.5);
       if (i > 0) out.push(`<path d="M${n(M + colW * i)} ${top + 5}V${top + 37}" stroke="${C.line}" stroke-width="0.12"/>`);
-      out.push(`<circle cx="${n(cx)}" cy="${top + 11}" r="6.3" fill="${tint}"/>`);
-      out.push(`<g transform="translate(${n(cx)} ${top + 11})">${icons[icon]}</g>`);
+      out.push(icon(name, cx, top + 11));
       out.push(label(k, cx, top + 23, { fill: C.soft, anchor: 'middle' }));
       out.push(text('display', v, 4.9, cx, top + 30, { anchor: 'middle' }));
       note.forEach((l, j) => out.push(text('sans', l, 2.05, cx, top + 34.3 + j * 2.9, { fill: C.soft, anchor: 'middle' })));
@@ -179,27 +192,30 @@ const faces = {
     ].join('');
   },
 
-  // Information panel.
+  // Information panel: what is inside, then the details.
   sideB: (w, h) => {
     const out = [paper(w, h), text('display', 'Naturally aromatic', 6.2, M, 15)];
-    out.push(body(['A beautifully balanced infusion that celebrates the pure', 'essence of vanilla, creating a soothing, memorable', 'experience in every cup.'], M, 21.5, { size: 2.15, lead: 3.2 }));
+    out.push(body(['A beautifully balanced infusion that celebrates the pure', 'essence of vanilla, creating a soothing, memorable', 'experience in every cup.'], M, 20.6, { size: 2.15, lead: 3.1 }));
+    const colW = (w - 2 * M) / 3;
+    [['tea', 'Ceylon tea'], ['pod', 'Natural vanilla'], ['teabag', '12 tea bags']].forEach(([name, k], i) => {
+      const cx = M + colW * (i + 0.5);
+      out.push(icon(name, cx, 36.2, 4.6, 0.72));
+      out.push(label(k, cx, 44.6, { anchor: 'middle' }));
+    });
     const rows = [
       ['Ingredients', ['To be confirmed before print']],
-      ['Net weight', ['24 g (12 tea bags × 2 g)']],
+      ['Net weight', ['24 g (12 tea bags \u00D7 2 g)']],
       ['Packed for', ['The Vanilla Shop', '253 Koswatta Road, Battaramulla, Sri Lanka']],
       ['Storage', ['To be confirmed before print']],
     ];
-    let y = 31.5;
+    let y = 48.6;
     rows.forEach(([k, vals]) => {
       out.push(hair(M, y, w - M, 0.12));
       out.push(label(k, M, y + 3.4, { fill: C.soft }));
-      vals.forEach((v, j) => out.push(text('sans', v, 2.15, 30, y + 3.4 + j * 2.9, { fill: v.startsWith('To be') ? C.soft : C.ink })));
-      y += 4.6 + vals.length * 2.9;
+      vals.forEach((v, j) => out.push(text('sans', v, 2.15, 30, y + 3.4 + j * 2.7, { fill: v.startsWith('To be') ? C.soft : C.ink })));
+      y += 3.8 + vals.length * 2.7;
     });
     out.push(hair(M, y, w - M, 0.12));
-    const sy = h - M - 10;
-    out.push(slot(M, sy, 17, 10, ['Agro Ventures', 'logo']));
-    out.push(slot(w - M - 25, sy, 25, 10, ['EAN-13', 'barcode']));
     return out.join('');
   },
 
@@ -213,14 +229,16 @@ const faces = {
     ].join('');
   },
 
-  // Base: batch and date fields.
+  // Base: batch and date, the barcode (EAN-13 at 80% = 30 x 21 mm), the Agro Ventures logo.
   bottom: (w, h) => {
     const cx = w / 2, out = [paper(w, h)];
-    out.push(text('display', 'Vanilla Tea', 6, cx, h / 2 - 6, { anchor: 'middle' }));
-    [['Batch', h / 2 + 6], ['Best before', h / 2 + 14]].forEach(([k, y]) => {
+    out.push(text('display', 'Vanilla Tea', 6, cx, 15, { anchor: 'middle' }));
+    [['Batch', 25], ['Best before', 32]].forEach(([k, y]) => {
       out.push(label(k, cx - 20, y, { fill: C.soft }));
       out.push(hair(cx, y + 0.3, cx + 20, 0.15));
     });
+    out.push(slot(cx - 15, 39, 30, 21, ['EAN-13 barcode', '30 \u00D7 21 mm (80%)']));
+    out.push(slot(cx - 9, 65, 18, 10, ['Agro Ventures', 'logo']));
     return out.join('');
   },
 
