@@ -81,6 +81,28 @@ const studies = {
   ].join(''),
 };
 
+// Generated illustrations (trimmed cut-outs from tools/cutout.py), placed in layout A.
+function pngSize(b) { return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) }; }
+function art(file, right, top, maxW, maxH) {
+  const b = fs.readFileSync(path.join(root, 'plates', 'generated', file));
+  const { w, h } = pngSize(b);
+  const s = Math.min(maxW / w, maxH / h);
+  return `<image href="data:image/png;base64,${b.toString('base64')}" width="${w}" height="${h}" transform="translate(${n(right - w * s)} ${n(top)}) scale(${n(s, 6)})"/>`;
+}
+const columnA = (image, caption) => [
+  image,
+  text('italic', 'The Vanilla Shop', 3.3, M, 12.5),
+  text('sans', caption, 1.6, 0, 0, { fill: C.soft, transform: `translate(${M + 1.2} 49) rotate(-90)` }),
+  label('Natural', M, 55.5),
+  text('serif', 'Vanilla', 9.6, M - 0.3, 65.2),
+  text('serif', 'Tea', 9.6, M - 0.3, 73.6),
+  hair(M, 76.6, 28.5),
+  label('12 tea bags \u00B7 24 g', M, 80.2, { fill: C.soft }),
+].join('');
+studies.gen1 = () => columnA(art('gen1-watercolour.png', W - 2, 3, 58, 80), 'Vanilla planifolia');
+studies.gen2 = () => columnA(art('gen2.png', W - 1.5, 2.5, 58, 81), 'Vanilla planifolia');
+studies.gen3 = () => columnA(art('gen3.png', W - 1.5, 2.5, 58, 81), 'Vanilla planifolia');
+
 const out = path.join(root, 'studies', 'out');
 fs.mkdirSync(out, { recursive: true });
 for (const [k, fn] of Object.entries(studies)) fs.writeFileSync(path.join(out, `front_${k}.svg`), svg(fn()));
