@@ -37,7 +37,8 @@ const PANELS = {
   inner:  { panel: R(145.50, 630.22, 393.53, 871.09),  region: R(142.715, 628.051, 393.961, 929.191) },
   bottom: { panel: R(633.68, 631.07, 881.70, 870.00),  region: R(629.184, 629.949, 881.703, 881.480) },
 };
-const size = (k) => ({ w: PANELS[k].panel.w / MM, h: PANELS[k].panel.h / MM });
+// Face studies (e.g. frontTea) use the size of the face they replace.
+const size = (k) => { const p = (PANELS[k] || PANELS[k.replace(/Tea$/, "")]).panel; return { w: p.w / MM, h: p.h / MM }; };
 
 // ---------------------------------------------------------------------------
 // Type (outlined with opentype.js)
@@ -179,6 +180,27 @@ const faces = {
   },
 
   inner: (w, h) => paper(w, h),
+
+  // Study: the same front with stronger tea cues (tea type, a tea-tag count, origin mark slot).
+  frontTea: (w, h) => {
+    const sz = 21.5 / width(F.display, 'Vanilla', 1), base = 67.8, lead = 0.9;
+    const tag = (x, y) => `<g fill="none" stroke="${C.ink}" stroke-width="0.3" stroke-linejoin="round">` +
+      `<path d="M${n(x + 2)} ${n(y - 3.4)}q-1.6 1.6 0 3.4"/>` +
+      `<path d="M${n(x)} ${n(y + 0.9)}l1 -1h2l1 1v4.6h-4Z"/><circle cx="${n(x + 2)}" cy="${n(y + 1)}" r="0.35"/></g>`;
+    return [
+      paper(w, h),
+      illustration(w - 1.5, 2.5, 58, 81),
+      logo(M, 7, 17.5),
+      slot(M, 29, 12, 9, ['Ceylon Tea', 'lion logo']),
+      label('Ceylon black tea', M, base - sz * lead - sz * 0.78 - 1.6),
+      text('display', 'Vanilla', sz, M - 0.3, base - sz * lead),
+      text('display', 'Tea', sz, M - 0.3, base),
+      text('sans', 'with natural vanilla', 2.2, M, base + 4.2, { fill: C.soft }),
+      hair(M, 74.6, 28.5),
+      tag(M, 76.4),
+      label('12 tea bags \u00B7 24 g', M + 6, 79.6),
+    ].join('');
+  },
 };
 
 // ---------------------------------------------------------------------------
