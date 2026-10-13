@@ -25,7 +25,20 @@
 
   // ---------------------------------------------------------------------------
   // Colourways. Forest keeps the existing brand green (#143A1D) and cream (#FEF8E9) from the source file.
+  const PLATE_FRAME = { paper: '#FEF8E9', frame: '#143A1D', frameInk: '#FEF8E9', frameSub: '#B9C7A2', frameAccent: '#D3DD7C' };
   VS.COLORWAYS = {
+    ceylon: {
+      name: 'Ceylon plate', design: 'plate', bg: '#143A1D', ink: '#FEF8E9', sub: '#C7D2AE', accent: '#D3DD7C', glow: '#EBC86A',
+      leafA: '#6E9B45', leafB: '#43733A', vine: '#9DBE5C', sepal: '#DDE3A0', petal: '#EEF0C2',
+      lip: '#FFF7D2', throat: '#E7BE4A', pod: '#3A2416', podHi: '#8A5E3E', shadow: '#0A2311',
+      cut: '#143A1D', badge: '#D3DD7C', badgeInk: '#143A1D', twine: '#FEF8E9', ...PLATE_FRAME,
+    },
+    ceylonCream: {
+      name: 'Ceylon plate, cream sides', design: 'plate', bg: '#FEF8E9', ink: '#143A1D', sub: '#55704C', accent: '#5E8C3A', glow: '#E7BE4A',
+      leafA: '#5E8C3A', leafB: '#2F5E2A', vine: '#7EA34A', sepal: '#C9D57A', petal: '#DCE3A0',
+      lip: '#F5E296', throat: '#D6A436', pod: '#3A2416', podHi: '#8A5E3E', shadow: '#E4DAC0',
+      cut: '#FEF8E9', badge: '#143A1D', badgeInk: '#FEF8E9', twine: '#143A1D', ...PLATE_FRAME,
+    },
     forest: {
       name: 'Forest', bg: '#143A1D', ink: '#FEF8E9', sub: '#C7D2AE', accent: '#D3DD7C', glow: '#EBC86A',
       leafA: '#6E9B45', leafB: '#43733A', vine: '#9DBE5C', sepal: '#DDE3A0', petal: '#EEF0C2',
@@ -51,7 +64,7 @@
   let F = null; // { display, italic, sans, bold, mono } opentype.Font objects
   VS.setFonts = (fonts) => { F = fonts; };
 
-  const n = (v) => Math.round(v * 1000) / 1000;
+  const n = (v, d = 3) => Math.round(v * 10 ** d) / 10 ** d;
 
   function measure(font, str, size, track = 0) {
     const glyphs = font.stringToGlyphs(str);
@@ -346,8 +359,10 @@
       P.push(T('sans', small, 2.2, 23.5, y + 5.4, c.sub));
       if (i < 2) P.push(rule(23.5, y + 9.5, w - 6, c.ink, 0.15));
     });
-    P.push(leaf(w - 9, h - 4, -38, 12, c, c.leafA, { bend: -1.4 }));
-    P.push(leaf(w - 7, h - 3, 18, 10, c, c.leafB, { bend: 1.2 }));
+    if (c.design !== 'plate') {
+      P.push(leaf(w - 9, h - 4, -38, 12, c, c.leafA, { bend: -1.4 }));
+      P.push(leaf(w - 7, h - 3, 18, 10, c, c.leafB, { bend: 1.2 }));
+    }
     return P.join('');
   };
 
@@ -396,28 +411,95 @@
   VS.inner = (c, w, h) => bgFill(w, h, c, 80) + stipple(w / 2, h * 0.45, 30, 30, 500, c.glow, 41);
 
   // ---------------------------------------------------------------------------
+  // "Ceylon plate" design: George De Alwis's watercolour of Vanilla planifolia
+  // (public domain, Wikimedia Commons), cleaned so its paper matches the brand cream.
+  let IMG = {};
+  VS.setImages = (images) => { IMG = images; };
+  const PLATE_CREDIT = 'Vanilla planifolia · watercolour by George De Alwis, Ceylon';
+
+  // Draws the plate scaled to `pw` mm wide with its top-left at x, y (plate fractions crop it).
+  function plateImage(x, y, pw, crop = [0, 0, 1, 1]) {
+    const p = IMG.plate;
+    const cw = (crop[2] - crop[0]) * p.w, ch = (crop[3] - crop[1]) * p.h;
+    const s = pw / cw;
+    return `<image href="${p.href}" width="${p.w}" height="${p.h}" preserveAspectRatio="none" ` +
+      `transform="translate(${n(x)} ${n(y)}) scale(${n(s, 6)}) translate(${n(-crop[0] * p.w)} ${n(-crop[1] * p.h)})"/>`;
+  }
+  const plateHeight = (pw, crop = [0, 0, 1, 1]) => pw * ((crop[3] - crop[1]) * IMG.plate.h) / ((crop[2] - crop[0]) * IMG.plate.w);
+
+  const frontPlate = (c, w, h) => {
+    const P = [], spine = 27, band = 66.5;
+    P.push(rect(-60, -60, w + 120, h + 120, c.paper));
+    // Painting in a cream window, framed by a forest spine and band like a picture mount.
+    const pw = 61;
+    P.push(plateImage(w + 0.3 - pw, -1.5, pw));
+    P.push(rect(-60, -60, spine + 60, h + 120, c.frame));
+    P.push(rect(spine, band, w + 60, h + 60, c.frame));
+    P.push(rule(spine, band, w + 60, c.frameAccent, 0.5));
+    const size = 25;
+    const vw = measure(F.display, 'Vanilla', size);
+    P.push(T('display', 'Vanilla', size, 0, 0, c.frameInk, { transform: `translate(24.2 ${n((h + vw) / 2)}) rotate(-90)` }));
+    P.push(T('italic', 'Natural Vanilla Tea', 5.6, spine + 4.5, band + 7.6, c.frameInk));
+    P.push(T('mono', '12 tea bags', 1.7, spine + 4.5, band + 12.6, c.frameSub, { upper: true, track: 0.06 }));
+    P.push(T('mono', 'Net wt 24 g', 1.7, (spine + w) / 2 + 3, band + 12.6, c.frameSub, { upper: true, track: 0.06, anchor: 'middle' }));
+    P.push(T('mono', 'Nº 01', 1.7, w - 4.5, band + 12.6, c.frameSub, { upper: true, track: 0.06, anchor: 'end' }));
+    P.push(T('mono', 'Painted in Ceylon', 1.3, w - 2.2, band - 2.2, c.frame, { upper: true, track: 0.08, anchor: 'end', opacity: 0.7 }));
+    return P.join('');
+  };
+
+  const backPlate = (c, w, h) => {
+    const P = [];
+    P.push(rect(-60, -60, w + 120, h + 120, c.frame));
+    // Arched window onto the flowers.
+    const ax = 47, aw = w - ax - 5, ay = 6, ah = 56, r = aw / 2;
+    const arch = `M${n(ax)} ${n(ay + ah)}V${n(ay + r)}A${n(r)} ${n(r)} 0 0 1 ${n(ax + aw)} ${n(ay + r)}V${n(ay + ah)}Z`;
+    const crop = [0.5, 0, 1, 0.56];
+    const ph = plateHeight(aw, crop);
+    P.push(`<clipPath id="arch-${c.id}"><path d="${arch}"/></clipPath>`);
+    P.push(`<path d="${arch}" fill="${c.paper}"/>`);
+    P.push(`<g clip-path="url(#arch-${c.id})">${plateImage(ax, ay + ah - ph, aw, crop)}</g>`);
+    P.push(T('mono', 'George De Alwis, Ceylon', 1.35, ax + aw / 2, ay + ah + 4.2, c.frameSub, { anchor: 'middle', upper: true, track: 0.07 }));
+    const s = 8.8;
+    P.push(T('display', 'Vanilla', s, 6, 17, c.frameInk));
+    P.push(T('display', 'was never', s, 6, 27.5, c.frameInk));
+    P.push(T('italic', 'plain.', s * 1.08, 6, 38.5, c.frameAccent));
+    const body = ['The delicate sweetness of natural', 'vanilla unfolds through warm,', 'comforting notes and a smooth,', 'mellow aroma.'];
+    body.forEach((l, i) => P.push(T('sans', l, 2.25, 6, 47 + i * 3.4, c.frameInk, { opacity: 0.9 })));
+    P.push(rule(6, 72.5, w - 5, c.frameInk, 0.2));
+    const note = ['The vanilla on this box is a 19th-century watercolour of Vanilla planifolia,', 'painted in Ceylon by George De Alwis.'];
+    note.forEach((l, i) => P.push(T('sans', l, 1.85, 6, 76.4 + i * 2.8, c.frameSub)));
+    return P.join('');
+  };
+
+  VS.frontPlate = frontPlate;
+  VS.backPlate = backPlate;
+
+  // ---------------------------------------------------------------------------
   // Assembly
 
   const sizeOf = (key) => { const p = VS.PANELS[key].panel; return { w: VS.mm(p.w), h: VS.mm(p.h) }; };
 
   // One face as a standalone SVG (used for 3D textures and previews).
+  const panelFn = (key, c) => (c.design === 'plate' && (key === 'front' || key === 'back')) ? VS[key + 'Plate'] : VS[key];
+  const getC = (cw) => Object.assign({ id: typeof cw === 'string' ? cw : 'custom' }, VS.COLORWAYS[cw] || cw);
+
   VS.faceSVG = (key, cw) => {
-    const c = VS.COLORWAYS[cw] || cw;
+    const c = getC(cw);
     const { w, h } = sizeOf(key);
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${n(w)}mm" height="${n(h)}mm" viewBox="0 0 ${n(w)} ${n(h)}">` +
       `<defs><clipPath id="f"><rect width="${n(w)}" height="${n(h)}"/></clipPath></defs>` +
-      `<g clip-path="url(#f)">${VS[key](c, w, h)}</g></svg>`;
+      `<g clip-path="url(#f)">${panelFn(key, c)(c, w, h)}</g></svg>`;
   };
 
   // The whole print sheet on the source artboard, with the verbatim dieline on top.
   VS.sheetSVG = (cw, o = {}) => {
-    const c = VS.COLORWAYS[cw] || cw;
+    const c = getC(cw);
     const A = VS.ARTBOARD;
     let defs = '', art = '';
     Object.entries(VS.PANELS).forEach(([key, { panel, region }]) => {
       const { w, h } = sizeOf(key);
       defs += `<clipPath id="clip-${key}"><rect x="${region.x}" y="${region.y}" width="${n(region.w)}" height="${n(region.h)}"/></clipPath>`;
-      art += `<g id="${key}" clip-path="url(#clip-${key})"><g transform="translate(${panel.x} ${panel.y}) scale(${n(MM)})">${VS[key](c, w, h)}</g></g>`;
+      art += `<g id="${key}" clip-path="url(#clip-${key})"><g transform="translate(${panel.x} ${panel.y}) scale(${n(MM, 6)})">${panelFn(key, c)(c, w, h)}</g></g>`;
     });
     const die = o.dieline === false ? '' : `<g id="Dieline">${root.VS_DIELINE || ''}</g>`;
     const bg = o.paper ? `<rect width="${A.w}" height="${A.h}" fill="${o.paper}"/>` : '';

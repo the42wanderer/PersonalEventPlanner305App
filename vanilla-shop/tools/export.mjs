@@ -17,6 +17,20 @@ VS.setFonts({
   sans: font('geist-medium.ttf'), bold: font('geist-bold.ttf'), mono: font('geist-mono.ttf'),
 });
 
+// Plate dimensions are read from the JPEG header so the embed keeps its true aspect ratio.
+const plateFile = path.join(dir, 'plates', 'de-alwis-vanilla.jpg');
+const jpg = fs.readFileSync(plateFile);
+function jpegSize(b) {
+  let i = 2;
+  while (i < b.length) {
+    const marker = b[i + 1], len = b.readUInt16BE(i + 2);
+    if (marker >= 0xC0 && marker <= 0xC3) return { h: b.readUInt16BE(i + 5), w: b.readUInt16BE(i + 7) };
+    i += 2 + len;
+  }
+  throw new Error('Not a JPEG: ' + plateFile);
+}
+VS.setImages({ plate: { href: 'data:image/jpeg;base64,' + jpg.toString('base64'), ...jpegSize(jpg) } });
+
 const out = path.join(dir, 'export');
 fs.mkdirSync(out, { recursive: true });
 for (const cw of Object.keys(VS.COLORWAYS)) {

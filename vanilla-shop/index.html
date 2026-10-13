@@ -81,8 +81,8 @@ button:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
 
 <header class="wrap top">
   <p class="eyebrow">The Vanilla Shop · Battaramulla · Packaging concept</p>
-  <h1>Natural Vanilla Tea, <em>redrawn</em></h1>
-  <p class="lede">A redesign of the 12-bag tea box on your exact dieline: cut-paper vanilla orchid, a grain glow for the aroma, and a soft retro serif set big. Drag the box to turn it.</p>
+  <h1>Natural Vanilla Tea, <em>painted in Ceylon</em></h1>
+  <p class="lede">The box now carries a real 19th-century watercolour of Vanilla planifolia by the Ceylonese artist George De Alwis, set in a forest-green mount on your exact dieline. Drag the box to turn it.</p>
 </header>
 
 <main class="wrap studio">
@@ -94,8 +94,8 @@ button:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
       <p class="hint" id="hint">Drag to turn</p>
     </div>
     <div class="controls">
-      <div class="group" role="group" aria-label="Colourway" id="colorways">
-        <span class="group-label">Colourway</span>
+      <div class="group" role="group" aria-label="Version" id="colorways">
+        <span class="group-label">Version</span>
       </div>
       <div class="group" role="group" aria-label="View">
         <button id="view3d" aria-pressed="true">3D box</button>
@@ -108,15 +108,15 @@ button:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
   <aside class="notes">
     <h2>What changed</h2>
     <figure class="before">
-      <img src="before.jpg" alt="The current front panel: a white lily on dark green with condensed sans type">
-      <figcaption><strong>Current front.</strong> The flower is a lily, the type is a stock condensed sans, and the green panel has nothing else going on.</figcaption>
+      <img src="before.jpg" alt="The current front panel from 1.pdf: engraved-style cream flowers above a green band with condensed type">
+      <figcaption><strong>Current front (1.pdf).</strong> The flowers have broad lily petals and rose-like centres. Real vanilla flowers are pale green, with narrow petals and a rolled, tube-shaped lip.</figcaption>
     </figure>
     <ul class="changes">
-      <li><b>A real vanilla orchid</b><span>Pale green-yellow sepals and the rolled trumpet lip of Vanilla planifolia, on a vine with aerial roots, beside cured pods tied in twine.</span></li>
-      <li><b>Cut-paper, Matisse-style</b><span>Flat shapes with a lifted shadow and cut-out leaf veins. This follows the botanical tea and matcha boxes on your boards (Theory of Tea, the olive cut-flower matcha box).</span></li>
-      <li><b>Glow for aroma</b><span>A vector grain stipple behind the flower, like the grainy matcha gradients, and a print-safe version of the "glow" moment in the animation brief.</span></li>
-      <li><b>Type with a voice</b><span>Fraunces, a soft retro serif, set vertically across the full front, in the spirit of Ochaya and Twelve. Geist and Geist Mono carry the details.</span></li>
-      <li><b>Still your brand</b><span>Forest keeps your existing green #143A1D and cream #FEF8E9. Cream and Lime are two alternatives for a wider range.</span></li>
+      <li><b>A real painting, not a drawing</b><span>A watercolour of Vanilla planifolia credited on Wikimedia Commons to George De Alwis, Ceylon. It shows the flowers, buds, green pods, leaves, aerial roots and a cured pod. It is public domain, so it can go on packaging.</span></li>
+      <li><b>A provenance story</b><span>A Sri Lankan artist painting Sri Lankan vanilla. The back panel tells that story in two lines, under an arched window onto the flowers.</span></li>
+      <li><b>Cleaned for print</b><span>Cropped inside the ruled border, aged paper colour-matched to your cream #FEF8E9, and stray marks removed, so the painting sits flush on the box.</span></li>
+      <li><b>Type with a voice</b><span>Fraunces, a soft retro serif, runs up the green spine, in the spirit of the tea and matcha boxes on your boards. Geist and Geist Mono carry the details.</span></li>
+      <li><b>Still your brand</b><span>Your forest green #143A1D frames the painting like a picture mount. The cut-paper first draft is still under Version for comparison.</span></li>
     </ul>
   </aside>
 </main>
@@ -124,10 +124,10 @@ button:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
 <section class="wrap specs" aria-labelledby="specs-h">
   <h2 id="specs-h">Print sheet</h2>
   <dl class="spec-grid">
-    <div class="spec"><dt>Dieline</dt><dd>Cut and fold lines copied from your 2.pdf, on the same 1194.94 × 1052.97 pt artboard</dd></div>
+    <div class="spec"><dt>Dieline</dt><dd>Cut and fold lines copied from your 2.pdf on the same 1194.94 × 1052.97 pt artboard. 1.pdf has the identical dieline, 7 mm further left</dd></div>
     <div class="spec"><dt>Box, fold to fold</dt><dd>87.7 W × 84.7 H × 84.6 D mm</dd></div>
-    <div class="spec"><dt>Artwork</dt><dd>All vector. Type is outlined, so no fonts are needed to open it</dd></div>
-    <div class="spec"><dt>Still to supply</dt><dd>Ingredients, EAN barcode, Ceylon Tea lion logo, Agro Ventures logo, official Vanilla Shop logo</dd></div>
+    <div class="spec"><dt>Artwork</dt><dd>Type is outlined, so no fonts are needed. The painting is embedded and needs the full-resolution scan before print</dd></div>
+    <div class="spec"><dt>Still to supply</dt><dd>Ingredients, EAN barcode, Ceylon Tea lion logo, Agro Ventures logo, official Vanilla Shop logo, a check of the painting credit</dd></div>
   </dl>
 </section>
 
@@ -148,21 +148,26 @@ button:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
     const [display, italic, sans, bold, mono] = await Promise.all(
       ['fraunces-display.ttf', 'fraunces-italic.ttf', 'geist-medium.ttf', 'geist-bold.ttf', 'geist-mono.ttf'].map(load));
     VS.setFonts({ display, italic, sans, bold, mono });
+    const blob = await (await fetch('plates/de-alwis-vanilla.jpg')).blob();
+    const href = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob); });
+    const dims = await new Promise((res) => { const i = new Image(); i.onload = () => res({ w: i.naturalWidth, h: i.naturalHeight }); i.src = href; });
+    VS.setImages({ plate: { href, ...dims } });
   } catch (e) {
-    status.textContent = 'The font files did not load. Reload the page to try again.';
+    status.textContent = 'The artwork files did not load. Reload the page to try again.';
     return;
   }
 
-  let colorway = 'forest';
-  try { colorway = localStorage.getItem('vs-colorway') || 'forest'; } catch (e) {}
-  if (!VS.COLORWAYS[colorway]) colorway = 'forest';
+  let colorway = 'ceylon';
+  try { colorway = localStorage.getItem('vs-design') || 'ceylon'; } catch (e) {}
+  if (!VS.COLORWAYS[colorway]) colorway = 'ceylon';
 
   // ---- Colourway buttons
   const cwWrap = $('colorways');
   Object.entries(VS.COLORWAYS).forEach(([key, c]) => {
     const b = document.createElement('button');
     b.type = 'button'; b.dataset.cw = key;
-    b.innerHTML = `<span class="sw" style="background:linear-gradient(135deg, ${c.bg} 55%, ${c.accent} 55%)"></span>${c.name}`;
+    const label = c.design === 'plate' ? c.name : `Cut-paper ${c.name.toLowerCase()} (v1)`;
+    b.innerHTML = `<span class="sw" style="background:linear-gradient(135deg, ${c.design === 'plate' ? c.frame : c.bg} 55%, ${c.design === 'plate' ? c.paper : c.accent} 55%)"></span>${label}`;
     b.addEventListener('click', () => setColorway(key));
     cwWrap.appendChild(b);
   });
@@ -290,7 +295,7 @@ button:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
 
   async function setColorway(key) {
     colorway = key;
-    try { localStorage.setItem('vs-colorway', key); } catch (e) {}
+    try { localStorage.setItem('vs-design', key); } catch (e) {}
     cwWrap.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cw === key)));
     await texture(key);
     if (!flat.hidden) flat.innerHTML = VS.sheetSVG(key, { paper: '#FFFFFF' });
