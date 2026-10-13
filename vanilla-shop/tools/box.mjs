@@ -38,7 +38,7 @@ const PANELS = {
   bottom: { panel: R(633.68, 631.07, 881.70, 870.00),  region: R(629.184, 629.949, 881.703, 881.480) },
 };
 // Face studies (e.g. frontTea) use the size of the face they replace.
-const size = (k) => { const p = (PANELS[k] || PANELS[k.replace(/Tea$/, "")]).panel; return { w: p.w / MM, h: p.h / MM }; };
+const size = (k) => { const p = (PANELS[k] || PANELS[k.replace(/(Tea|V2)$/, "")]).panel; return { w: p.w / MM, h: p.h / MM }; };
 
 // ---------------------------------------------------------------------------
 // Type (outlined with opentype.js)
@@ -199,6 +199,50 @@ const faces = {
       hair(M, 74.6, 28.5),
       tag(M, 76.4),
       label('12 tea bags \u00B7 24 g', M + 6, 79.6),
+    ].join('');
+  },
+
+  // Study v2: new illustration (vanilla + tea sprig), Ceylon tea hills behind, lion mark, tea cues.
+  frontV2: (w, h) => {
+    const sz = 21.5 / width(F.display, 'Vanilla', 1), base = 63.5, lead = 0.9;
+    const hills = fs.readFileSync(path.join(root, 'plates', 'generated', 'v2-hills-front.jpg'));
+    const hw = hills.readUInt16BE(hills.indexOf(Buffer.from([0xFF, 0xC0])) + 7), hh = hills.readUInt16BE(hills.indexOf(Buffer.from([0xFF, 0xC0])) + 5);
+    const bandW = w + 6, bandH = bandW * hh / hw;
+    const v2 = fs.readFileSync(path.join(root, 'plates', 'generated', 'v2-vanilla-tea.png'));
+    const vw = v2.readUInt32BE(16), vh = v2.readUInt32BE(20), vs = 82 / vh;
+    const tag = (x, y) => `<g fill="none" stroke="${C.ink}" stroke-width="0.3" stroke-linejoin="round">` +
+      `<path d="M${n(x + 2)} ${n(y - 3.4)}q-1.6 1.6 0 3.4"/>` +
+      `<path d="M${n(x)} ${n(y + 0.9)}l1 -1h2l1 1v4.6h-4Z"/><circle cx="${n(x + 2)}" cy="${n(y + 1)}" r="0.35"/></g>`;
+    const lionSrc = fs.readFileSync(path.join(root, 'brand', 'ceylon-tea-lion.svg'), 'utf8');
+    const lvw = Number(lionSrc.match(/viewBox="0 0 ([\d.]+)/)[1]);
+    const lion = (x, y, lw) => `<path fill="#B8862B" fill-rule="evenodd" d="${lionSrc.match(/ d="([^"]+)"/)[1]}" transform="translate(${n(x)} ${n(y)}) scale(${n(lw / lvw, 6)})"/>`;
+    return [
+      paper(w, h),
+      `<image href="data:image/jpeg;base64,${hills.toString('base64')}" width="${hw}" height="${hh}" transform="translate(-3 ${n(h + 1 - bandH)}) scale(${n(bandW / hw, 6)})"/>`,
+      `<image href="data:image/png;base64,${v2.toString('base64')}" width="${vw}" height="${vh}" transform="translate(${n(w - 1 - vw * vs)} 1.5) scale(${n(vs, 6)})"/>`,
+      logo(M, 7, 17.5),
+      lion(M, 29, 11),
+      label('Ceylon black tea', M, base - sz * lead - sz * 0.78 - 1.6),
+      text('display', 'Vanilla', sz, M - 0.3, base - sz * lead),
+      text('display', 'Tea', sz, M - 0.3, base),
+      text('sans', 'with natural vanilla', 2.2, M, base + 4.2, { fill: C.soft }),
+      hair(M, 71, 28.5),
+      tag(M, 72.8),
+      label('12 tea bags \u00B7 24 g', M + 6, 76),
+    ].join('');
+  },
+
+  // Study v2 back: the cup, the line, the story.
+  backV2: (w, h) => {
+    const cup = fs.readFileSync(path.join(root, 'plates', 'generated', 'v2-cup.png'));
+    const cw = cup.readUInt32BE(16), ch = cup.readUInt32BE(20), cs = 40 / cw, cx = w / 2;
+    return [
+      paper(w, h),
+      `<image href="data:image/png;base64,${cup.toString('base64')}" width="${cw}" height="${ch}" transform="translate(${n(cx - 20)} 5) scale(${n(cs, 6)})"/>`,
+      text('display', 'Vanilla was never plain.', 6.4, cx, 54, { anchor: 'middle' }),
+      body(['The delicate sweetness of natural vanilla unfolds', 'through warm, comforting notes and a smooth,', 'mellow aroma.'], cx, 61.5, { anchor: 'middle', size: 2.3, lead: 3.4 }),
+      hair(cx - 6, 72.5, cx + 6),
+      label('Ceylon black tea with natural vanilla', cx, 77.7, { anchor: 'middle', fill: C.soft }),
     ].join('');
   },
 };
