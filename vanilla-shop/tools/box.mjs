@@ -38,7 +38,7 @@ const PANELS = {
   bottom: { panel: R(633.68, 631.07, 881.70, 870.00),  region: R(629.184, 629.949, 881.703, 881.480) },
 };
 // Face studies (e.g. frontTea) use the size of the face they replace.
-const size = (k) => { const p = (PANELS[k] || PANELS[k.replace(/(Tea|V2[a-z]?)$/, "")]).panel; return { w: p.w / MM, h: p.h / MM }; };
+const size = (k) => { const p = (PANELS[k] || PANELS[k.replace(/(Tea|V\d[a-z]?)$/, "")]).panel; return { w: p.w / MM, h: p.h / MM }; };
 
 // ---------------------------------------------------------------------------
 // Type (outlined with opentype.js)
@@ -86,7 +86,7 @@ const paper = (w, h, bleed = 80) => `<rect x="${-bleed}" y="${-bleed}" width="${
 // Faces
 const faces = {
   // Logo top-left, product name bottom-left, the plant filling the right.
-  front: (w, h) => {
+  frontV1: (w, h) => {
     const sz = 21.5 / width(F.display, 'Vanilla', 1), base = 73.6, lead = 0.9;
     return [
       paper(w, h),
@@ -120,7 +120,7 @@ const faces = {
   },
 
   // Brand panel: logo, the line, the story.
-  back: (w, h) => {
+  backV1: (w, h) => {
     const lw = 26, cx = w / 2;
     return [
       paper(w, h),
@@ -152,8 +152,7 @@ const faces = {
     });
     out.push(hair(M, y, w - M, 0.12));
     const sy = h - M - 10;
-    out.push(slot(M, sy, 15, 10, ['Ceylon Tea', 'lion logo']));
-    out.push(slot(M + 17, sy, 17, 10, ['Agro Ventures', 'logo']));
+    out.push(slot(M, sy, 17, 10, ['Agro Ventures', 'logo']));
     out.push(slot(w - M - 25, sy, 25, 10, ['EAN-13', 'barcode']));
     return out.join('');
   },
@@ -164,7 +163,7 @@ const faces = {
     return [
       paper(w, h),
       logo(w / 2 - lw / 2, h / 2 - logoH(lw) / 2 - 4, lw),
-      label('Natural vanilla tea', w / 2, h / 2 + logoH(lw) / 2 + 3, { anchor: 'middle', fill: C.soft }),
+      label('Authentic Ceylon vanilla tea', w / 2, h / 2 + logoH(lw) / 2 + 3, { anchor: 'middle', fill: C.soft }),
     ].join('');
   },
 
@@ -233,6 +232,10 @@ const faces = {
     ].join('');
   },
 
+  // Approved: front and back for print.
+  front: (w, h) => faces.frontV2(w, h, 'Authentic Ceylon', 'with Natural Vanilla'),
+  back: (w, h) => faces.backV2(w, h),
+
   frontV2b: (w, h) => faces.frontV2(w, h, 'Ceylon', 'Black tea with natural vanilla'),
   frontV2c: (w, h) => faces.frontV2(w, h, 'Authentic Ceylon', 'Black tea, naturally flavoured'),
 
@@ -246,7 +249,7 @@ const faces = {
       text('display', 'Vanilla was never plain.', 6.4, cx, 54, { anchor: 'middle' }),
       body(['The delicate sweetness of natural vanilla unfolds', 'through warm, comforting notes and a smooth,', 'mellow aroma.'], cx, 61.5, { anchor: 'middle', size: 2.3, lead: 3.4 }),
       hair(cx - 6, 72.5, cx + 6),
-      label('Ceylon black tea with natural vanilla', cx, 77.7, { anchor: 'middle', fill: C.soft }),
+      label('Authentic Ceylon vanilla tea', cx, 77.7, { anchor: 'middle', fill: C.soft }),
     ].join('');
   },
 };
