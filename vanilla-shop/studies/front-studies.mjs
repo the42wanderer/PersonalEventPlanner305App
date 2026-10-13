@@ -110,18 +110,17 @@ function logo(x, y, w, fill = C.ink) {
   const d = src.match(/ d="([^"]+)"/)[1];
   return `<path fill="${fill}" fill-rule="evenodd" d="${d}" transform="translate(${n(x)} ${n(y)}) scale(${n(w / vw, 6)})"/>`;
 }
-const columnLogo = (image, caption, logoW = 17.5) => [
+const columnLogo = (image, logoW = 17.5) => [
   image,
   logo(M, 7, logoW),
-  text('sans', caption, 1.6, 0, 0, { fill: C.soft, transform: `translate(${M + 1.2} 49) rotate(-90)` }),
   label('Natural', M, 55.5),
   text('serif', 'Vanilla', 9.6, M - 0.3, 65.2),
   text('serif', 'Tea', 9.6, M - 0.3, 73.6),
   hair(M, 76.6, 28.5),
   label('12 tea bags \u00B7 24 g', M, 80.2, { fill: C.soft }),
 ].join('');
-studies.logo_gen3 = () => columnLogo(art('gen3.png', W - 1.5, 2.5, 58, 81), 'Vanilla planifolia');
-studies.logo_gen1 = () => columnLogo(art('gen1-watercolour.png', W - 2, 3, 58, 80), 'Vanilla planifolia');
+studies.logo_gen3 = () => columnLogo(art('gen3.png', W - 1.5, 2.5, 58, 81));
+studies.logo_gen1 = () => columnLogo(art('gen1-watercolour.png', W - 2, 3, 58, 80));
 
 const out = path.join(root, 'studies', 'out');
 fs.mkdirSync(out, { recursive: true });
