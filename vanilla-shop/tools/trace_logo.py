@@ -1,6 +1,6 @@
-"""Trace the raster Vanilla Shop logo into a single-colour vector SVG.
+"""Trace a raster logo into a single-colour vector SVG.
 
-Usage: python3 tools/trace_logo.py brand/logo-source.webp brand/vanilla-shop-logo.svg [#hex]
+Usage: python3 tools/trace_logo.py SOURCE OUT.svg [#hex] [title]
 Writes a tightly cropped SVG with one evenodd path, recoloured with the given fill.
 """
 import sys
@@ -10,14 +10,18 @@ from PIL import Image
 
 src, out = sys.argv[1], sys.argv[2]
 fill = sys.argv[3] if len(sys.argv) > 3 else '#143A1D'
+title = sys.argv[4] if len(sys.argv) > 4 else 'The Vanilla Shop'
 im = Image.open(src).convert('RGBA')
+if im.width < 1200:  # upscale small sources so the trace has smoother curves
+    im = im.resize((im.width * 4, im.height * 4), Image.LANCZOS)
 a = np.asarray(im).astype(float)
 lum = a[..., :3].mean(2)
-ink = (a[..., 3] > 127) & (lum < 128)
-ys, xs = np.where(ink)
+# Ink = anything clearly darker than white (works for black or coloured marks).
+ink = (a[..., 3] > 127) & (np.sqrt(((a[..., :3] - 255) ** 2).sum(2)) > 90)
 pad = 6
-y0, y1, x0, x1 = ys.min() - pad, ys.max() + pad, xs.min() - pad, xs.max() + pad
-ink = ink[y0:y1, x0:x1]
+ink = np.pad(ink, pad)  # marks that touch the image edge still get a clean outline
+ys, xs = np.where(ink)
+ink = ink[ys.min() - pad:ys.max() + pad, xs.min() - pad:xs.max() + pad]
 
 # potracer treats False as ink, so pass the inverse.
 paths = potrace.Bitmap(~ink).trace(turdsize=4, alphamax=1.0, opticurve=True, opttolerance=0.2)
@@ -33,6 +37,6 @@ for curve in paths:
     d.append('Z')
 h, w = ink.shape
 svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}">'
-       f'<title>The Vanilla Shop</title><path fill="{fill}" fill-rule="evenodd" d="{"".join(d)}"/></svg>')
+       f'<title>{title}</title><path fill="{fill}" fill-rule="evenodd" d="{"".join(d)}"/></svg>')
 open(out, 'w').write(svg)
 print(out, w, 'x', h, len(paths), 'shapes', len(svg) // 1024, 'KB')
