@@ -121,6 +121,7 @@ const columnLogo = (image, logoW = 17.5) => [
 ].join('');
 studies.logo_gen3 = () => columnLogo(art('gen3.png', W - 1.5, 2.5, 58, 81));
 studies.logo_gen1 = () => columnLogo(art('gen1-watercolour.png', W - 2, 3, 58, 80));
+studies.logo_gen2 = () => columnLogo(art('gen2.png', W - 1.5, 2.5, 58, 81));
 
 const out = path.join(root, 'studies', 'out');
 fs.mkdirSync(out, { recursive: true });
