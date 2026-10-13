@@ -234,7 +234,7 @@ const faces = {
   // Base: batch and date, the barcode (EAN-13 at 80% = 30 x 21 mm), the Agro Ventures logo.
   bottom: (w, h) => {
     const cx = w / 2, out = [paper(w, h)];
-    out.push(text('upright', 'Vanilla Tea', 6, cx, 15, { anchor: 'middle' }));
+    out.push(text('display', 'Vanilla Tea', 6, cx, 15, { anchor: 'middle' }));
     [['Batch', 25], ['Best before', 32]].forEach(([k, y]) => {
       out.push(label(k, cx - 20, y, { fill: C.soft }));
       out.push(hair(cx, y + 0.3, cx + 20, 0.15));
@@ -270,7 +270,7 @@ const faces = {
   // Study v2: new illustration (vanilla + tea sprig), Ceylon tea hills behind, lion mark, tea cues.
   // Naming reads top to bottom as one phrase: [over] Vanilla Tea, [under].
   frontV2: (w, h, over = 'Natural', under = 'Pure Ceylon black tea') => {
-    const sz = 26 / width(F.upright, 'Vanilla', 1), base = 64.5, lead = 0.92;
+    const sz = 26 / width(F.display, 'Vanilla', 1), base = 64.5, lead = 0.92;
     const v2 = fs.readFileSync(path.join(root, 'plates', 'generated', 'v2-vanilla-tea.png'));
     const vw = v2.readUInt32BE(16), vh = v2.readUInt32BE(20), vs = 72 / vh;
     const tag = (x, y) => `<g fill="none" stroke="${C.ink}" stroke-width="0.3" stroke-linejoin="round">` +
@@ -287,8 +287,8 @@ const faces = {
       logo(M, 7, 17.5),
       lion(M, 30, 8.5),
       label(over, M, base - sz * lead - sz * 0.72 - 2.4),
-      text('upright', 'Vanilla', sz, M - 0.4, base - sz * lead),
-      text('upright', 'Tea', sz, M - 0.4, base),
+      text('display', 'Vanilla', sz, M - 0.4, base - sz * lead),
+      text('display', 'Tea', sz, M - 0.4, base),
       text('sans', under, 2.3, M, base + 4.6, { fill: C.soft }),
       hair(M, 72.6, 33),
       tag(M, 74.4),
