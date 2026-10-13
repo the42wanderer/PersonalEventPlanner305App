@@ -38,7 +38,7 @@ const PANELS = {
   bottom: { panel: R(633.68, 631.07, 881.70, 870.00),  region: R(629.184, 629.949, 881.703, 881.480) },
 };
 // Face studies (e.g. frontTea) use the size of the face they replace.
-const size = (k) => { const p = (PANELS[k] || PANELS[k.replace(/(Tea|V2)$/, "")]).panel; return { w: p.w / MM, h: p.h / MM }; };
+const size = (k) => { const p = (PANELS[k] || PANELS[k.replace(/(Tea|V2[a-z]?)$/, "")]).panel; return { w: p.w / MM, h: p.h / MM }; };
 
 // ---------------------------------------------------------------------------
 // Type (outlined with opentype.js)
@@ -203,7 +203,8 @@ const faces = {
   },
 
   // Study v2: new illustration (vanilla + tea sprig), Ceylon tea hills behind, lion mark, tea cues.
-  frontV2: (w, h) => {
+  // Naming reads top to bottom as one phrase: [over] Vanilla Tea, [under].
+  frontV2: (w, h, over = 'Natural', under = 'Pure Ceylon black tea') => {
     const sz = 21.5 / width(F.display, 'Vanilla', 1), base = 63.5, lead = 0.9;
     const hills = fs.readFileSync(path.join(root, 'plates', 'generated', 'v2-hills-front.jpg'));
     const hw = hills.readUInt16BE(hills.indexOf(Buffer.from([0xFF, 0xC0])) + 7), hh = hills.readUInt16BE(hills.indexOf(Buffer.from([0xFF, 0xC0])) + 5);
@@ -222,15 +223,18 @@ const faces = {
       `<image href="data:image/png;base64,${v2.toString('base64')}" width="${vw}" height="${vh}" transform="translate(${n(w - 1 - vw * vs)} 1.5) scale(${n(vs, 6)})"/>`,
       logo(M, 7, 17.5),
       lion(M, 29, 11),
-      label('Ceylon black tea', M, base - sz * lead - sz * 0.78 - 1.6),
+      label(over, M, base - sz * lead - sz * 0.78 - 1.6),
       text('display', 'Vanilla', sz, M - 0.3, base - sz * lead),
       text('display', 'Tea', sz, M - 0.3, base),
-      text('sans', 'with natural vanilla', 2.2, M, base + 4.2, { fill: C.soft }),
+      text('sans', under, 2.2, M, base + 4.2, { fill: C.soft }),
       hair(M, 71, 28.5),
       tag(M, 72.8),
       label('12 tea bags \u00B7 24 g', M + 6, 76),
     ].join('');
   },
+
+  frontV2b: (w, h) => faces.frontV2(w, h, 'Ceylon', 'Black tea with natural vanilla'),
+  frontV2c: (w, h) => faces.frontV2(w, h, 'Authentic Ceylon', 'Black tea, naturally flavoured'),
 
   // Study v2 back: the cup, the line, the story.
   backV2: (w, h) => {
