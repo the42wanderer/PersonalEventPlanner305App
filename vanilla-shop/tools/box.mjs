@@ -82,6 +82,29 @@ function slot(x, y, w, h, lines) {
 
 const paper = (w, h, bleed = 80) => `<rect x="${-bleed}" y="${-bleed}" width="${w + bleed * 2}" height="${h + bleed * 2}" fill="${C.paper}"/>`;
 
+// Ceylon tea-hills band: one seamless tile repeated along the box, so the landscape runs
+// continuously across the folds from the front, round the brewing side, to the back.
+const hillsTile = fs.readFileSync(path.join(root, 'plates', 'generated', 'v3-hills-tile.jpg'));
+const sof = hillsTile.indexOf(Buffer.from([0xFF, 0xC0]));
+const HT = { w: hillsTile.readUInt16BE(sof + 7), h: hillsTile.readUInt16BE(sof + 5), href: 'data:image/jpeg;base64,' + hillsTile.toString('base64') };
+const TILE_W = 115, TILE_H = TILE_W * HT.h / HT.w;
+function hillsBand(key, w, h) {
+  const wrapStart = { front: 0, sideA: size('front').w, back: size('front').w + size('sideA').w }[key];
+  let out = '';
+  for (let i = Math.floor(wrapStart / TILE_W) - 1; i * TILE_W - wrapStart < w + 5; i++) {
+    out += `<image href="${HT.href}" width="${HT.w}" height="${HT.h}" preserveAspectRatio="none" transform="translate(${n(i * TILE_W - wrapStart)} ${n(h + 1.5 - TILE_H)}) scale(${n((TILE_W + 0.25) / HT.w, 6)} ${n(TILE_H / HT.h, 6)})"/>`; // 0.25 mm overlap hides the anti-aliased join
+  }
+  return out;
+}
+// Paper-coloured gradient over the band where type sits: opaque at `from`, clear at `to`.
+function fadeBand(id, from, to, h) {
+  const x0 = Math.min(from, to), x1 = Math.max(from, to), opaqueLeft = from < to;
+  return `<linearGradient id="fade-${id}" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="${C.paper}" stop-opacity="${opaqueLeft ? 1 : 0}"/><stop offset="1" stop-color="${C.paper}" stop-opacity="${opaqueLeft ? 0 : 1}"/></linearGradient>` +
+    `<rect x="${n(x0)}" y="${n(h - TILE_H - 2)}" width="${n(x1 - x0)}" height="${n(TILE_H + 6)}" fill="url(#fade-${id})"/>` +
+    (opaqueLeft ? `<rect x="-10" y="${n(h - TILE_H - 2)}" width="${n(x0 + 10)}" height="${n(TILE_H + 6)}" fill="${C.paper}"/>`
+                : `<rect x="${n(x1)}" y="${n(h - TILE_H - 2)}" width="20" height="${n(TILE_H + 6)}" fill="${C.paper}"/>`);
+}
+
 // ---------------------------------------------------------------------------
 // Faces
 const faces = {
@@ -107,15 +130,15 @@ const faces = {
       ['Steep', '5 minutes', 'Then lift the bag out'],
       ['Or', 'Over ice', 'Let it cool and pour over ice'],
     ];
-    const out = [paper(w, h), text('display', 'How to brew', 8, M, 17), hair(M, 22, w - M)];
+    const out = [paper(w, h), hillsBand('sideA', w, h), text('display', 'How to brew', 8, M, 17),
+      label('2 g per tea bag', w - M, 17, { fill: C.soft, anchor: 'end' }), hair(M, 21, w - M)];
     rows.forEach(([k, v, d], i) => {
-      const y = 33 + i * 15;
+      const y = 30.5 + i * 13;
       out.push(label(k, M, y - 1.2, { fill: C.soft }));
       out.push(text('display', v, 6.2, 27, y));
       out.push(text('sans', d, 2.25, 27, y + 4.4, { fill: C.soft }));
       out.push(hair(M, y + 8, w - M, 0.12));
     });
-    out.push(label('2 g per tea bag', M, h - M, { fill: C.soft }));
     return out.join('');
   },
 
@@ -205,9 +228,6 @@ const faces = {
   // Naming reads top to bottom as one phrase: [over] Vanilla Tea, [under].
   frontV2: (w, h, over = 'Natural', under = 'Pure Ceylon black tea') => {
     const sz = 21.5 / width(F.display, 'Vanilla', 1), base = 63.5, lead = 0.9;
-    const hills = fs.readFileSync(path.join(root, 'plates', 'generated', 'v2-hills-front.jpg'));
-    const hw = hills.readUInt16BE(hills.indexOf(Buffer.from([0xFF, 0xC0])) + 7), hh = hills.readUInt16BE(hills.indexOf(Buffer.from([0xFF, 0xC0])) + 5);
-    const bandW = w + 6, bandH = bandW * hh / hw;
     const v2 = fs.readFileSync(path.join(root, 'plates', 'generated', 'v2-vanilla-tea.png'));
     const vw = v2.readUInt32BE(16), vh = v2.readUInt32BE(20), vs = 82 / vh;
     const tag = (x, y) => `<g fill="none" stroke="${C.ink}" stroke-width="0.3" stroke-linejoin="round">` +
@@ -218,7 +238,8 @@ const faces = {
     const lion = (x, y, lw) => `<path fill="#B8862B" fill-rule="evenodd" d="${lionSrc.match(/ d="([^"]+)"/)[1]}" transform="translate(${n(x)} ${n(y)}) scale(${n(lw / lvw, 6)})"/>`;
     return [
       paper(w, h),
-      `<image href="data:image/jpeg;base64,${hills.toString('base64')}" width="${hw}" height="${hh}" transform="translate(-3 ${n(h + 1 - bandH)}) scale(${n(bandW / hw, 6)})"/>`,
+      hillsBand('front', w, h),
+      fadeBand('front', 31, 47, h),
       `<image href="data:image/png;base64,${v2.toString('base64')}" width="${vw}" height="${vh}" transform="translate(${n(w - 1 - vw * vs)} 1.5) scale(${n(vs, 6)})"/>`,
       logo(M, 7, 17.5),
       lion(M, 29, 11),
@@ -242,14 +263,14 @@ const faces = {
   // Study v2 back: the cup, the line, the story.
   backV2: (w, h) => {
     const cup = fs.readFileSync(path.join(root, 'plates', 'generated', 'v2-cup.png'));
-    const cw = cup.readUInt32BE(16), ch = cup.readUInt32BE(20), cs = 40 / cw, cx = w / 2;
+    const cw = cup.readUInt32BE(16), ch = cup.readUInt32BE(20), cs = 38 / cw, cx = w / 2;
     return [
       paper(w, h),
-      `<image href="data:image/png;base64,${cup.toString('base64')}" width="${cw}" height="${ch}" transform="translate(${n(cx - 20)} 5) scale(${n(cs, 6)})"/>`,
-      text('display', 'Vanilla was never plain.', 6.4, cx, 54, { anchor: 'middle' }),
-      body(['The delicate sweetness of natural vanilla unfolds', 'through warm, comforting notes and a smooth,', 'mellow aroma.'], cx, 61.5, { anchor: 'middle', size: 2.3, lead: 3.4 }),
-      hair(cx - 6, 72.5, cx + 6),
-      label('Authentic Ceylon vanilla tea', cx, 77.7, { anchor: 'middle', fill: C.soft }),
+      hillsBand('back', w, h),
+      fadeBand('back', w - 4, w - 26, h),
+      `<image href="data:image/png;base64,${cup.toString('base64')}" width="${cw}" height="${ch}" transform="translate(${n(cx - 19)} 3) scale(${n(cs, 6)})"/>`,
+      text('display', 'Vanilla was never plain.', 6.4, cx, 48.5, { anchor: 'middle' }),
+      body(['The delicate sweetness of natural vanilla unfolds', 'through warm, comforting notes and a smooth,', 'mellow aroma.'], cx, 55.5, { anchor: 'middle', size: 2.3, lead: 3.4 }),
     ].join('');
   },
 };
