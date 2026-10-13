@@ -123,21 +123,44 @@ const faces = {
     ].join('');
   },
 
-  // Brewing, set as a short typographic table.
+  // Brewing: three steps as aligned columns, each with a line icon, label, value and note.
   sideA: (w, h) => {
-    const rows = [
-      ['Water', '150 ml', 'One tea bag in hot water'],
-      ['Steep', '5 minutes', 'Then lift the bag out'],
-      ['Or', 'Over ice', 'Let it cool and pour over ice'],
+    const tint = '#E9ECDC';
+    const stroke = `fill="none" stroke="${C.ink}" stroke-width="0.32" stroke-linecap="round" stroke-linejoin="round"`;
+    // Icons drawn in a ±5.5 mm box around (0, 0).
+    const icons = {
+      cup: `<path ${stroke} d="M-5 4.3Q0 5.7 5 4.3"/>` +
+        `<path ${stroke} d="M-3.8 -1.2H3.2Q3.2 3.9 -0.3 3.9Q-3.8 3.9 -3.8 -1.2Z"/>` +
+        `<path ${stroke} d="M3.15 -0.3q2.1 0 2.1 1.3t-2.35 1.6"/>` +
+        `<path ${stroke} d="M1.3 -1.2L2.5 -4.1"/><rect ${stroke} x="1.75" y="-5.95" width="1.7" height="1.9" rx="0.2" transform="rotate(12 2.6 -5)"/>` +
+        `<path ${stroke} d="M-2.1 -2.4q-0.8 -1 0 -2M-0.5 -2.4q-0.8 -1 0 -2"/>`,
+      timer: `<path d="M0 0.7L0 -3.2A3.9 3.9 0 0 1 1.95 -2.68Z" fill="${C.ink}" opacity="0.18"/>` +
+        `<circle ${stroke} cx="0" cy="0.7" r="3.9"/><path ${stroke} d="M-0.9 -4.6H0.9M0 -4.6V-3.2M3 -2.5l0.7 -0.7"/>` +
+        `<path ${stroke} d="M0 0.7L1.6 -2.1"/><circle cx="0" cy="0.7" r="0.35" fill="${C.ink}"/>` +
+        `<path ${stroke} d="M0 -2.6v0.5M3.3 0.7h-0.5M0 4v-0.5M-3.3 0.7h0.5"/>`,
+      ice: `<path ${stroke} d="M-3.1 -4.4L-2.4 4.6H2.4L3.1 -4.4"/><path ${stroke} d="M-2.85 -1.1H2.85"/>` +
+        `<rect ${stroke} x="-2.3" y="-0.3" width="2.1" height="2.1" rx="0.3" transform="rotate(14 -1.25 0.75)"/>` +
+        `<rect ${stroke} x="0.1" y="1.6" width="1.9" height="1.9" rx="0.3" transform="rotate(-10 1.05 2.55)"/>` +
+        `<path ${stroke} d="M1 -1.1L2.3 -6.1"/>`,
+    };
+    const steps = [
+      ['cup', 'Water', '150 ml', ['One tea bag in', 'hot water']],
+      ['timer', 'Steep', '5 minutes', ['Then lift the', 'bag out']],
+      ['ice', 'Or', 'Over ice', ['Let it cool and', 'pour over ice']],
     ];
-    const out = [paper(w, h), hillsBand('sideA', w, h), text('display', 'How to brew', 8, M, 17),
-      label('2 g per tea bag', w - M, 17, { fill: C.soft, anchor: 'end' }), hair(M, 21, w - M)];
-    rows.forEach(([k, v, d], i) => {
-      const y = 30.5 + i * 13;
-      out.push(label(k, M, y - 1.2, { fill: C.soft }));
-      out.push(text('display', v, 6.2, 27, y));
-      out.push(text('sans', d, 2.25, 27, y + 4.4, { fill: C.soft }));
-      out.push(hair(M, y + 8, w - M, 0.12));
+    const colW = (w - 2 * M) / 3, top = 21;
+    const out = [paper(w, h), hillsBand('sideA', w, h),
+      text('display', 'How to brew', 8, M, 16.5),
+      label('2 g per tea bag', w - M, 16.5, { fill: C.soft, anchor: 'end' }),
+      hair(M, top, w - M)];
+    steps.forEach(([icon, k, v, note], i) => {
+      const cx = M + colW * (i + 0.5);
+      if (i > 0) out.push(`<path d="M${n(M + colW * i)} ${top + 5}V${top + 37}" stroke="${C.line}" stroke-width="0.12"/>`);
+      out.push(`<circle cx="${n(cx)}" cy="${top + 11}" r="6.3" fill="${tint}"/>`);
+      out.push(`<g transform="translate(${n(cx)} ${top + 11})">${icons[icon]}</g>`);
+      out.push(label(k, cx, top + 23, { fill: C.soft, anchor: 'middle' }));
+      out.push(text('display', v, 4.9, cx, top + 30, { anchor: 'middle' }));
+      note.forEach((l, j) => out.push(text('sans', l, 2.05, cx, top + 34.3 + j * 2.9, { fill: C.soft, anchor: 'middle' })));
     });
     return out.join('');
   },
