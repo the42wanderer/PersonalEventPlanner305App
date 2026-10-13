@@ -11,6 +11,9 @@ const font = (f) => opentype.loadSync(path.join(root, 'fonts', f));
 const F = {
   serif: font('instrument-serif.ttf'), italic: font('instrument-serif-italic.ttf'),
   sans: font('geist-regular.ttf'), medium: font('geist-medium.ttf'),
+  frauncesBlack: font('fraunces-black-italic.ttf'), frauncesSoft: font('fraunces-display.ttf'),
+  frauncesItalic: font('fraunces-italic.ttf'), gloock: font('gloock.ttf'),
+  bodoniItalic: font('bodoni-moda-italic.ttf'), bodoni: font('bodoni-moda-bold.ttf'),
 };
 
 // Front panel, fold to fold (mm), measured from the supplied dieline.
@@ -122,6 +125,27 @@ const columnLogo = (image, logoW = 17.5) => [
 studies.logo_gen3 = () => columnLogo(art('gen3.png', W - 1.5, 2.5, 58, 81));
 studies.logo_gen1 = () => columnLogo(art('gen1-watercolour.png', W - 2, 3, 58, 80));
 studies.logo_gen2 = () => columnLogo(art('gen2.png', W - 1.5, 2.5, 58, 81));
+
+// Type studies: layout A with the logo and image No. 3; only the product-name face changes.
+// Each face is sized so "Vanilla" fills the same 21.5 mm column width.
+const typeStudy = (key, leading = 0.88, nudge = 0) => {
+  const size = 21.5 / width(F[key], 'Vanilla', 1);
+  const base = 73.6;
+  return [
+    art('gen3.png', W - 1.5, 2.5, 58, 81),
+    logo(M, 7, 17.5),
+    label('Natural', M, base - size * leading - size * 0.78 - 1.6),
+    text(key, 'Vanilla', size, M - 0.3 + nudge, base - size * leading),
+    text(key, 'Tea', size, M - 0.3 + nudge, base),
+    hair(M, 76.6, 28.5),
+    label('12 tea bags \u00B7 24 g', M, 80.2, { fill: C.soft }),
+  ].join('');
+};
+for (const [k, key, lead] of [
+  ['fraunces_soft', 'frauncesSoft', 0.9], ['fraunces_black_italic', 'frauncesBlack', 0.9],
+  ['fraunces_italic', 'frauncesItalic', 0.9], ['bodoni_italic', 'bodoniItalic', 0.9],
+  ['gloock', 'gloock', 0.9], ['bodoni', 'bodoni', 0.9],
+]) studies['type_' + k] = () => typeStudy(key, lead);
 
 const out = path.join(root, 'studies', 'out');
 fs.mkdirSync(out, { recursive: true });
