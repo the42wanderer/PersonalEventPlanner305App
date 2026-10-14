@@ -47,10 +47,25 @@ function width(f, s, sz, track = 0) {
   const g = f.stringToGlyphs(s), k = sz / f.unitsPerEm;
   return g.reduce((w, gl, i) => w + gl.advanceWidth * k + (i < g.length - 1 ? f.getKerningValue(gl, g[i + 1]) * k + track * sz : 0), 0);
 }
+// In LIVE mode text is written as editable <text> (for the Illustrator file); otherwise as outlines.
+// font-family lists the PostScript name first (what Illustrator matches) and the family name second.
+let LIVE = false;
+const FONT_NAMES = {
+  display: { family: "'Fraunces144ptSuperSoftWonky-Italic', 'Fraunces 144pt SuperSoft Wonky'", style: 'italic' },
+  upright: { family: "'Fraunces144ptSuperSoftWonky-SemiBold', 'Fraunces 144pt SuperSoft Wonky SemiBold'" },
+  sans: { family: "'Geist-Regular', 'Geist'" },
+  medium: { family: "'Geist-Medium', 'Geist Medium'" },
+};
+const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 function text(key, s, sz, x, y, o = {}) {
   const f = F[key], str = o.caps ? s.toUpperCase() : s, g = f.stringToGlyphs(str), k = sz / f.unitsPerEm;
   const w = width(f, str, sz, o.track || 0);
   let cx = o.anchor === 'end' ? x - w : o.anchor === 'middle' ? x - w / 2 : x, d = '';
+  if (LIVE && !o.outline && str.trim()) {
+    const fn = FONT_NAMES[key];
+    return `<text x="${n(cx)}" y="${n(y)}" font-family="${fn.family}"${fn.style ? ` font-style="${fn.style}"` : ''} font-size="${n(sz)}"` +
+      `${o.track ? ` letter-spacing="${n(o.track * sz, 4)}"` : ''} fill="${o.fill || C.ink}"${o.opacity != null ? ` opacity="${o.opacity}"` : ''}>${esc(str)}</text>`;
+  }
   g.forEach((gl, i) => {
     d += gl.getPath(cx, y, sz).toPathData(3);
     cx += gl.advanceWidth * k + (i < g.length - 1 ? f.getKerningValue(gl, g[i + 1]) * k + (o.track || 0) * sz : 0);
@@ -175,9 +190,9 @@ function ean13(code, x, y, fill = C.ink) {
     i = j;
   }
   const sz = 2.2, ty = y + barH + 0.35 + sz * 0.72; // digits sit just under the short bars
-  const digits = text('sans', code[0], sz, x + qz - 1.6 * m, ty, { anchor: 'end', fill }) +
-    text('sans', code.slice(1, 7), sz, x + qz + (3 + 21) * m, ty, { anchor: 'middle', fill, track: 0.06 }) +
-    text('sans', code.slice(7), sz, x + qz + (50 + 21) * m, ty, { anchor: 'middle', fill, track: 0.06 });
+  const digits = text('sans', code[0], sz, x + qz - 1.6 * m, ty, { anchor: 'end', fill, outline: true }) +
+    text('sans', code.slice(1, 7), sz, x + qz + (3 + 21) * m, ty, { anchor: 'middle', fill, track: 0.06, outline: true }) +
+    text('sans', code.slice(7), sz, x + qz + (50 + 21) * m, ty, { anchor: 'middle', fill, track: 0.06, outline: true });
   return `<path d="${d}" fill="${fill}"/>${digits}`;
 }
 const EAN_W = 113 * 0.264;
@@ -392,15 +407,17 @@ function faceSVG(key) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${n(w)}mm" height="${n(h)}mm" viewBox="0 0 ${n(w)} ${n(h)}">` +
     `<defs><clipPath id="c"><rect width="${n(w)}" height="${n(h)}"/></clipPath></defs><g clip-path="url(#c)">${faces[key](w, h)}</g></svg>`;
 }
+// Group names as they appear in Illustrator's Layers panel.
+const GROUP_NAMES = { front: 'Front', sideA: 'Side_How_to_brew', back: 'Back', sideB: 'Side_Whats_inside', top: 'Top', inner: 'Inner_flap', bottom: 'Base' };
 function sheetSVG() {
   let defs = '', art = '';
   for (const [key, { panel, region }] of Object.entries(PANELS)) {
     const { w, h } = size(key);
     defs += `<clipPath id="clip-${key}"><rect x="${region.x}" y="${region.y}" width="${n(region.w)}" height="${n(region.h)}"/></clipPath>`;
-    art += `<g id="${key}" clip-path="url(#clip-${key})"><g transform="translate(${panel.x} ${panel.y}) scale(${n(MM, 6)})">${faces[key](w, h)}</g></g>`;
+    art += `<g id="${GROUP_NAMES[key]}" clip-path="url(#clip-${key})"><g transform="translate(${panel.x} ${panel.y}) scale(${n(MM, 6)})">${faces[key](w, h)}</g></g>`;
   }
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1194.94pt" height="1052.97pt" viewBox="0 0 1194.94 1052.97">` +
-    `<title>Natural Vanilla Tea – print sheet</title><defs>${defs}</defs><rect width="1194.94" height="1052.97" fill="#FFFFFF"/>` +
+    `<title>Natural Vanilla Tea – print sheet</title><defs>${defs}</defs><rect id="Background" width="1194.94" height="1052.97" fill="#FFFFFF"/>` +
     `<g id="Artwork">${art}</g><g id="Dieline">${globalThis.VS_DIELINE}</g></svg>`;
 }
 
@@ -409,3 +426,15 @@ fs.mkdirSync(out, { recursive: true });
 for (const key of Object.keys(faces)) fs.writeFileSync(path.join(out, `face-${key}.svg`), faceSVG(key));
 fs.writeFileSync(path.join(out, 'natural-vanilla-tea_print-sheet.svg'), sheetSVG());
 console.log('wrote', fs.readdirSync(out).length, 'files to', out);
+
+// Editable version for Illustrator: same artwork, but type stays live text.
+// Sinhala/Tamil labels, the barcode and the logos stay as outlines.
+LIVE = true;
+const editable = path.join(root, 'export', 'editable');
+fs.mkdirSync(path.join(editable, 'fonts'), { recursive: true });
+fs.writeFileSync(path.join(editable, 'natural-vanilla-tea_EDITABLE.svg'), sheetSVG());
+for (const f of ['fraunces-italic.ttf', 'fraunces-display.ttf', 'geist-regular.ttf', 'geist-medium.ttf']) {
+  fs.copyFileSync(path.join(root, 'fonts', f), path.join(editable, 'fonts', f));
+}
+LIVE = false;
+console.log('wrote editable SVG and fonts to', editable);
