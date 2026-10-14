@@ -409,6 +409,10 @@ function faceSVG(key) {
 }
 // Group names as they appear in Illustrator's Layers panel.
 const GROUP_NAMES = { front: 'Front', sideA: 'Side_How_to_brew', back: 'Back', sideB: 'Side_Whats_inside', top: 'Top', inner: 'Inner_flap', bottom: 'Base' };
+// Illustrator only reads embedded images from xlink:href; with plain href it treats them as missing links.
+const forIllustrator = (svg) => svg
+  .replace('<svg xmlns="http://www.w3.org/2000/svg"', '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"')
+  .replace(/<image href=/g, '<image xlink:href=');
 function sheetSVG() {
   let defs = '', art = '';
   for (const [key, { panel, region }] of Object.entries(PANELS)) {
@@ -416,9 +420,9 @@ function sheetSVG() {
     defs += `<clipPath id="clip-${key}"><rect x="${region.x}" y="${region.y}" width="${n(region.w)}" height="${n(region.h)}"/></clipPath>`;
     art += `<g id="${GROUP_NAMES[key]}" clip-path="url(#clip-${key})"><g transform="translate(${panel.x} ${panel.y}) scale(${n(MM, 6)})">${faces[key](w, h)}</g></g>`;
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1194.94pt" height="1052.97pt" viewBox="0 0 1194.94 1052.97">` +
+  return forIllustrator(`<svg xmlns="http://www.w3.org/2000/svg" width="1194.94pt" height="1052.97pt" viewBox="0 0 1194.94 1052.97">` +
     `<title>Natural Vanilla Tea – print sheet</title><defs>${defs}</defs><rect id="Background" width="1194.94" height="1052.97" fill="#FFFFFF"/>` +
-    `<g id="Artwork">${art}</g><g id="Dieline">${globalThis.VS_DIELINE}</g></svg>`;
+    `<g id="Artwork">${art}</g><g id="Dieline">${globalThis.VS_DIELINE}</g></svg>`);
 }
 
 const out = path.join(root, 'export', 'final');
