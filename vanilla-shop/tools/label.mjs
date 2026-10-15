@@ -128,16 +128,23 @@ function build(p) {
   if (p.weightUnder) out.push(text('display', '100 g', 4.6, L, b2 + 13.5));
   else out.push(text('display', '100 g', 4.4, w - L, 25.6, { anchor: 'end' }));
   // Spec card: one compact, outlined panel at the foot, aligned to the text column. Barcode on the
-  // left, the batch fields as a small ruled table on the right, a hairline between them.
-  const cw = 58, ch = 15.2, cx = L - 1.5, cy = h - 5.2 - ch;
-  out.push(`<rect x="${n(cx)}" y="${n(cy)}" width="${cw}" height="${ch}" rx="1.4" fill="#FFFFFF" stroke="${C.ink}" stroke-width="0.22"/>`);
-  out.push(ean13(p.gtin, cx + 0.2, cy + 1.3));
-  const fx = cx + 32.2;
-  out.push(`<path d="M${n(fx - 1.6)} ${n(cy + 2)}V${n(cy + ch - 2)}" stroke="${C.ink}" stroke-width="0.12"/>`);
-  [['MRP Rs.', 0], ['MFD', 1], ['EXP', 2], ['BTN', 3]].forEach(([k, i]) => {
-    const y = cy + 3.9 + i * 3.25;
-    out.push(label(k, fx, y, { size: 1.45, fill: C.ink }));
-    out.push(`<path d="M${n(fx + 8.4)} ${n(y + 0.25)}H${n(cx + cw - 2)}" stroke="${C.soft}" stroke-width="0.1" stroke-dasharray="0.35 0.35"/>`);
+  // left, the batch fields as a small ruled table on the right; one padding all round.
+  // The barcode is scaled to match the size on the current pouch (bars about 21 mm wide, roughly
+  // 67% magnification; GS1 recommends at least 80%, so test-scan before print).
+  const K = 0.84, pad = 1.6, M = 0.264;
+  const barsW = 95 * M * K, bcH = (BAR_H + 2.6) * K;
+  const ch = bcH + 2 * pad, cx = L - 1.5, cy = h - 5.2 - ch;
+  const bx = cx + pad + 1.2;                                  // left edge of the bars (digit "4" sits in the gap)
+  const divX = bx + barsW + pad, fx = divX + pad, lineX0 = fx + 7.4, lineLen = 11.5;
+  const cw = lineX0 + lineLen + pad - cx;
+  out.push(`<rect x="${n(cx)}" y="${n(cy)}" width="${n(cw)}" height="${n(ch)}" rx="1.3" fill="#FFFFFF" stroke="${C.ink}" stroke-width="0.22"/>`);
+  out.push(`<g transform="translate(${n(bx - 11 * M * K)} ${n(cy + pad)}) scale(${K})">${ean13(p.gtin, 0, 0)}</g>`);
+  out.push(`<path d="M${n(divX)} ${n(cy + pad)}V${n(cy + ch - pad)}" stroke="${C.ink}" stroke-width="0.12"/>`);
+  const rows = ['MRP Rs.', 'MFD', 'EXP', 'BTN'], top = cy + pad + 1.15, step = (ch - 2 * pad - 1.15) / (rows.length - 1);
+  rows.forEach((k, i) => {
+    const y = top + i * step;
+    out.push(label(k, fx, y, { size: 1.35, fill: C.ink }));
+    out.push(`<path d="M${n(lineX0)} ${n(y + 0.2)}H${n(lineX0 + lineLen)}" stroke="${C.soft}" stroke-width="0.1" stroke-dasharray="0.35 0.35"/>`);
   });
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${w + 2 * BLEED}mm" height="${h + 2 * BLEED}mm" viewBox="${-BLEED} ${-BLEED} ${w + 2 * BLEED} ${h + 2 * BLEED}">` +
     `<defs><clipPath id="bleed"><path d="${outline(-BLEED)}"/></clipPath></defs>` +
