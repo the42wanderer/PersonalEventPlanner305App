@@ -101,7 +101,8 @@ const LABELS = {
   // Same layout; the vanilla-and-cinnamon painting sits over the vine's base. "Tea" moves up into
   // the descriptor so the name stays clear of the vine.
   'vanilla-cinnamon-tea-100g': { ground: 'v6-label-ground-cinnamon.jpg', over: 'Authentic Ceylon tea', lines: ['Vanilla &', 'Cinnamon'], under: ['Vanilla and cinnamon blended', 'with pure Ceylon tea'], gtin: '4796034220250',
-    pieces: [...COMMON, { piece: 'cinnamon', at: [37, 84], width: 40 }] },
+    // Cinnamon painting flipped (quills to the left) across the lower left, the teacup set just above it.
+    pieces: [COMMON[0], COMMON[2], { piece: 'cinnamon', at: [-2, 69.5], width: 46, flip: true }, { piece: 'teacup', at: [25, 59.5], width: 16 }] },
 };
 
 // Place an artwork by its painted area (box, in source pixels): top-left at `at` (mm), sized by height or width.
@@ -109,7 +110,7 @@ function art(d) {
   const a = PIECE[d.piece], [x0, y0, x1, y1] = a.box, s = d.height ? d.height / (y1 - y0) : d.width / (x1 - x0);
   const inner = img(a.file, -x0 * s, -y0 * s, a.pw * s, a.ph * s);
   // rotate 90 turns the piece clockwise about its painted box's top-left, then shifts it back into place.
-  const rot = d.rotate === 90 ? `translate(${n((y1 - y0) * s)} 0) rotate(90)` : '';
+  const rot = d.rotate === 90 ? `translate(${n((y1 - y0) * s)} 0) rotate(90)` : d.flip ? `translate(${n((x1 - x0) * s)} 0) scale(-1 1)` : '';
   return `<g transform="translate(${n(d.at[0])} ${n(d.at[1])}) ${rot}">${inner}</g>`;
 }
 
