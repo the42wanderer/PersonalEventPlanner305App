@@ -77,9 +77,19 @@ const outline = (inset = 0) => {
 };
 
 const LABELS = {
-  'natural-vanilla-tea-100g': { ground: 'v6-label-ground-vanilla.jpg', over: 'Authentic Ceylon', lines: ['Vanilla', 'Tea'], under: 'with Natural Vanilla', gtin: '4796034220243' },
-  'vanilla-cinnamon-tea-100g': { ground: 'v6-label-ground-cinnamon.jpg', over: 'Authentic Ceylon', lines: ['Vanilla &', 'Cinnamon Tea'], under: ['Vanilla and cinnamon blended', 'with pure Ceylon tea'], vineDrop: 3.5, gtin: '4796034220250' },
+  'natural-vanilla-tea-100g': { ground: 'v6-label-ground-vanilla.jpg', over: 'Authentic Ceylon', lines: ['Vanilla', 'Tea'], under: 'with Natural Vanilla', gtin: '4796034220243',
+    // Upright vine: artwork bbox x 89-930, y 126-1438 px; climbs the right side beside the name.
+    art: { file: 'v7-vine-upright.png', pw: 1024, ph: 1536, box: [89, 126, 930, 1438], at: [23, 27], height: 65 } },
+  'vanilla-cinnamon-tea-100g': { ground: 'v6-label-ground-cinnamon.jpg', over: 'Authentic Ceylon', lines: ['Vanilla &', 'Cinnamon Tea'], under: ['Vanilla and cinnamon blended', 'with pure Ceylon tea'], gtin: '4796034220250',
+    // Vanilla pods, orchid and cinnamon quills: artwork bbox x 237-1331, y 263-802 px; across the foot.
+    art: { file: 'v7-vanilla-cinnamon.png', pw: 1536, ph: 1024, box: [237, 263, 1331, 802], at: [5, 54], width: 70 } },
 };
+
+// Place an artwork by its painted area (box, in source pixels): top-left at `at` (mm), sized by height or width.
+function art(a) {
+  const [x0, y0, x1, y1] = a.box, s = a.height ? a.height / (y1 - y0) : a.width / (x1 - x0);
+  return img(a.file, a.at[0] - x0 * s, a.at[1] - y0 * s, a.pw * s, a.ph * s);
+}
 
 function build(p) {
   const { w, h } = SIZE;
@@ -87,11 +97,11 @@ function build(p) {
   // The painting large, bleeding off both sides: flower right of centre, pods running off the left.
   const vw = 128, vh = vw * VINE.ph / VINE.pw;
   const L = 7;                                                    // left text edge
-  const sz = Math.min(13.5, 54 / width(F.display, p.lines[0], 1), 54 / width(F.display, p.lines[1], 1));
+  const sz = Math.min(12.5, 54 / width(F.display, p.lines[0], 1), 54 / width(F.display, p.lines[1], 1));
   const b1 = 27 + sz * 0.74, b2 = b1 + sz * 0.88;
   const out = [
     img(p.ground, -BLEED, -BLEED, w + 2 * BLEED, h + 2 * BLEED),
-    img(VINE.file, -22, h - vh - 8.5 + (p.vineDrop || 0), vw, vh),
+    art(p.art),
     logo(w / 2 - 6.5, 6.5, 13),
     label(p.over, L, 25.2),
     text('display', p.lines[0], sz, L - 0.5, b1),
