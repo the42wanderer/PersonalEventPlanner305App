@@ -98,18 +98,18 @@ function build(p) {
     text('display', p.lines[1], sz, L - 0.5, b2),
     ...[].concat(p.under).map((u, i) => text('sans', u, 2.2, L, b2 + 5 + i * 3)),
   ];
-  // One slim strip at the foot: batch fields as a single row of small labels, weight and barcode.
+  // Net weight on the line with "Authentic Ceylon", right-aligned.
+  out.push(text('display', '100 g', 4.4, w - L, 25.6, { anchor: 'end' }));
+  // One slim strip at the foot: barcode on white at the left, batch fields beside it.
   const fy = h - 12.6;
-  out.push(`<rect x="${-BLEED}" y="${fy - 4.4}" width="${w + 2 * BLEED}" height="${h - fy + 4.4 + BLEED}" fill="#FFFBF2" fill-opacity="0.9"/>`);
-  out.push(text('display', '100 g', 5, L, fy + 1.6));
+  out.push(`<rect x="${-BLEED}" y="${fy - 5.4}" width="${w + 2 * BLEED}" height="${h - fy + 5.4 + BLEED}" fill="#FFFBF2" fill-opacity="0.9"/>`);
+  out.push(`<rect x="3.6" y="${n(fy - 4.4)}" width="30.6" height="13.4" fill="#FFFFFF"/>`);
+  out.push(ean13(p.gtin, 3.8, fy - 3.6));            // EAN-13 at 80% with shortened bars (see BAR_H)
   [['MRP Rs.', 0], ['MFD', 1], ['EXP', 2], ['BTN', 3]].forEach(([k, i]) => {
-    const y = fy - 0.6 + i * 3.3;
-    out.push(label(k, 22, y, { size: 1.45, fill: C.soft }));
-    out.push(`<path d="M${n(31)} ${n(y + 0.3)}H${n(38.5)}" stroke="${C.soft}" stroke-width="0.12"/>`);
+    const y = fy - 1.9 + i * 3.1;
+    out.push(label(k, 38, y, { size: 1.5, fill: C.soft }));
+    out.push(`<path d="M${n(48)} ${n(y + 0.3)}H${n(w - 5)}" stroke="${C.soft}" stroke-width="0.12"/>`);
   });
-  // EAN-13 at 80% with shortened bars (see BAR_H), on white.
-  out.push(`<rect x="${n(w - 31.6)}" y="${n(fy - 3.4)}" width="30.6" height="14" fill="#FFFFFF"/>`);
-  out.push(ean13(p.gtin, w - 31.4, fy - 2.6));
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${w + 2 * BLEED}mm" height="${h + 2 * BLEED}mm" viewBox="${-BLEED} ${-BLEED} ${w + 2 * BLEED} ${h + 2 * BLEED}">` +
     `<defs><clipPath id="bleed"><path d="${outline(-BLEED)}"/></clipPath></defs>` +
     `<g id="Artwork" clip-path="url(#bleed)">${out.join('')}</g>` +
