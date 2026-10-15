@@ -421,9 +421,12 @@ if (VARIANT === 'vine') {
 
   // Warm ground: one painted gradient round the four walls (sliced per face with 3 mm bleed);
   // lid, base and flaps take its lightest tone.
-  C.paper = '#FBF0D8';
+  // GROUND picks the painted ground (tools/mesh_plate.py presets); flat ones are a single colour.
+  const GROUND_NAME = process.env.GROUND || 'custard';
+  const LID = { custard: '#FAEFD4', golden: '#F8E7C0', butter: '#F6E6BE', sage: '#E6E7CB' };
+  C.paper = LID[GROUND_NAME];
   TINT = '#FFF8E8';
-  const GROUND = Object.fromEntries(['front', 'sideA', 'back', 'sideB'].map((k) => [k, plate(`v6-ground-${k}.jpg`)]));
+  const GROUND = Object.fromEntries(['front', 'sideA', 'back', 'sideB'].map((k) => [k, plate(`v6-ground-${GROUND_NAME}-${k}.jpg`)]));
   const ground = (key, w, h) => { const g = GROUND[key]; return `<image href="${g.href}" width="${g.w}" height="${g.h}" preserveAspectRatio="none" transform="translate(-3 -3) scale(${n((w + 6) / g.w, 6)} ${n((h + 6) / g.h, 6)})"/>`; };
   const wall = (key, w, h) => paper(w, h) + ground(key, w, h);
 
