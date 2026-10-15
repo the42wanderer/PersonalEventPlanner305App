@@ -144,10 +144,9 @@ function build(p) {
     ...[].concat(p.under).map((u, i) => text('sans', u, 2.2, L, b2 + 5 + i * 3)),
   ];
   // Net weight on the line with "Authentic Ceylon", right-aligned.
-  // Net weight under the descriptor, then the Sri Lanka Tea Board's Ceylon Tea lion.
+  // Net weight under the descriptor. (No Ceylon Tea lion: the mark needs Sri Lanka Tea Board clearance.)
   const wy = b2 + 5 + p.under.length * 3 + 5.2;
   out.push(text('display', '100 g', 4.6, L, wy));
-  out.push(lion(L, wy + 4.5, 15));
   // Spec card: one compact, outlined panel at the foot, aligned to the text column. Barcode on the
   // left, the batch fields as a small ruled table on the right; one padding all round.
   // The barcode is scaled to match the size on the current pouch (bars about 21 mm wide, roughly
