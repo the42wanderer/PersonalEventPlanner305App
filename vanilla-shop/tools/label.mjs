@@ -13,8 +13,10 @@ const F = { display: font('fraunces-italic.ttf'), sans: font('geist-regular.ttf'
 const C = { ink: '#143A1D', soft: '#5C6F5F', line: '#143A1D' };
 const n = (v, d = 3) => Math.round(v * 10 ** d) / 10 ** d;
 
-const SIZE = { w: 70, h: 100, shoulder: 13 };   // mm; arch rises from the shoulders to the top edge
+const SIZE = { w: 70, h: 110, shoulder: 8.5 };  // mm, matched to the current label on the kraft pouch; arch rises from the shoulders to the top edge
 const BLEED = 3;
+// Barcode bar height: 18.28 mm is full height at 80%; shortened to fit the label's foot strip.
+const BAR_H = 9.5;
 
 function width(f, s, sz, track = 0) {
   const g = f.stringToGlyphs(s), k = sz / f.unitsPerEm;
@@ -50,7 +52,7 @@ function ean13(code, x, y, fill = C.ink) {
   guards.push(bits.length + 1, bits.length + 3); bits += '01010';
   dg.slice(7).forEach((d) => { bits += R[d]; });
   guards.push(bits.length, bits.length + 2); bits += '101';
-  const m = 0.264, qz = 11 * m, barH = 18.28, guardExtra = 1.32;
+  const m = 0.264, qz = 11 * m, barH = BAR_H, guardExtra = 1.32;
   let d = '';
   for (let i = 0; i < bits.length; i++) {
     if (bits[i] !== '1') continue;
@@ -76,40 +78,55 @@ const outline = (inset = 0) => {
 
 const LABELS = {
   'natural-vanilla-tea-100g': { ground: 'v6-label-ground-vanilla.jpg', over: 'Authentic Ceylon', lines: ['Vanilla', 'Tea'], under: 'with Natural Vanilla', gtin: '4796034220243' },
-  'vanilla-cinnamon-tea-100g': { ground: 'v6-label-ground-cinnamon.jpg', over: 'Authentic Ceylon', lines: ['Vanilla &', 'Cinnamon Tea'], under: 'Vanilla and cinnamon blended with pure Ceylon tea', gtin: '4796034220250' },
+  'vanilla-cinnamon-tea-100g': { ground: 'v6-label-ground-cinnamon.jpg', over: 'Authentic Ceylon', lines: ['Vanilla &', 'Cinnamon Tea'], under: ['Vanilla and cinnamon blended', 'with pure Ceylon tea'], vineDrop: 3.5, gtin: '4796034220250' },
 };
 
 function build(p) {
   const { w, h } = SIZE;
   const VINE = { file: 'v6-vine-2x.png', pw: 3808, ph: 1651 };
-  const vw = 80, vh = vw * VINE.ph / VINE.pw;                 // the vine, wider than the label, cropped by it
-  const sz = Math.min(11, 48 / width(F.display, p.lines[0], 1), 48 / width(F.display, p.lines[1], 1));
-  const b1 = 26 + sz * 0.78, b2 = b1 + sz * 0.9;
+  // The painting large, bleeding off both sides: flower right of centre, pods running off the left.
+  const vw = 128, vh = vw * VINE.ph / VINE.pw;
+  const L = 7;                                                    // left text edge
+  const sz = Math.min(13.5, 54 / width(F.display, p.lines[0], 1), 54 / width(F.display, p.lines[1], 1));
+  const b1 = 27 + sz * 0.74, b2 = b1 + sz * 0.88;
   const out = [
     img(p.ground, -BLEED, -BLEED, w + 2 * BLEED, h + 2 * BLEED),
-    img(VINE.file, 3, 45.5, vw, vh),
-    logo(w / 2 - 6, 7.5, 12),
-    label(p.over, w / 2, 23.6, { anchor: 'middle' }),
-    text('display', p.lines[0], sz, w / 2, b1, { anchor: 'middle' }),
-    text('display', p.lines[1], sz, w / 2, b2, { anchor: 'middle' }),
-    text('sans', p.under, p.under.length > 30 ? 1.95 : 2.4, w / 2, b2 + 4.6, { anchor: 'middle' }),
+    img(VINE.file, -22, h - vh - 8.5 + (p.vineDrop || 0), vw, vh),
+    logo(w / 2 - 6.5, 6.5, 13),
+    label(p.over, L, 25.2),
+    text('display', p.lines[0], sz, L - 0.5, b1),
+    text('display', p.lines[1], sz, L - 0.5, b2),
+    ...[].concat(p.under).map((u, i) => text('sans', u, 2.2, L, b2 + 5 + i * 3)),
   ];
-  // Barcode on its own white tile (scanners want a light, even ground); batch fields and weight beside it.
-  out.push(`<rect x="2.4" y="${h - 23.6}" width="31.4" height="21.6" rx="1" fill="#FFFFFF"/>`);
-  out.push(ean13(p.gtin, 2.6, h - 22.6));
+  // One slim strip at the foot: batch fields as a single row of small labels, weight and barcode.
+  const fy = h - 12.6;
+  out.push(`<rect x="${-BLEED}" y="${fy - 4.4}" width="${w + 2 * BLEED}" height="${h - fy + 4.4 + BLEED}" fill="#FFFBF2" fill-opacity="0.9"/>`);
+  out.push(text('display', '100 g', 5, L, fy + 1.6));
   [['MRP Rs.', 0], ['MFD', 1], ['EXP', 2], ['BTN', 3]].forEach(([k, i]) => {
-    const y = h - 15.6 + i * 3.9;
-    out.push(label(k, 38, y, { size: 1.7 }));
-    out.push(`<path d="M${n(49)} ${n(y + 0.4)}H${n(w - 4)}" stroke="${C.line}" stroke-width="0.14"/>`);
+    const y = fy - 0.6 + i * 3.3;
+    out.push(label(k, 22, y, { size: 1.45, fill: C.soft }));
+    out.push(`<path d="M${n(31)} ${n(y + 0.3)}H${n(38.5)}" stroke="${C.soft}" stroke-width="0.12"/>`);
   });
-  out.push(text('display', '100 g', 4.6, w - 4, h - 19.6, { anchor: 'end' }));
+  // EAN-13 at 80% with shortened bars (see BAR_H), on white.
+  out.push(`<rect x="${n(w - 31.6)}" y="${n(fy - 3.4)}" width="30.6" height="14" fill="#FFFFFF"/>`);
+  out.push(ean13(p.gtin, w - 31.4, fy - 2.6));
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${w + 2 * BLEED}mm" height="${h + 2 * BLEED}mm" viewBox="${-BLEED} ${-BLEED} ${w + 2 * BLEED} ${h + 2 * BLEED}">` +
     `<defs><clipPath id="bleed"><path d="${outline(-BLEED)}"/></clipPath></defs>` +
     `<g id="Artwork" clip-path="url(#bleed)">${out.join('')}</g>` +
+    `<path id="Keyline" d="${outline(2.2)}" fill="none" stroke="${C.ink}" stroke-width="0.25"/>` +
     `<path id="Cut_line" d="${outline()}" fill="none" stroke="#E4007C" stroke-width="0.2"/></svg>`;
 }
 
 const dir = path.join(root, 'export', 'labels');
 fs.mkdirSync(dir, { recursive: true });
-for (const [k, p] of Object.entries(LABELS)) fs.writeFileSync(path.join(dir, `${k}.svg`), build(p));
+for (const [k, p] of Object.entries(LABELS)) {
+  const svg = build(p);
+  fs.writeFileSync(path.join(dir, `${k}.svg`), svg);
+  // Preview: trimmed to the cut line, no bleed or cut path (for mock-ups).
+  const { w, h } = SIZE;
+  fs.writeFileSync(path.join(dir, `${k}_preview.svg`), svg
+    .replace(/width="[\d.]+mm" height="[\d.]+mm" viewBox="[^"]+"/, `width="${w}mm" height="${h}mm" viewBox="0 0 ${w} ${h}"`)
+    .replace(/<path d="[^"]+"\/><\/clipPath>/, `<path d="${outline()}"/></clipPath>`)
+    .replace(/<path id="Cut_line"[^>]+\/>/, ''));
+}
 console.log('wrote', Object.keys(LABELS).join(', '));
