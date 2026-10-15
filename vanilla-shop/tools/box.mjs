@@ -415,8 +415,9 @@ if (VARIANT === 'vine') {
     return { w: b.readUInt32BE(16), h: b.readUInt32BE(20), href: 'data:image/png;base64,' + b.toString('base64') };
   };
   // Firefly cut-outs of the v6 paintings (true masks, pixels untouched).
-  const WRAP = plate('v6-vine.png'), SPRIG = plate('v6-sprig.png');
-  const DIAGRAM = plate('v2-vanilla-tea.png');
+  // The vine's trail fades out on the brewing side (v6-vine-faded.png), so its hazy leaves read as distance.
+  const WRAP = plate('v6-vine-faded.png'), SPRIG = plate('v6-sprig.png');
+  const DIAGRAM = plate('v6-diagram-soft.png'); // v2 botanical plate, desaturated and warmed
   const place = (p, x, y, s) => `<image href="${p.href}" width="${p.w}" height="${p.h}" transform="translate(${n(x)} ${n(y)}) scale(${n(s, 6)})"/>`;
 
   // Warm ground: one painted gradient round the four walls (sliced per face with 3 mm bleed);
@@ -432,7 +433,7 @@ if (VARIANT === 'vine') {
   const wall = (key, w, h) => paper(w, h) + ground(key, w, h);
 
   // One placement for the vine, in mm from the front's left edge; each face shows its slice.
-  const V = { x: -13.4, y: -2.6, s: 0.105 };
+  const V = { x: -10.4, y: -0.6, s: 0.105 };
   const wrapAt = (key) => ({ front: 0, sideA: size('front').w }[key]);
   const vineWrap = (key) => place(WRAP, V.x - wrapAt(key), V.y, V.s);
   // Tea-bag tag on its string, drawn in the icon line style.
@@ -440,39 +441,45 @@ if (VARIANT === 'vine') {
     `<path d="M${n(x + 2)} ${n(y - 3.4)}q-1.6 1.6 0 3.4"/>` +
     `<path d="M${n(x)} ${n(y + 0.9)}l1 -1h2l1 1v4.6h-4Z"/><circle cx="${n(x + 2)}" cy="${n(y + 1)}" r="0.35"/></g>`;
 
+  const lionSrc = fs.readFileSync(path.join(root, 'brand', 'ceylon-tea-lion.svg'), 'utf8');
+  const LION = { vw: Number(lionSrc.match(/viewBox="0 0 ([\d.]+)/)[1]), d: lionSrc.match(/ d="([^"]+)"/)[1] };
+  const lion = (x, y, lw) => `<path fill="#9C6F1E" fill-rule="evenodd" d="${LION.d}" transform="translate(${n(x)} ${n(y)}) scale(${n(lw / LION.vw, 6)})"/>`;
+
   faces.front = (w, h) => {
-    const sz = 30 / width(F.display, 'Vanilla', 1), base = 45.2, lead = 0.9;
+    const sz = 36 / width(F.display, 'Vanilla', 1), base = 47.6, lead = 0.88;
     return [
       wall('front', w, h),
       vineWrap('front'),
       logo(M, 6.5, 13),
-      label('Authentic Ceylon', M, base - sz * lead - sz * 0.72 - 2.4),
-      text('display', 'Vanilla', sz, M - 0.4, base - sz * lead),
-      text('display', 'Tea', sz, M - 0.4, base),
-      text('sans', 'with Natural Vanilla', 2.5, M, base + 5),
+      lion(w - M - 11, 7.5, 11),
+      label('Authentic Ceylon', M, base - sz * lead - sz * 0.72 - 2.6),
+      text('display', 'Vanilla', sz, M - 0.5, base - sz * lead),
+      text('display', 'Tea', sz, M - 0.5, base),
+      text('sans', 'with Natural Vanilla', 2.6, M, base + 5.4),
       tag(M, 76.6),
-      label('12 tea bags · 24 g', M + 6, 79.8),
+      label('12 tea bags \u00B7 24 g', M + 6, 79.8),
     ].join('');
   };
 
   // Brewing steps stacked on the right, each with its line icon; the vine fills the left and foot.
+  // Brewing: one text edge for the title, rule, steps and footnote; the icons hang in the gutter.
   faces.sideA = (w, h) => {
-    const x = 31, tx = x + 10.5;
+    const tx = 42, ix = tx - 6.2;
     const steps = [['cup', '150 ml', 'One tea bag in hot water'], ['timer', '5 minutes', 'Then lift the bag out'], ['ice', 'Over ice', 'Let it cool and pour over ice']];
-    const out = [wall('sideA', w, h), vineWrap('sideA'), text('display', 'How to brew', 6.4, x, 14.5), hair(x, 17.6, w - M)];
+    const out = [wall('sideA', w, h), vineWrap('sideA'), text('display', 'How to brew', 6.4, tx, 14.5), hair(tx, 17.8, w - M)];
     steps.forEach(([ic, v, note], i) => {
-      const y = 26.5 + i * 10;
-      out.push(icon(ic, x + 4.2, y - 1.6, 4.2, 0.62));
+      const y = 27 + i * 9.6;
+      out.push(icon(ic, ix, y - 1.4, 3.9, 0.5));
       out.push(text('display', v, 4.2, tx, y));
-      out.push(text('sans', note, 2.0, tx, y + 3.3, { fill: C.soft }));
+      out.push(text('sans', note, 2.0, tx, y + 3.2, { fill: C.soft }));
     });
-    out.push(label('2 g per tea bag', w - M, 79.8, { anchor: 'end', fill: C.soft }));
+    out.push(label('2 g per tea bag', tx, 79.8, { fill: C.soft }));
     return out.join('');
   };
 
   // The line, then the plant itself: a labelled plate of vanilla with a Ceylon tea sprig.
   faces.back = (w, h) => {
-    const s = 66 / DIAGRAM.h, x0 = w - 2 - DIAGRAM.w * s, y0 = 13;
+    const s = 56 / DIAGRAM.h, x0 = w - 5 - DIAGRAM.w * s, y0 = 17;
     const at = (px, py) => [x0 + px * s, y0 + py * s];
     const callouts = [
       ['Vanilla orchid', 'Hand-pollinated; open for one day', at(545, 330), 40],
