@@ -62,6 +62,8 @@ fine = rng.normal(0, P['grain'], (H, W))
 clump = np.asarray(Image.fromarray(np.clip(rng.normal(128, 60, (H, W)), 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1.4))).astype(float) - 128
 img = img + (fine + clump * 0.35)[..., None] + rng.normal(0, 1.2, (H, W, 3))
 im = Image.fromarray(np.clip(img, 0, 255).astype(np.uint8))
+if len(sys.argv) > 2 and sys.argv[2] == 'strip':   # whole wrap, for other box sizes
+    im.save(f'plates/generated/v6-ground-{name}-strip.jpg', quality=90)
 for k, (x, w) in FACES.items():
     im.crop((round(x * PPM), 0, round((x + w + 6) * PPM), H)).save(f'plates/generated/v6-ground-{name}-{k}.jpg', quality=90)
 print(name, im.size)
