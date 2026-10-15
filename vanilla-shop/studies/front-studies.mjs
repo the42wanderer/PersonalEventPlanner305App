@@ -147,6 +147,68 @@ for (const [k, key, lead] of [
   ['gloock', 'gloock', 0.9], ['bodoni', 'bodoni', 0.9],
 ]) studies['type_' + k] = () => typeStudy(key, lead);
 
+// v3: bolder, clearer fronts (brief: obviously vanilla + tea, modern, approachable).
+const GREEN = '#143A1D', CREAM = '#FEF8E9', SAGE = '#B9C7A2', GOLD = '#B8862B';
+const lionSrc = fs.readFileSync(path.join(root, 'brand', 'ceylon-tea-lion.svg'), 'utf8');
+const lion = (x, y, w, fill = GOLD) => {
+  const vw = Number(lionSrc.match(/viewBox="0 0 ([\d.]+)/)[1]);
+  return `<path fill="${fill}" fill-rule="evenodd" d="${lionSrc.match(/ d="([^"]+)"/)[1]}" transform="translate(${n(x)} ${n(y)}) scale(${n(w / vw, 6)})"/>`;
+};
+function plantImg(x, y, h) {
+  const b = fs.readFileSync(path.join(root, 'plates', 'generated', 'v2-vanilla-tea.png'));
+  const pw = b.readUInt32BE(16), ph = b.readUInt32BE(20), s = h / ph;
+  return { svg: `<image href="data:image/png;base64,${b.toString('base64')}" width="${pw}" height="${ph}" transform="translate(${n(x)} ${n(y)}) scale(${n(s, 6)})"/>`, w: pw * s };
+}
+function hillsImg(x, y, w) {
+  const b = fs.readFileSync(path.join(root, 'plates', 'generated', 'v3-hills-tile.jpg'));
+  const sof = b.indexOf(Buffer.from([0xFF, 0xC0])), iw = b.readUInt16BE(sof + 7), ih = b.readUInt16BE(sof + 5);
+  return { svg: `<image href="data:image/jpeg;base64,${b.toString('base64')}" width="${iw}" height="${ih}" preserveAspectRatio="none" transform="translate(${n(x)} ${n(y)}) scale(${n(w / iw, 6)})"/>`, h: w * ih / iw };
+}
+// Compact tea-tag icon, vertically centred on a label baseline y.
+const tagIcon = (x, y, c) => `<g fill="none" stroke="${c}" stroke-width="0.28" stroke-linejoin="round"><path d="M${n(x)} ${n(y - 2.1)}l0.8 -0.8h1.6l0.8 0.8v3.5h-3.2Z"/><circle cx="${n(x + 1.6)}" cy="${n(y - 2)}" r="0.3"/></g>`;
+const nameBlock = (x, base, sz, fill, sub) => [
+  label('Authentic Ceylon', x, base - sz * 0.92 - sz * 0.72 - 2.6, { fill: sub }),
+  text('frauncesItalic', 'Vanilla', sz, x - 0.4, base - sz * 0.92, { fill }),
+  text('frauncesItalic', 'Tea', sz, x - 0.4, base, { fill }),
+  text('sans', 'with Natural Vanilla', 2.3, x, base + 4.6, { fill: sub }),
+].join('');
+
+// A: cream top with the plant; a green band whose top edge is the tea hills; pod hangs into it.
+studies.v3_band = () => {
+  const plant = plantImg(0, 0, 0);
+  const ph = 74, p = plantImg(W + 9 - 1000 * (74 / 1485), 1.5, ph);
+  const hills = hillsImg(-4, 0, W + 8);
+  const hy = 35.5, solid = hy + hills.h * 0.8;
+  const sz = 28 / width(F.frauncesItalic, 'Vanilla', 1);
+  return [
+    hills.svg.replace('translate(-4 0)', `translate(-4 ${hy})`),
+    `<linearGradient id="bandfade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${GREEN}" stop-opacity="0"/><stop offset="1" stop-color="${GREEN}"/></linearGradient>`,
+    `<rect x="-5" y="${n(hy + hills.h * 0.35)}" width="${W + 10}" height="${n(solid - hy - hills.h * 0.35 + 0.2)}" fill="url(#bandfade)"/>`,
+    `<rect x="-5" y="${n(solid)}" width="${W + 10}" height="${n(H - solid + 5)}" fill="${GREEN}"/>`,
+    p.svg,
+    logo(M, 7, 17.5),
+    lion(M, 29.5, 8.5),
+    nameBlock(M, 71, sz, CREAM, SAGE),
+    tagIcon(M, 81, CREAM),
+    label('12 tea bags · 24 g', M + 4.6, 81, { fill: CREAM }),
+  ].join('');
+};
+
+// B: full green box, the plant on dark ground, big cream name.
+studies.v3_green = () => {
+  const ph = 80, p = plantImg(W + 8 - 1000 * (80 / 1485), 2.5, ph);
+  const sz = 30 / width(F.frauncesItalic, 'Vanilla', 1);
+  return [
+    `<rect x="-5" y="-5" width="${W + 10}" height="${H + 10}" fill="${GREEN}"/>`,
+    p.svg,
+    logo(M, 7, 17.5, CREAM),
+    lion(M, 29.5, 8.5),
+    nameBlock(M, 70, sz, CREAM, SAGE),
+    tagIcon(M, 80.5, CREAM),
+    label('12 tea bags · 24 g', M + 4.6, 80.5, { fill: CREAM }),
+  ].join('');
+};
+
 const out = path.join(root, 'studies', 'out');
 fs.mkdirSync(out, { recursive: true });
 for (const [k, fn] of Object.entries(studies)) fs.writeFileSync(path.join(out, `front_${k}.svg`), svg(fn()));
