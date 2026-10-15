@@ -123,7 +123,7 @@ function fadeBand(id, from, to, h) {
 }
 
 // Line icons, one style across the box: 0.32 mm forest stroke, drawn in a ±5.5 mm box around 0,0.
-let TINT = '#E9ECDC';
+let TINT = '#E9ECDC', TINT_OPACITY = 1;
 const STROKE = `fill="none" stroke="${C.ink}" stroke-width="0.32" stroke-linecap="round" stroke-linejoin="round"`;
 const ICONS = {
   cup: `<path ${STROKE} d="M-5 4.3Q0 5.7 5 4.3"/>` +
@@ -152,7 +152,7 @@ const ICONS = {
     `<path ${STROKE} d="M-0.9 -1.2C-0.9 -3.6 1.2 -4.6 2.6 -3.4"/><rect ${STROKE} x="2.3" y="-4.2" width="2.4" height="2.8" rx="0.3" transform="rotate(-14 3.5 -2.8)"/>`,
 };
 const icon = (name, cx, cy, r = 6.3, scale = 1) =>
-  `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" fill="${TINT}"/><g transform="translate(${n(cx)} ${n(cy)}) scale(${scale})">${ICONS[name]}</g>`;
+  `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" fill="${TINT}"${TINT_OPACITY < 1 ? ` fill-opacity="${TINT_OPACITY}"` : ''}/><g transform="translate(${n(cx)} ${n(cy)}) scale(${scale})">${ICONS[name]}</g>`;
 
 // Product and legal details, taken from the pack currently sold in the shop (Vanilla_Tea_P.pdf).
 const DISTRIBUTOR = {
@@ -422,10 +422,11 @@ if (VARIANT === 'vine') {
   // Warm ground: one painted gradient round the four walls (sliced per face with 3 mm bleed);
   // lid, base and flaps take its lightest tone.
   // GROUND picks the painted ground (tools/mesh_plate.py presets); flat ones are a single colour.
-  const GROUND_NAME = process.env.GROUND || 'custard';
+  const GROUND_NAME = process.env.GROUND || 'golden';
   const LID = { custard: '#FAEFD4', golden: '#F8E7C0', butter: '#F6E6BE', sage: '#E6E7CB' };
   C.paper = LID[GROUND_NAME];
-  TINT = '#FFF8E8';
+  // Icon discs: a veil of light over the ground rather than solid stickers.
+  TINT = '#FFFBF2'; TINT_OPACITY = 0.42;
   const GROUND = Object.fromEntries(['front', 'sideA', 'back', 'sideB'].map((k) => [k, plate(`v6-ground-${GROUND_NAME}-${k}.jpg`)]));
   const ground = (key, w, h) => { const g = GROUND[key]; return `<image href="${g.href}" width="${g.w}" height="${g.h}" preserveAspectRatio="none" transform="translate(-3 -3) scale(${n((w + 6) / g.w, 6)} ${n((h + 6) / g.h, 6)})"/>`; };
   const wall = (key, w, h) => paper(w, h) + ground(key, w, h);
