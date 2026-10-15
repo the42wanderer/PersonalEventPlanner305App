@@ -1,0 +1,59 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Box pair mock-up</title>
+<style>html,body{margin:0;background:radial-gradient(120% 90% at 50% 35%,#f1ece1 0%,#d9d2c1 78%)}canvas{display:block}</style>
+<!-- The cube and the 25-bag long box together. Serve the vanilla-shop folder over http and open
+     studies/mockup-pair.html?cube=v5/out/mock-cube&long=v5/out/mock-long  (folders of face-*.jpg) -->
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(async () => {
+  const q = new URLSearchParams(location.search);
+  const W = 1800, H = 1100;
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setSize(W, H); renderer.setPixelRatio(1);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  document.body.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(24, W / H, 1, 500);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xd8cfb8, 0.8));
+  const key = new THREE.DirectionalLight(0xfff6e6, 0.55);
+  key.position.set(-16, 26, 18); key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 10;
+  Object.assign(key.shadow.camera, { left: -25, right: 25, top: 25, bottom: -25 });
+  scene.add(key);
+
+  const tex = (url) => new Promise((res) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = 2048; c.height = Math.round(2048 * img.height / img.width);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 8;
+      res(new THREE.MeshStandardMaterial({ map: t, roughness: 0.85, metalness: 0 }));
+    };
+    img.src = url;
+  });
+  // Box sizes in cm from the dielines. BoxGeometry face order: +x, -x, +y, -y, +z, -z.
+  async function box(dir, w, h, d) {
+    const f = (n) => tex(`${dir}/face-${n}.jpg`);
+    const mats = await Promise.all([f('sideA'), f('sideB'), f('top'), f('bottom'), f('front'), f('back')]);
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mats);
+    m.castShadow = true; m.position.y = h / 2;
+    scene.add(m);
+    return m;
+  }
+  const long = await box(q.get('long'), 17.593, 8.47, 8.51);
+  const cube = await box(q.get('cube'), 8.766, 8.474, 8.457);
+  long.position.set(-5.2, long.position.y, -3.2); long.rotation.y = -0.38;
+  cube.position.set(8.6, cube.position.y, 4.2); cube.rotation.y = -0.62;
+
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(120, 120), new THREE.ShadowMaterial({ opacity: 0.2 }));
+  ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+
+  camera.position.set(0, 17, 44); camera.lookAt(1, 4.2, 0);
+  renderer.render(scene, camera);
+  document.title = 'ready';
+})();
+</script>
