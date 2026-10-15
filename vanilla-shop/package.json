@@ -1,0 +1,7 @@
+{
+  "name": "vanilla-shop-tea-box",
+  "private": true,
+  "type": "module",
+  "scripts": { "export": "node tools/export.mjs" },
+  "dependencies": { "opentype.js": "1.3.4" }
+}
