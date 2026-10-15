@@ -13,6 +13,11 @@ from PIL import Image, ImageFilter
 PPM = 12
 STRIP_W, STRIP_H = 350.65, 90.74            # the four walls plus 3 mm bleed at each end and edge
 FACES = {'front': (0, 87.66), 'sideA': (87.66, 84.57), 'back': (172.23, 87.58), 'sideB': (259.81, 84.84)}
+# Long 25-bag box: front, right side, back, left side (mm, from its dieline).
+LONG = len(sys.argv) > 2 and sys.argv[2] == 'long'
+if LONG:
+    FACES = {'front': (0, 175.93), 'sideA': (175.93, 85.12), 'back': (261.05, 175.02), 'sideB': (436.07, 84.49)}
+    STRIP_W = 520.56 + 6
 
 # (x, y, rx, ry, angle_deg, colour) in strip mm (x 0 = 3 mm before the front's left edge).
 PRESETS = {
@@ -65,5 +70,5 @@ im = Image.fromarray(np.clip(img, 0, 255).astype(np.uint8))
 if len(sys.argv) > 2 and sys.argv[2] == 'strip':   # whole wrap, for other box sizes
     im.save(f'plates/generated/v6-ground-{name}-strip.jpg', quality=90)
 for k, (x, w) in FACES.items():
-    im.crop((round(x * PPM), 0, round((x + w + 6) * PPM), H)).save(f'plates/generated/v6-ground-{name}-{k}.jpg', quality=90)
+    im.crop((round(x * PPM), 0, round((x + w + 6) * PPM), H)).save(f'plates/generated/v6-ground-{name}{"-long" if LONG else ""}-{k}.jpg', quality=90)
 print(name, im.size)

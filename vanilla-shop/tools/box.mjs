@@ -10,6 +10,11 @@ const require = createRequire(import.meta.url);
 const opentype = require('opentype.js');
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 await import(path.join(root, 'dieline.js'));
+await import(path.join(root, 'dieline-long.js'));
+// BOX=long builds the 25-bag long box (about 176 x 84 x 85 mm) on its own dieline; default is the cube.
+const BOX = process.env.BOX || 'cube';
+// Pack contents, used wherever the copy states them.
+const PACK = BOX === 'long' ? { bags: 25, net: 50 } : { bags: 12, net: 24 };
 
 // ---------------------------------------------------------------------------
 // System
@@ -29,7 +34,7 @@ const n = (v, d = 3) => Math.round(v * 10 ** d) / 10 ** d;
 // Dieline geometry (points, from 2.pdf). panel = fold to fold; region = artwork + bleed area.
 const MM = 72 / 25.4;
 const R = (x0, y0, x1, y1) => ({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
-const PANELS = {
+let PANELS = {
   front:  { panel: R(145.46, 390.86, 393.94, 631.07),  region: R(141.258, 391.242, 393.320, 630.828) },
   sideA:  { panel: R(393.94, 390.86, 633.68, 631.07),  region: R(393.035, 250.227, 634.207, 656.613) },
   back:   { panel: R(633.68, 390.86, 881.95, 631.07),  region: R(632.051, 391.246, 882.355, 630.699) },
@@ -38,6 +43,22 @@ const PANELS = {
   inner:  { panel: R(145.50, 630.22, 393.53, 871.09),  region: R(142.715, 628.051, 393.961, 929.191) },
   bottom: { panel: R(633.68, 631.07, 881.70, 870.00),  region: R(629.184, 629.949, 881.703, 881.480) },
 };
+// Long box (Vanilla_Tea_Pdfdieline_1.pdf). Walking round it: front, right side (brewing), back,
+// left side (batch and barcode). The lid hangs off the back; the outer base flap (with its tuck) too,
+// and the front's base panel folds in under it.
+const LONG_PANELS = {
+  front:  { panel: R(850.5, 382.8, 1349.2, 622.9),  region: R(850.5, 374.3, 1349.2, 622.9) },
+  sideA:  { panel: R(1349.2, 382.8, 1590.5, 622.9), region: R(1349.2, 244.7, 1599, 775.1) },
+  back:   { panel: R(114.9, 382.8, 611, 622.9),     region: R(114.9, 382.8, 611, 622.9) },
+  sideB:  { panel: R(611, 382.8, 850.5, 622.9),     region: R(611, 244.7, 850.5, 775.1) },
+  top:    { panel: R(114.9, 142.3, 611, 382.8),     region: R(106.4, 82.4, 612, 382.8) },
+  inner:  { panel: R(850.5, 622.9, 1349.2, 862.7),  region: R(842, 622.9, 1357.7, 871.2) },
+  bottom: { panel: R(114.9, 622.9, 611, 862.4),     region: R(106.4, 622.9, 619.5, 922.3) },
+};
+if (BOX === 'long') PANELS = LONG_PANELS;
+const SHEET = BOX === 'long'
+  ? { w: 1642.42, h: 941.328, dieline: () => globalThis.VS_DIELINE_LONG, title: 'Natural Vanilla Tea, 25 bags – print sheet' }
+  : { w: 1194.94, h: 1052.97, dieline: () => globalThis.VS_DIELINE, title: 'Natural Vanilla Tea – print sheet' };
 // Face studies (e.g. frontTea) use the size of the face they replace.
 const size = (k) => { const p = (PANELS[k] || PANELS[k.replace(/(Tea|V\d[a-z]?)$/, "")]).panel; return { w: p.w / MM, h: p.h / MM }; };
 
@@ -263,18 +284,18 @@ const faces = {
   // Information panel: what is inside, then the details.
   sideB: (w, h) => {
     const out = [paper(w, h), text('display', 'What\u2019s inside', 6.2, M, 15)];
-    out.push(body(['Ceylon black tea with natural vanilla, in 12 tagged,', 'unbleached tea bags of 2 g each.'], M, 21.6, { size: 2.15, lead: 3.1 }));
+    out.push(body([`Ceylon black tea with natural vanilla, in ${PACK.bags} tagged,`, 'unbleached tea bags of 2 g each.'], M, 21.6, { size: 2.15, lead: 3.1 }));
     const colW = (w - 2 * M) / 3;
-    [['tea', 'Ceylon tea'], ['pod', 'Natural vanilla'], ['teabag', '12 tea bags']].forEach(([name, k], i) => {
+    [['tea', 'Ceylon tea'], ['pod', 'Natural vanilla'], ['teabag', `${PACK.bags} tea bags`]].forEach(([name, k], i) => {
       const cx = M + colW * (i + 0.5);
       out.push(icon(name, cx, 36.2, 4.6, 0.72));
       out.push(label(k, cx, 44.6, { anchor: 'middle' }));
     });
     const rows = [
       ['Ingredients', ['To be confirmed before print']],
-      ['Net weight', ['24 g (12 tea bags \u00D7 2 g)']],
+      ['Net weight', [`${PACK.net} g (${PACK.bags} tea bags \u00D7 2 g)`]],
       ['Storage', ['To be confirmed before print']],
-      ['Distributor', [DISTRIBUTOR.name + ' \u2014 see base']],
+      ['Distributor', [DISTRIBUTOR.name + (BOX === 'long' ? ' \u2014 see side' : ' \u2014 see base')]],
     ];
     let y = 48.6;
     rows.forEach(([k, vals]) => {
@@ -428,7 +449,7 @@ if (VARIANT === 'vine') {
   C.paper = LID[GROUND_NAME];
   // Icon discs: a veil of light over the ground rather than solid stickers.
   TINT = '#FFFBF2'; TINT_OPACITY = 0.42;
-  const GROUND = Object.fromEntries(['front', 'sideA', 'back', 'sideB'].map((k) => [k, plate(`v6-ground-${GROUND_NAME}-${k}.jpg`)]));
+  const GROUND = Object.fromEntries(['front', 'sideA', 'back', 'sideB'].map((k) => [k, plate(`v6-ground-${GROUND_NAME}${BOX === 'long' ? '-long' : ''}-${k}.jpg`)]));
   const ground = (key, w, h) => { const g = GROUND[key]; return `<image href="${g.href}" width="${g.w}" height="${g.h}" preserveAspectRatio="none" transform="translate(-3 -3) scale(${n((w + 6) / g.w, 6)} ${n((h + 6) / g.h, 6)})"/>`; };
   const wall = (key, w, h) => paper(w, h) + ground(key, w, h);
 
@@ -519,6 +540,69 @@ if (VARIANT === 'vine') {
       label('Authentic Ceylon vanilla tea', w / 2, h / 2 + logoH(lw) / 2 + 3.5, { anchor: 'middle', fill: C.soft }),
     ].join('');
   };
+
+  // ---- Long box: the same parts, rearranged for a front and back twice as wide.
+  if (BOX === 'long') {
+    const CLIMB = plate('v6-climb.png');
+    const cubeBack = faces.back, cubeTop = faces.top, baseInfo = faces.bottom, CUBE = { back: 87.58, side: 84.84 };
+    V.x = 30; V.y = -2.4; V.s = 0.104;
+    const LM = 9;
+
+    // Type on the left half, the vine large on the right; its trail runs on round the right side.
+    faces.front = (w, h) => {
+      const sz = 48 / width(F.display, 'Vanilla', 1), base = 54, lead = 0.88;
+      return [
+        wall('front', w, h),
+        vineWrap('front'),
+        logo(LM, 6, 13),
+        lion(w - LM - 12, 7.5, 12),
+        label('Authentic Ceylon', LM, base - sz * lead - sz * 0.72 - 3.4, { size: 2.1 }),
+        text('display', 'Vanilla', sz, LM - 0.6, base - sz * lead),
+        text('display', 'Tea', sz, LM - 0.6, base),
+        text('sans', 'with Natural Vanilla', 3, LM, base + 6),
+        tag(LM, 76.4),
+        label(`${PACK.bags} tea bags \u00B7 ${PACK.net} g`, LM + 6.2, 79.6),
+      ].join('');
+    };
+
+    // Brewing on the left of the side, the tendril climbing its right edge.
+    faces.sideA = (w, h) => {
+      const tx = 17, ix = tx - 6.2, s = 0.035;
+      const steps = [['cup', '150 ml', 'One tea bag in hot water'], ['timer', '5 minutes', 'Then lift the bag out'], ['ice', 'Over ice', 'Let it cool and pour over ice']];
+      const out = [wall('sideA', w, h), vineWrap('sideA'), place(CLIMB, w - 2 - 612 * s, h + 1.5 - CLIMB.h * s, s),
+        text('display', 'How to brew', 6.4, tx, 14.5), hair(tx, 17.8, w - 24)];
+      steps.forEach(([ic, v, note], i) => {
+        const y = 27 + i * 9.6;
+        out.push(icon(ic, ix, y - 1.4, 3.9, 0.5));
+        out.push(text('display', v, 4.2, tx, y));
+        out.push(text('sans', note, 2.0, tx, y + 3.2, { fill: C.soft }));
+      });
+      out.push(label('2 g per tea bag', tx, 79.8, { fill: C.soft }));
+      return out.join('');
+    };
+
+    // Back: the labelled plant on the left half, what's inside on the right, divided by a hairline.
+    faces.back = (w, h) => [
+      wall('back', w, h),
+      cubeBack(CUBE.back, h).replace(wall('back', CUBE.back, h), ''),
+      `<path d="M${n(CUBE.back + 1.5)} 12V${n(h - 10)}" stroke="${C.line}" stroke-width="0.12"/>`,
+      `<g transform="translate(${n(w - CUBE.side)} 0)">${sideB(CUBE.side, h).replace(paper(CUBE.side, h), '')}</g>`,
+    ].join('');
+
+    // Left side: the batch block, barcode and distributor (the cube's base).
+    faces.sideB = (w, h) => baseInfo(w, h).replace(paper(w, h), wall('sideB', w, h));
+
+    // Lid: hinged at the back, so its artwork is turned to read from the front.
+    faces.top = (w, h) => `<g transform="rotate(180 ${n(w / 2)} ${n(h / 2)})">${cubeTop(w, h)}</g>`;
+
+    // Outer base flap: the mark; the front's base panel folds in under it.
+    faces.bottom = (w, h) => {
+      const lw = 24;
+      return paper(w, h) + logo(w / 2 - lw / 2, h / 2 - logoH(lw) / 2 - 3, lw) +
+        label('Authentic Ceylon vanilla tea', w / 2, h / 2 + logoH(lw) / 2 + 3.5, { anchor: 'middle', fill: C.soft });
+    };
+    faces.inner = (w, h) => paper(w, h);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -529,7 +613,9 @@ function faceSVG(key) {
     `<defs><clipPath id="c"><rect width="${n(w)}" height="${n(h)}"/></clipPath></defs><g clip-path="url(#c)">${faces[key](w, h)}</g></svg>`;
 }
 // Group names as they appear in Illustrator's Layers panel.
-const GROUP_NAMES = { front: 'Front', sideA: 'Side_How_to_brew', back: 'Back', sideB: 'Side_Whats_inside', top: 'Top', inner: 'Inner_flap', bottom: 'Base' };
+const GROUP_NAMES = BOX === 'long'
+  ? { front: 'Front', sideA: 'Side_How_to_brew', back: 'Back', sideB: 'Side_Batch_and_barcode', top: 'Lid', inner: 'Inner_base_flap', bottom: 'Base' }
+  : { front: 'Front', sideA: 'Side_How_to_brew', back: 'Back', sideB: 'Side_Whats_inside', top: 'Top', inner: 'Inner_flap', bottom: 'Base' };
 // Illustrator only reads embedded images from xlink:href; with plain href it treats them as missing links.
 const forIllustrator = (svg) => svg
   .replace('<svg xmlns="http://www.w3.org/2000/svg"', '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"')
@@ -541,13 +627,14 @@ function sheetSVG() {
     defs += `<clipPath id="clip-${key}"><rect x="${region.x}" y="${region.y}" width="${n(region.w)}" height="${n(region.h)}"/></clipPath>`;
     art += `<g id="${GROUP_NAMES[key]}" clip-path="url(#clip-${key})"><g transform="translate(${panel.x} ${panel.y}) scale(${n(MM, 6)})">${faces[key](w, h)}</g></g>`;
   }
-  return forIllustrator(`<svg xmlns="http://www.w3.org/2000/svg" width="1194.94pt" height="1052.97pt" viewBox="0 0 1194.94 1052.97">` +
-    `<title>Natural Vanilla Tea – print sheet</title><defs>${defs}</defs><rect id="Background" width="1194.94" height="1052.97" fill="#FFFFFF"/>` +
-    `<g id="Artwork">${art}</g><g id="Dieline">${globalThis.VS_DIELINE}</g></svg>`);
+  return forIllustrator(`<svg xmlns="http://www.w3.org/2000/svg" width="${SHEET.w}pt" height="${SHEET.h}pt" viewBox="0 0 ${SHEET.w} ${SHEET.h}">` +
+    `<title>${SHEET.title}</title><defs>${defs}</defs><rect id="Background" width="${SHEET.w}" height="${SHEET.h}" fill="#FFFFFF"/>` +
+    `<g id="Artwork">${art}</g><g id="Dieline">${SHEET.dieline()}</g></svg>`);
 }
 
-const STEM = VARIANT ? `natural-vanilla-tea-${VARIANT}` : 'natural-vanilla-tea';
-const out = path.join(root, 'export', VARIANT || 'final');
+const TAG = (VARIANT || 'final') + (BOX === 'long' ? '-long' : '');
+const STEM = 'natural-vanilla-tea' + (VARIANT ? `-${VARIANT}` : '') + (BOX === 'long' ? '-long' : '');
+const out = path.join(root, 'export', TAG);
 fs.mkdirSync(out, { recursive: true });
 const FINAL = ['front', 'sideA', 'back', 'sideB', 'top', 'inner', 'bottom'];
 for (const key of VARIANT ? FINAL : Object.keys(faces)) fs.writeFileSync(path.join(out, `face-${key}.svg`), faceSVG(key));
@@ -557,7 +644,7 @@ console.log('wrote', fs.readdirSync(out).length, 'files to', out);
 // Editable version for Illustrator: same artwork, but type stays live text.
 // Sinhala/Tamil labels, the barcode and the logos stay as outlines.
 LIVE = true;
-const editable = path.join(root, 'export', VARIANT ? `${VARIANT}-editable` : 'editable');
+const editable = path.join(root, 'export', VARIANT || BOX === 'long' ? `${TAG}-editable` : 'editable');
 fs.mkdirSync(path.join(editable, 'fonts'), { recursive: true });
 fs.writeFileSync(path.join(editable, `${STEM}_EDITABLE.svg`), sheetSVG());
 for (const f of ['fraunces-italic.ttf', 'fraunces-display.ttf', 'geist-regular.ttf', 'geist-medium.ttf']) {
