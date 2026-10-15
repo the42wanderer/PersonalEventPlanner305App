@@ -436,7 +436,8 @@ if (VARIANT === 'vine') {
     return { w: b.readUInt32BE(16), h: b.readUInt32BE(20), href: 'data:image/png;base64,' + b.toString('base64') };
   };
   // Firefly cut-outs of the v6 paintings (true masks, pixels untouched).
-  // The vine's trail fades out on the brewing side (v6-vine-faded.png), so its hazy leaves read as distance.
+  // The vine's trail fades out on the brewing side (v6-vine-faded.png, made from the 2x upscale
+  // v6-vine-2x.png), so its hazy leaves read as distance.
   const WRAP = plate('v6-vine-faded.png'), SPRIG = plate('v6-sprig.png');
   const DIAGRAM = plate('v6-diagram-soft.png'); // v2 botanical plate, desaturated and warmed
   const place = (p, x, y, s) => `<image href="${p.href}" width="${p.w}" height="${p.h}" transform="translate(${n(x)} ${n(y)}) scale(${n(s, 6)})"/>`;
@@ -456,7 +457,8 @@ if (VARIANT === 'vine') {
   // One placement for the vine, in mm from the front's left edge; each face shows its slice.
   const V = { x: -10.4, y: -0.6, s: 0.105 };
   const wrapAt = (key) => ({ front: 0, sideA: size('front').w }[key]);
-  const vineWrap = (key) => place(WRAP, V.x - wrapAt(key), V.y, V.s);
+  // V.s is mm per pixel of the 1904 px painting; the scale adapts if a higher-resolution copy is used.
+  const vineWrap = (key) => place(WRAP, V.x - wrapAt(key), V.y, V.s * 1904 / WRAP.w);
   // Tea-bag tag on its string, drawn in the icon line style.
   const tag = (x, y) => `<g fill="none" stroke="${C.ink}" stroke-width="0.3" stroke-linejoin="round">` +
     `<path d="M${n(x + 2)} ${n(y - 3.4)}q-1.6 1.6 0 3.4"/>` +
