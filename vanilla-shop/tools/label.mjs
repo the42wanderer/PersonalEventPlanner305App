@@ -15,6 +15,8 @@ const n = (v, d = 3) => Math.round(v * 10 ** d) / 10 ** d;
 
 const SIZE = { w: 70, h: 110, shoulder: 8.5 };  // mm, matched to the current label on the kraft pouch; arch rises from the shoulders to the top edge
 const BLEED = 3;
+// LABEL_GROUND picks the ground: cream (default), golden (the boxes'), or a tools/label_ground.py preset.
+const GROUND = process.env.LABEL_GROUND || 'cream';
 // Barcode bar height: 18.28 mm is full height at 80%; shortened to fit the label's foot strip.
 const BAR_H = 9.5;
 
@@ -100,7 +102,7 @@ function build(p) {
   const sz = Math.min(12.5, 54 / width(F.display, p.lines[0], 1), 54 / width(F.display, p.lines[1], 1));
   const b1 = 27 + sz * 0.74, b2 = b1 + sz * 0.88;
   const out = [
-    img(p.ground, -BLEED, -BLEED, w + 2 * BLEED, h + 2 * BLEED),
+    img(GROUND === 'cream' ? p.ground : p.ground.replace('label-ground-', `label-ground-${GROUND}-`), -BLEED, -BLEED, w + 2 * BLEED, h + 2 * BLEED),
     art(p.art),
     logo(w / 2 - 6.5, 6.5, 13),
     label(p.over, L, 25.2),
@@ -127,7 +129,7 @@ function build(p) {
     `<path id="Cut_line" d="${outline()}" fill="none" stroke="#E4007C" stroke-width="0.2"/></svg>`;
 }
 
-const dir = path.join(root, 'export', 'labels');
+const dir = path.join(root, 'export', GROUND === 'cream' ? 'labels' : `labels-${GROUND}`);
 fs.mkdirSync(dir, { recursive: true });
 for (const [k, p] of Object.entries(LABELS)) {
   const svg = build(p);
