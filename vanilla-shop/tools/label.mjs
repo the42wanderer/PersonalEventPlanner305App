@@ -78,22 +78,39 @@ const outline = (inset = 0) => {
   return `M${n(i)} ${n(h - i)}V${n(s + i)}H${n(5 + i)}C${n(12)} ${n(1 + i)} ${n(w - 12)} ${n(1 + i)} ${n(w - 5 - i)} ${n(s + i)}H${n(w - i)}V${n(h - i)}Z`;
 };
 
+// Pieces placed by their painted area: file, source size, box = painted bbox in source px.
+const PIECE = {
+  vine:     { file: 'v7-vine-upright.png', pw: 1024, ph: 1536, box: [89, 126, 930, 1438] },
+  cinnamon: { file: 'v7-vanilla-cinnamon.png', pw: 1536, ph: 1024, box: [237, 263, 1331, 802] },
+  teacup:   { file: 'v7-teacup.png', pw: 1254, ph: 1254, box: [153, 302, 1180, 1051] },
+  tip:      { file: 'v8-crop-climb-tip.png', pw: 580, ph: 680, box: [76, 20, 523, 679] },       // back-panel tendril tip, stem cut at bottom
+  trail:    { file: 'v8-crop-vine-trail.png', pw: 1219, ph: 859, box: [0, 367, 1047, 770] },    // the main vine's trailing leaves, cut at left
+};
+// Shared composition: name and weight on the left, the upright vine down the right (running on
+// under the spec card), the teacup low on the left, the tendril tip curling into the top-left corner
+// and the vine's trailing leaves coming in from the left edge under the cup.
+const COMMON = [
+  { piece: 'tip', at: [-1, 12.2], height: 21, rotate: 90 },
+  { piece: 'trail', at: [-1.5, 81], width: 30 },
+  { piece: 'vine', at: [28, 12], height: 94 },
+  { piece: 'teacup', at: [5.5, 64], width: 22 },
+];
 const LABELS = {
-  'natural-vanilla-tea-100g': { ground: 'v6-label-ground-vanilla.jpg', over: 'Authentic Ceylon', lines: ['Vanilla', 'Tea'], under: 'with Natural Vanilla', gtin: '4796034220243',
-    // Upright vine: artwork bbox x 89-930, y 126-1438 px; climbs the right side beside the name.
-    art: { file: 'v7-vine-upright.png', pw: 1024, ph: 1536, box: [89, 126, 930, 1438], at: [32, 11.5], height: 77 },
-    weightUnder: true,
-    deco: [{ at: [-1.5, 9.4], width: 21, flip: true, rotate: -6 }, { at: [-2.5, 66], width: 21, flip: true, rotate: -22 }] },
-  'vanilla-cinnamon-tea-100g': { ground: 'v6-label-ground-cinnamon.jpg', over: 'Authentic Ceylon', lines: ['Vanilla &', 'Cinnamon Tea'], under: ['Vanilla and cinnamon blended', 'with pure Ceylon tea'], gtin: '4796034220250',
-    // Vanilla pods, orchid and cinnamon quills: artwork bbox x 237-1331, y 263-802 px; across the foot.
-    art: { file: 'v7-vanilla-cinnamon.png', pw: 1536, ph: 1024, box: [237, 263, 1331, 802], at: [3, 52.5], width: 66 },
-    deco: [{ at: [-1.5, 9.4], width: 19, flip: true, rotate: -6 }, { at: [52.5, 9.4], width: 19, rotate: 6 }] },
+  'natural-vanilla-tea-100g': { ground: 'v6-label-ground-vanilla.jpg', over: 'Authentic Ceylon', lines: ['Vanilla', 'Tea'], under: ['with Natural Vanilla'], gtin: '4796034220243',
+    pieces: COMMON },
+  // Same layout; the vanilla-and-cinnamon painting sits over the vine's base. "Tea" moves up into
+  // the descriptor so the name stays clear of the vine.
+  'vanilla-cinnamon-tea-100g': { ground: 'v6-label-ground-cinnamon.jpg', over: 'Authentic Ceylon tea', lines: ['Vanilla &', 'Cinnamon'], under: ['Vanilla and cinnamon blended', 'with pure Ceylon tea'], gtin: '4796034220250',
+    pieces: [...COMMON, { piece: 'cinnamon', at: [37, 84], width: 40 }] },
 };
 
 // Place an artwork by its painted area (box, in source pixels): top-left at `at` (mm), sized by height or width.
-function art(a) {
-  const [x0, y0, x1, y1] = a.box, s = a.height ? a.height / (y1 - y0) : a.width / (x1 - x0);
-  return img(a.file, a.at[0] - x0 * s, a.at[1] - y0 * s, a.pw * s, a.ph * s);
+function art(d) {
+  const a = PIECE[d.piece], [x0, y0, x1, y1] = a.box, s = d.height ? d.height / (y1 - y0) : d.width / (x1 - x0);
+  const inner = img(a.file, -x0 * s, -y0 * s, a.pw * s, a.ph * s);
+  // rotate 90 turns the piece clockwise about its painted box's top-left, then shifts it back into place.
+  const rot = d.rotate === 90 ? `translate(${n((y1 - y0) * s)} 0) rotate(90)` : '';
+  return `<g transform="translate(${n(d.at[0])} ${n(d.at[1])}) ${rot}">${inner}</g>`;
 }
 
 // Leaf sprig (v6-sprig.png: leaves span x 223-1447, y 168-927 px, stem cut at the right edge),
@@ -112,12 +129,11 @@ function build(p) {
   // The painting large, bleeding off both sides: flower right of centre, pods running off the left.
   const vw = 128, vh = vw * VINE.ph / VINE.pw;
   const L = 7;                                                    // left text edge
-  const sz = Math.min(12.5, 54 / width(F.display, p.lines[0], 1), 54 / width(F.display, p.lines[1], 1));
+  const sz = Math.min(12.5, 42 / width(F.display, p.lines[0], 1), 42 / width(F.display, p.lines[1], 1));
   const b1 = 27 + sz * 0.74, b2 = b1 + sz * 0.88;
   const out = [
     img(GROUND === 'cream' ? p.ground : p.ground.replace('label-ground-', `label-ground-${GROUND}-`), -BLEED, -BLEED, w + 2 * BLEED, h + 2 * BLEED),
-    ...(p.deco || []).map(sprig),
-    art(p.art),
+    ...p.pieces.map(art),
     logo(w / 2 - 6.5, 6.5, 13),
     label(p.over, L, 25.2),
     text('display', p.lines[0], sz, L - 0.5, b1),
@@ -125,8 +141,8 @@ function build(p) {
     ...[].concat(p.under).map((u, i) => text('sans', u, 2.2, L, b2 + 5 + i * 3)),
   ];
   // Net weight on the line with "Authentic Ceylon", right-aligned.
-  if (p.weightUnder) out.push(text('display', '100 g', 4.6, L, b2 + 13.5));
-  else out.push(text('display', '100 g', 4.4, w - L, 25.6, { anchor: 'end' }));
+  // Net weight under the descriptor.
+  out.push(text('display', '100 g', 4.6, L, b2 + 5 + p.under.length * 3 + 5.2));
   // Spec card: one compact, outlined panel at the foot, aligned to the text column. Barcode on the
   // left, the batch fields as a small ruled table on the right; one padding all round.
   // The barcode is scaled to match the size on the current pouch (bars about 21 mm wide, roughly
