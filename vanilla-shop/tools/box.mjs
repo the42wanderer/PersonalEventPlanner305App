@@ -123,7 +123,7 @@ function fadeBand(id, from, to, h) {
 }
 
 // Line icons, one style across the box: 0.32 mm forest stroke, drawn in a ±5.5 mm box around 0,0.
-const TINT = '#E9ECDC';
+let TINT = '#E9ECDC';
 const STROKE = `fill="none" stroke="${C.ink}" stroke-width="0.32" stroke-linecap="round" stroke-linejoin="round"`;
 const ICONS = {
   cup: `<path ${STROKE} d="M-5 4.3Q0 5.7 5 4.3"/>` +
@@ -408,63 +408,102 @@ const VARIANT = process.env.VARIANT || '';
 if (VARIANT === 'vine') {
   const plate = (f) => {
     const b = fs.readFileSync(path.join(root, 'plates', 'generated', f));
+    if (f.endsWith('.jpg')) {
+      const sof = b.indexOf(Buffer.from([0xFF, 0xC0]));
+      return { w: b.readUInt16BE(sof + 7), h: b.readUInt16BE(sof + 5), href: 'data:image/jpeg;base64,' + b.toString('base64') };
+    }
     return { w: b.readUInt32BE(16), h: b.readUInt32BE(20), href: 'data:image/png;base64,' + b.toString('base64') };
   };
   // Firefly cut-outs of the v6 paintings (true masks, pixels untouched).
-  const WRAP = plate('v6-vine.png'), SPRIG = plate('v6-sprig.png'), CLIMB = plate('v6-climb.png');
-  const place = (p, x, y, s, flip = false) => `<image href="${p.href}" width="${p.w}" height="${p.h}" transform="translate(${n(x + (flip ? p.w * s : 0))} ${n(y)}) scale(${n(flip ? -s : s, 6)} ${n(s, 6)})"/>`;
-  // One placement for the whole wrap, in mm from the front's left edge; each face shows its slice.
+  const WRAP = plate('v6-vine.png'), SPRIG = plate('v6-sprig.png');
+  const DIAGRAM = plate('v2-vanilla-tea.png');
+  const place = (p, x, y, s) => `<image href="${p.href}" width="${p.w}" height="${p.h}" transform="translate(${n(x)} ${n(y)}) scale(${n(s, 6)})"/>`;
+
+  // Warm ground: one painted gradient round the four walls (sliced per face with 3 mm bleed);
+  // lid, base and flaps take its lightest tone.
+  C.paper = '#FBF0D8';
+  TINT = '#FFF8E8';
+  const GROUND = Object.fromEntries(['front', 'sideA', 'back', 'sideB'].map((k) => [k, plate(`v6-ground-${k}.jpg`)]));
+  const ground = (key, w, h) => { const g = GROUND[key]; return `<image href="${g.href}" width="${g.w}" height="${g.h}" preserveAspectRatio="none" transform="translate(-3 -3) scale(${n((w + 6) / g.w, 6)} ${n((h + 6) / g.h, 6)})"/>`; };
+  const wall = (key, w, h) => paper(w, h) + ground(key, w, h);
+
+  // One placement for the vine, in mm from the front's left edge; each face shows its slice.
   const V = { x: -13.4, y: -2.6, s: 0.105 };
   const wrapAt = (key) => ({ front: 0, sideA: size('front').w }[key]);
   const vineWrap = (key) => place(WRAP, V.x - wrapAt(key), V.y, V.s);
+  // Tea-bag tag on its string, drawn in the icon line style.
+  const tag = (x, y) => `<g fill="none" stroke="${C.ink}" stroke-width="0.3" stroke-linejoin="round">` +
+    `<path d="M${n(x + 2)} ${n(y - 3.4)}q-1.6 1.6 0 3.4"/>` +
+    `<path d="M${n(x)} ${n(y + 0.9)}l1 -1h2l1 1v4.6h-4Z"/><circle cx="${n(x + 2)}" cy="${n(y + 1)}" r="0.35"/></g>`;
 
   faces.front = (w, h) => {
     const sz = 30 / width(F.display, 'Vanilla', 1), base = 45.2, lead = 0.9;
     return [
-      paper(w, h),
+      wall('front', w, h),
       vineWrap('front'),
       logo(M, 6.5, 13),
       label('Authentic Ceylon', M, base - sz * lead - sz * 0.72 - 2.4),
       text('display', 'Vanilla', sz, M - 0.4, base - sz * lead),
       text('display', 'Tea', sz, M - 0.4, base),
       text('sans', 'with Natural Vanilla', 2.5, M, base + 5),
-      label('12 tea bags · 24 g', M, 79.8),
+      tag(M, 76.6),
+      label('12 tea bags · 24 g', M + 6, 79.8),
     ].join('');
   };
 
-  // Brewing steps stacked in one column on the right; the vine fills the left and the foot.
+  // Brewing steps stacked on the right, each with its line icon; the vine fills the left and foot.
   faces.sideA = (w, h) => {
-    const x = 33, steps = [['150 ml', 'One tea bag in hot water'], ['5 minutes', 'Then lift the bag out'], ['Over ice', 'Let it cool and pour over ice']];
-    const out = [paper(w, h), vineWrap('sideA'), text('display', 'How to brew', 6.4, x, 14.5), hair(x, 17.6, w - M)];
-    steps.forEach(([v, note], i) => {
-      const y = 25 + i * 9;
-      out.push(text('display', v, 4.4, x, y));
-      out.push(text('sans', note, 2.05, x, y + 3.4, { fill: C.soft }));
+    const x = 31, tx = x + 10.5;
+    const steps = [['cup', '150 ml', 'One tea bag in hot water'], ['timer', '5 minutes', 'Then lift the bag out'], ['ice', 'Over ice', 'Let it cool and pour over ice']];
+    const out = [wall('sideA', w, h), vineWrap('sideA'), text('display', 'How to brew', 6.4, x, 14.5), hair(x, 17.6, w - M)];
+    steps.forEach(([ic, v, note], i) => {
+      const y = 26.5 + i * 10;
+      out.push(icon(ic, x + 4.2, y - 1.6, 4.2, 0.62));
+      out.push(text('display', v, 4.2, tx, y));
+      out.push(text('sans', note, 2.0, tx, y + 3.3, { fill: C.soft }));
     });
     out.push(label('2 g per tea bag', w - M, 79.8, { anchor: 'end', fill: C.soft }));
     return out.join('');
   };
 
-  // The line and the story, left-aligned; the tendril climbs the right edge from the base.
+  // The line, then the plant itself: a labelled plate of vanilla with a Ceylon tea sprig.
   faces.back = (w, h) => {
-    const s = 0.039; // tendril artwork: leaves span x 71-612 px, stem cut at the bottom edge
-    return [
-      paper(w, h),
-      place(CLIMB, w - 2 - 612 * s, h + 1.5 - CLIMB.h * s, s),
-      text('display', 'Vanilla was', 7.4, M, 19),
-      text('display', 'never plain.', 7.4, M, 26.8),
-      body(['The delicate sweetness of natural', 'vanilla unfolds through warm,', 'comforting notes and a smooth,', 'mellow aroma.'], M, 35, { size: 2.3, lead: 3.4 }),
-      hair(M, 74.6, 28.5),
-      label('Natural vanilla tea \u00B7 12 bags \u00B7 24 g', M, 79.8, { fill: C.soft }),
-    ].join('');
+    const s = 66 / DIAGRAM.h, x0 = w - 2 - DIAGRAM.w * s, y0 = 13;
+    const at = (px, py) => [x0 + px * s, y0 + py * s];
+    const callouts = [
+      ['Vanilla orchid', 'Hand-pollinated; open for one day', at(545, 330), 40],
+      ['Aerial roots', 'The vine climbs by them', at(165, 560), 48],
+      ['Ceylon tea', 'Two leaves and a bud', at(330, 1065), 56],
+      ['Green pods', 'Ripen for about nine months', at(470, 980), 64],
+      ['Cured pod', 'Sweated and dried for months', at(585, 1270), 72],
+    ];
+    const out = [wall('back', w, h), place(DIAGRAM, x0, y0, s),
+      text('display', 'Vanilla was', 6.2, M, 15),
+      text('display', 'never plain.', 6.2, M, 21.6),
+      body(['The delicate sweetness of natural', 'vanilla unfolds through warm,', 'comforting notes and a smooth,', 'mellow aroma.'], M, 27.4, { size: 2.0, lead: 2.8 })];
+    callouts.forEach(([k, note, [px, py], y]) => {
+      const lw = Math.max(width(F.medium, k.toUpperCase(), 1.7, 0.14), width(F.sans, note, 1.85));
+      out.push(text('medium', k, 1.7, M, y, { caps: true, track: 0.14 }));
+      out.push(text('sans', note, 1.85, M, y + 2.7, { fill: C.soft }));
+      const sx = M + lw + 1.6, sy = y - 0.6;
+      out.push(`<path d="M${n(sx)} ${n(sy)}H${n(Math.min(px - 3, sx + 4))}L${n(px)} ${n(py)}" fill="none" stroke="${C.ink}" stroke-width="0.14"/>`);
+      out.push(`<circle cx="${n(px)}" cy="${n(py)}" r="0.55" fill="${C.ink}"/>`);
+    });
+    return out.join('');
   };
 
-  // Lid: the mark, with a sprig reaching in from the back corner.
+  // Information side: unchanged layout, on the warm ground.
+  const sideB = faces.sideB;
+  faces.sideB = (w, h) => sideB(w, h).replace(paper(w, h), wall('sideB', w, h));
+
+  // Lid: two sprigs reaching in from opposite corners frame the mark.
   faces.top = (w, h) => {
-    const lw = 28, s = 0.026; // sprig artwork: leaves from y 168 px, stem cut at the right edge
+    const lw = 26, s = 0.024; // sprig artwork: leaves from y 168 px, stem cut at the right edge
+    const sprig = place(SPRIG, w + 1.5 - SPRIG.w * s, 1.5 - 168 * s, s);
     return [
       paper(w, h),
-      place(SPRIG, w + 1.5 - SPRIG.w * s, 2 - 168 * s, s),
+      sprig,
+      `<g transform="rotate(180 ${n(w / 2)} ${n(h / 2)})">${sprig}</g>`,
       logo(w / 2 - lw / 2, h / 2 - logoH(lw) / 2 - 3, lw),
       label('Authentic Ceylon vanilla tea', w / 2, h / 2 + logoH(lw) / 2 + 3.5, { anchor: 'middle', fill: C.soft }),
     ].join('');
