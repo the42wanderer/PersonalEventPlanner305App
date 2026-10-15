@@ -84,7 +84,7 @@ const outline = (inset = 0) => {
 const PIECE = {
   vine:     { file: 'v7-vine-upright.png', pw: 1024, ph: 1536, box: [89, 126, 930, 1438] },
   cinnamon: { file: 'v7-vanilla-cinnamon.png', pw: 1536, ph: 1024, box: [237, 263, 1331, 802] },
-  vineCinnamon: { file: 'v7-vine-upright-cinnamon.png', pw: 1024, ph: 1536, box: [87, 133, 912, 1420] }, // same vine, cinnamon quills at its base
+  vineCinnamon: { file: 'v7-vine-upright-cinnamon.png', pw: 1024, ph: 1536, box: [89, 126, 930, 1438] }, // the same vine (same framing), cinnamon quills at its base on the left
   teacup:   { file: 'v7-teacup.png', pw: 1254, ph: 1254, box: [153, 302, 1180, 1051] },
   tip:      { file: 'v8-crop-climb-tip.png', pw: 580, ph: 680, box: [76, 20, 523, 679] },       // back-panel tendril tip, stem cut at bottom
   trail:    { file: 'v8-crop-vine-trail.png', pw: 1219, ph: 859, box: [0, 367, 1047, 770] },    // the main vine's trailing leaves, cut at left
@@ -104,7 +104,7 @@ const LABELS = {
   // the descriptor so the name stays clear of the vine.
   'vanilla-cinnamon-tea-100g': { ground: 'v6-label-ground-cinnamon.jpg', over: 'Authentic Ceylon tea', lines: ['Vanilla &', 'Cinnamon'], under: ['Vanilla and cinnamon blended', 'with pure Ceylon tea'], gtin: '4796034220250',
     // The same vine with cinnamon quills painted in at its base.
-    pieces: [COMMON[0], COMMON[1], { piece: 'vineCinnamon', at: [27.5, 13], height: 80 }], nameWidth: 37 },
+    pieces: [COMMON[0], COMMON[1], { piece: 'vineCinnamon', at: [28, 12], height: 94 }] },
 };
 
 // Place an artwork by its painted area (box, in source pixels): top-left at `at` (mm), sized by height or width.
