@@ -82,7 +82,7 @@ const outline = (inset = 0) => {
 
 // Pieces placed by their painted area: file, source size, box = painted bbox in source px.
 const PIECE = {
-  vine:     { file: 'v7-vine-upright.png', pw: 1024, ph: 1536, box: [89, 126, 930, 1438] },
+  vine:     { file: 'v7-vine-upright-b.png', pw: 1024, ph: 1536, box: [89, 126, 930, 1438] },   // the cinnamon painting's vine without the quills, so both labels match leaf for leaf
   cinnamon: { file: 'v7-vanilla-cinnamon.png', pw: 1536, ph: 1024, box: [237, 263, 1331, 802] },
   vineCinnamon: { file: 'v7-vine-upright-cinnamon.png', pw: 1024, ph: 1536, box: [89, 126, 930, 1438] }, // the same vine (same framing), cinnamon quills at its base on the left
   teacup:   { file: 'v7-teacup.png', pw: 1254, ph: 1254, box: [153, 302, 1180, 1051] },
