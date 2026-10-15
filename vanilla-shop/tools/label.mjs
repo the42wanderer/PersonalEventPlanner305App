@@ -18,7 +18,7 @@ const BLEED = 3;
 // LABEL_GROUND picks the ground: cream (default), golden (the boxes'), or a tools/label_ground.py preset.
 const GROUND = process.env.LABEL_GROUND || 'cream';
 // Barcode bar height: 18.28 mm is full height at 80%; shortened to fit the label's foot strip.
-const BAR_H = 9.5;
+const BAR_H = 10;
 
 function width(f, s, sz, track = 0) {
   const g = f.stringToGlyphs(s), k = sz / f.unitsPerEm;
@@ -81,12 +81,12 @@ const outline = (inset = 0) => {
 const LABELS = {
   'natural-vanilla-tea-100g': { ground: 'v6-label-ground-vanilla.jpg', over: 'Authentic Ceylon', lines: ['Vanilla', 'Tea'], under: 'with Natural Vanilla', gtin: '4796034220243',
     // Upright vine: artwork bbox x 89-930, y 126-1438 px; climbs the right side beside the name.
-    art: { file: 'v7-vine-upright.png', pw: 1024, ph: 1536, box: [89, 126, 930, 1438], at: [27, 11.5], height: 80 },
+    art: { file: 'v7-vine-upright.png', pw: 1024, ph: 1536, box: [89, 126, 930, 1438], at: [32, 11.5], height: 77 },
     weightUnder: true,
-    deco: [{ at: [-1.5, 9.4], width: 21, flip: true, rotate: -6 }, { at: [-2.5, 72], width: 22, flip: true, rotate: -22 }] },
+    deco: [{ at: [-1.5, 9.4], width: 21, flip: true, rotate: -6 }, { at: [-2.5, 66], width: 21, flip: true, rotate: -22 }] },
   'vanilla-cinnamon-tea-100g': { ground: 'v6-label-ground-cinnamon.jpg', over: 'Authentic Ceylon', lines: ['Vanilla &', 'Cinnamon Tea'], under: ['Vanilla and cinnamon blended', 'with pure Ceylon tea'], gtin: '4796034220250',
     // Vanilla pods, orchid and cinnamon quills: artwork bbox x 237-1331, y 263-802 px; across the foot.
-    art: { file: 'v7-vanilla-cinnamon.png', pw: 1536, ph: 1024, box: [237, 263, 1331, 802], at: [5, 54], width: 70 },
+    art: { file: 'v7-vanilla-cinnamon.png', pw: 1536, ph: 1024, box: [237, 263, 1331, 802], at: [3, 52.5], width: 66 },
     deco: [{ at: [-1.5, 9.4], width: 19, flip: true, rotate: -6 }, { at: [52.5, 9.4], width: 19, rotate: 6 }] },
 };
 
@@ -127,15 +127,17 @@ function build(p) {
   // Net weight on the line with "Authentic Ceylon", right-aligned.
   if (p.weightUnder) out.push(text('display', '100 g', 4.6, L, b2 + 13.5));
   else out.push(text('display', '100 g', 4.4, w - L, 25.6, { anchor: 'end' }));
-  // One slim strip at the foot: barcode on white at the left, batch fields beside it.
-  const fy = h - 12.6;
-  out.push(`<rect x="${-BLEED}" y="${fy - 5.4}" width="${w + 2 * BLEED}" height="${h - fy + 5.4 + BLEED}" fill="#FFFBF2" fill-opacity="0.9"/>`);
-  out.push(`<rect x="3.6" y="${n(fy - 4.4)}" width="30.6" height="13.4" fill="#FFFFFF"/>`);
-  out.push(ean13(p.gtin, 3.8, fy - 3.6));            // EAN-13 at 80% with shortened bars (see BAR_H)
+  // Spec card: one compact, outlined panel at the foot, aligned to the text column. Barcode on the
+  // left, the batch fields as a small ruled table on the right, a hairline between them.
+  const cw = 58, ch = 15.2, cx = L - 1.5, cy = h - 5.2 - ch;
+  out.push(`<rect x="${n(cx)}" y="${n(cy)}" width="${cw}" height="${ch}" rx="1.4" fill="#FFFFFF" stroke="${C.ink}" stroke-width="0.22"/>`);
+  out.push(ean13(p.gtin, cx + 0.2, cy + 1.3));
+  const fx = cx + 32.2;
+  out.push(`<path d="M${n(fx - 1.6)} ${n(cy + 2)}V${n(cy + ch - 2)}" stroke="${C.ink}" stroke-width="0.12"/>`);
   [['MRP Rs.', 0], ['MFD', 1], ['EXP', 2], ['BTN', 3]].forEach(([k, i]) => {
-    const y = fy - 1.9 + i * 3.1;
-    out.push(label(k, 38, y, { size: 1.5, fill: C.soft }));
-    out.push(`<path d="M${n(48)} ${n(y + 0.3)}H${n(w - 5)}" stroke="${C.soft}" stroke-width="0.12"/>`);
+    const y = cy + 3.9 + i * 3.25;
+    out.push(label(k, fx, y, { size: 1.45, fill: C.ink }));
+    out.push(`<path d="M${n(fx + 8.4)} ${n(y + 0.25)}H${n(cx + cw - 2)}" stroke="${C.soft}" stroke-width="0.1" stroke-dasharray="0.35 0.35"/>`);
   });
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${w + 2 * BLEED}mm" height="${h + 2 * BLEED}mm" viewBox="${-BLEED} ${-BLEED} ${w + 2 * BLEED} ${h + 2 * BLEED}">` +
     `<defs><clipPath id="bleed"><path d="${outline(-BLEED)}"/></clipPath></defs>` +
