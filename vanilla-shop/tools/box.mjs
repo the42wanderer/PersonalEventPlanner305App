@@ -410,10 +410,11 @@ if (VARIANT === 'vine') {
     const b = fs.readFileSync(path.join(root, 'plates', 'generated', f));
     return { w: b.readUInt32BE(16), h: b.readUInt32BE(20), href: 'data:image/png;base64,' + b.toString('base64') };
   };
-  const WRAP = plate('v5-vine-wrap.png'), SPRIG = plate('v5-vine-sprig.png'), CLIMB = plate('v5-vine-climb.png');
+  // Firefly cut-outs of the v6 paintings (true masks, pixels untouched).
+  const WRAP = plate('v6-vine.png'), SPRIG = plate('v6-sprig.png'), CLIMB = plate('v6-climb.png');
   const place = (p, x, y, s, flip = false) => `<image href="${p.href}" width="${p.w}" height="${p.h}" transform="translate(${n(x + (flip ? p.w * s : 0))} ${n(y)}) scale(${n(flip ? -s : s, 6)} ${n(s, 6)})"/>`;
   // One placement for the whole wrap, in mm from the front's left edge; each face shows its slice.
-  const V = { x: -17.9, y: 14.4, s: 0.105 };
+  const V = { x: -13.4, y: -2.6, s: 0.105 };
   const wrapAt = (key) => ({ front: 0, sideA: size('front').w }[key]);
   const vineWrap = (key) => place(WRAP, V.x - wrapAt(key), V.y, V.s);
 
@@ -446,24 +447,24 @@ if (VARIANT === 'vine') {
 
   // The line and the story, left-aligned; the tendril climbs the right edge from the base.
   faces.back = (w, h) => {
-    const s = 0.118, cw = CLIMB.w * s, ch = CLIMB.h * s;
+    const s = 0.039; // tendril artwork: leaves span x 71-612 px, stem cut at the bottom edge
     return [
       paper(w, h),
-      place(CLIMB, w - cw + 3, h - ch + 1.5, s),
+      place(CLIMB, w - 2 - 612 * s, h + 1.5 - CLIMB.h * s, s),
       text('display', 'Vanilla was', 7.4, M, 19),
       text('display', 'never plain.', 7.4, M, 26.8),
       body(['The delicate sweetness of natural', 'vanilla unfolds through warm,', 'comforting notes and a smooth,', 'mellow aroma.'], M, 35, { size: 2.3, lead: 3.4 }),
       hair(M, 74.6, 28.5),
-      label('Natural vanilla tea · 12 bags · 24 g', M, 79.8, { fill: C.soft }),
+      label('Natural vanilla tea \u00B7 12 bags \u00B7 24 g', M, 79.8, { fill: C.soft }),
     ].join('');
   };
 
   // Lid: the mark, with a sprig reaching in from the back corner.
   faces.top = (w, h) => {
-    const lw = 28, s = 0.075;
+    const lw = 28, s = 0.026; // sprig artwork: leaves from y 168 px, stem cut at the right edge
     return [
       paper(w, h),
-      place(SPRIG, w - SPRIG.w * s + 1.5, -1.5, s, true),
+      place(SPRIG, w + 1.5 - SPRIG.w * s, 2 - 168 * s, s),
       logo(w / 2 - lw / 2, h / 2 - logoH(lw) / 2 - 3, lw),
       label('Authentic Ceylon vanilla tea', w / 2, h / 2 + logoH(lw) / 2 + 3.5, { anchor: 'middle', fill: C.soft }),
     ].join('');
