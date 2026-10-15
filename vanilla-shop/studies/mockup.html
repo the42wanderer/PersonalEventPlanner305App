@@ -3,7 +3,7 @@
 <title>Box mock-up</title>
 <style>html,body{margin:0;background:radial-gradient(120% 90% at 50% 35%,#efebe0 0%,#d9d3c3 75%)}canvas{display:block}</style>
 <!-- Folded-box mock-up: renders the exported faces on a box of the real dieline size.
-     Serve the vanilla-shop folder over http and open studies/mockup.html?view=front|side|back[&design=lily] -->
+     Serve the vanilla-shop folder over http and open studies/mockup.html?view=front|side|back[&design=lily | &dir=v5/out/dusk-tea] -->
 <body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -12,7 +12,8 @@
   const view = q.get('view') || 'front';
   // ?design=<folder> loads comparison faces from studies/comparison/<folder>/face-*.jpg
   const design = q.get('design');
-  const faceUrl = (name) => design ? `comparison/${design}/face-${name}.jpg` : `../export/final/face-${name}.svg`;
+  const dir = q.get('dir');
+  const faceUrl = (name) => dir ? `${dir}/face-${name}.jpg` : design ? `comparison/${design}/face-${name}.jpg` : `../export/final/face-${name}.svg`;
   const W = 1600, H = 1100;
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
   renderer.setSize(W, H); renderer.setPixelRatio(1);
