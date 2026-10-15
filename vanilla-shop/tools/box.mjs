@@ -401,6 +401,76 @@ const faces = {
 };
 
 // ---------------------------------------------------------------------------
+// Variant "vine" (VARIANT=vine): the same box and copy, with the painted vanilla vine growing
+// round it instead of the tea hills: flower and pods on the front, trailing on round the brewing
+// side, a sprig on the lid and a tendril climbing the back. Writes to export/vine/.
+const VARIANT = process.env.VARIANT || '';
+if (VARIANT === 'vine') {
+  const plate = (f) => {
+    const b = fs.readFileSync(path.join(root, 'plates', 'generated', f));
+    return { w: b.readUInt32BE(16), h: b.readUInt32BE(20), href: 'data:image/png;base64,' + b.toString('base64') };
+  };
+  const WRAP = plate('v5-vine-wrap.png'), SPRIG = plate('v5-vine-sprig.png'), CLIMB = plate('v5-vine-climb.png');
+  const place = (p, x, y, s, flip = false) => `<image href="${p.href}" width="${p.w}" height="${p.h}" transform="translate(${n(x + (flip ? p.w * s : 0))} ${n(y)}) scale(${n(flip ? -s : s, 6)} ${n(s, 6)})"/>`;
+  // One placement for the whole wrap, in mm from the front's left edge; each face shows its slice.
+  const V = { x: -17.9, y: 14.4, s: 0.105 };
+  const wrapAt = (key) => ({ front: 0, sideA: size('front').w }[key]);
+  const vineWrap = (key) => place(WRAP, V.x - wrapAt(key), V.y, V.s);
+
+  faces.front = (w, h) => {
+    const sz = 30 / width(F.display, 'Vanilla', 1), base = 45.2, lead = 0.9;
+    return [
+      paper(w, h),
+      vineWrap('front'),
+      logo(M, 6.5, 13),
+      label('Authentic Ceylon', M, base - sz * lead - sz * 0.72 - 2.4),
+      text('display', 'Vanilla', sz, M - 0.4, base - sz * lead),
+      text('display', 'Tea', sz, M - 0.4, base),
+      text('sans', 'with Natural Vanilla', 2.5, M, base + 5),
+      label('12 tea bags · 24 g', M, 79.8),
+    ].join('');
+  };
+
+  // Brewing steps stacked in one column on the right; the vine fills the left and the foot.
+  faces.sideA = (w, h) => {
+    const x = 33, steps = [['150 ml', 'One tea bag in hot water'], ['5 minutes', 'Then lift the bag out'], ['Over ice', 'Let it cool and pour over ice']];
+    const out = [paper(w, h), vineWrap('sideA'), text('display', 'How to brew', 6.4, x, 14.5), hair(x, 17.6, w - M)];
+    steps.forEach(([v, note], i) => {
+      const y = 25 + i * 9;
+      out.push(text('display', v, 4.4, x, y));
+      out.push(text('sans', note, 2.05, x, y + 3.4, { fill: C.soft }));
+    });
+    out.push(label('2 g per tea bag', w - M, 79.8, { anchor: 'end', fill: C.soft }));
+    return out.join('');
+  };
+
+  // The line and the story, left-aligned; the tendril climbs the right edge from the base.
+  faces.back = (w, h) => {
+    const s = 0.118, cw = CLIMB.w * s, ch = CLIMB.h * s;
+    return [
+      paper(w, h),
+      place(CLIMB, w - cw + 3, h - ch + 1.5, s),
+      text('display', 'Vanilla was', 7.4, M, 19),
+      text('display', 'never plain.', 7.4, M, 26.8),
+      body(['The delicate sweetness of natural', 'vanilla unfolds through warm,', 'comforting notes and a smooth,', 'mellow aroma.'], M, 35, { size: 2.3, lead: 3.4 }),
+      hair(M, 74.6, 28.5),
+      label('Natural vanilla tea · 12 bags · 24 g', M, 79.8, { fill: C.soft }),
+    ].join('');
+  };
+
+  // Lid: the mark, with a sprig reaching in from the back corner.
+  faces.top = (w, h) => {
+    const lw = 28, s = 0.075;
+    return [
+      paper(w, h),
+      place(SPRIG, w - SPRIG.w * s + 1.5, -1.5, s, true),
+      logo(w / 2 - lw / 2, h / 2 - logoH(lw) / 2 - 3, lw),
+      label('Authentic Ceylon vanilla tea', w / 2, h / 2 + logoH(lw) / 2 + 3.5, { anchor: 'middle', fill: C.soft }),
+    ].join('');
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Output
 function faceSVG(key) {
   const { w, h } = size(key);
@@ -425,18 +495,20 @@ function sheetSVG() {
     `<g id="Artwork">${art}</g><g id="Dieline">${globalThis.VS_DIELINE}</g></svg>`);
 }
 
-const out = path.join(root, 'export', 'final');
+const STEM = VARIANT ? `natural-vanilla-tea-${VARIANT}` : 'natural-vanilla-tea';
+const out = path.join(root, 'export', VARIANT || 'final');
 fs.mkdirSync(out, { recursive: true });
-for (const key of Object.keys(faces)) fs.writeFileSync(path.join(out, `face-${key}.svg`), faceSVG(key));
-fs.writeFileSync(path.join(out, 'natural-vanilla-tea_print-sheet.svg'), sheetSVG());
+const FINAL = ['front', 'sideA', 'back', 'sideB', 'top', 'inner', 'bottom'];
+for (const key of VARIANT ? FINAL : Object.keys(faces)) fs.writeFileSync(path.join(out, `face-${key}.svg`), faceSVG(key));
+fs.writeFileSync(path.join(out, `${STEM}_print-sheet.svg`), sheetSVG());
 console.log('wrote', fs.readdirSync(out).length, 'files to', out);
 
 // Editable version for Illustrator: same artwork, but type stays live text.
 // Sinhala/Tamil labels, the barcode and the logos stay as outlines.
 LIVE = true;
-const editable = path.join(root, 'export', 'editable');
+const editable = path.join(root, 'export', VARIANT ? `${VARIANT}-editable` : 'editable');
 fs.mkdirSync(path.join(editable, 'fonts'), { recursive: true });
-fs.writeFileSync(path.join(editable, 'natural-vanilla-tea_EDITABLE.svg'), sheetSVG());
+fs.writeFileSync(path.join(editable, `${STEM}_EDITABLE.svg`), sheetSVG());
 for (const f of ['fraunces-italic.ttf', 'fraunces-display.ttf', 'geist-regular.ttf', 'geist-medium.ttf']) {
   fs.copyFileSync(path.join(root, 'fonts', f), path.join(editable, 'fonts', f));
 }
