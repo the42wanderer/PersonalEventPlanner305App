@@ -81,16 +81,29 @@ const outline = (inset = 0) => {
 const LABELS = {
   'natural-vanilla-tea-100g': { ground: 'v6-label-ground-vanilla.jpg', over: 'Authentic Ceylon', lines: ['Vanilla', 'Tea'], under: 'with Natural Vanilla', gtin: '4796034220243',
     // Upright vine: artwork bbox x 89-930, y 126-1438 px; climbs the right side beside the name.
-    art: { file: 'v7-vine-upright.png', pw: 1024, ph: 1536, box: [89, 126, 930, 1438], at: [23, 27], height: 65 } },
+    art: { file: 'v7-vine-upright.png', pw: 1024, ph: 1536, box: [89, 126, 930, 1438], at: [27, 11.5], height: 80 },
+    weightUnder: true,
+    deco: [{ at: [-1.5, 9.4], width: 21, flip: true, rotate: -6 }, { at: [-2.5, 72], width: 22, flip: true, rotate: -22 }] },
   'vanilla-cinnamon-tea-100g': { ground: 'v6-label-ground-cinnamon.jpg', over: 'Authentic Ceylon', lines: ['Vanilla &', 'Cinnamon Tea'], under: ['Vanilla and cinnamon blended', 'with pure Ceylon tea'], gtin: '4796034220250',
     // Vanilla pods, orchid and cinnamon quills: artwork bbox x 237-1331, y 263-802 px; across the foot.
-    art: { file: 'v7-vanilla-cinnamon.png', pw: 1536, ph: 1024, box: [237, 263, 1331, 802], at: [5, 54], width: 70 } },
+    art: { file: 'v7-vanilla-cinnamon.png', pw: 1536, ph: 1024, box: [237, 263, 1331, 802], at: [5, 54], width: 70 },
+    deco: [{ at: [-1.5, 9.4], width: 19, flip: true, rotate: -6 }, { at: [52.5, 9.4], width: 19, rotate: 6 }] },
 };
 
 // Place an artwork by its painted area (box, in source pixels): top-left at `at` (mm), sized by height or width.
 function art(a) {
   const [x0, y0, x1, y1] = a.box, s = a.height ? a.height / (y1 - y0) : a.width / (x1 - x0);
   return img(a.file, a.at[0] - x0 * s, a.at[1] - y0 * s, a.pw * s, a.ph * s);
+}
+
+// Leaf sprig (v6-sprig.png: leaves span x 223-1447, y 168-927 px, stem cut at the right edge),
+// tucked in at a label edge. flip puts the cut stem on the left; rotate turns it about its top-left.
+const SPRIG = { file: 'v6-sprig.png', pw: 1448, ph: 1086, box: [223, 168, 1447, 927] };
+function sprig(d) {
+  const [x0, y0, x1] = SPRIG.box, s = d.width / (x1 - x0);
+  const inner = img(SPRIG.file, -x0 * s, -y0 * s, SPRIG.pw * s, SPRIG.ph * s);
+  const flip = d.flip ? `translate(${n(d.width)} 0) scale(-1 1)` : '';
+  return `<g transform="translate(${n(d.at[0])} ${n(d.at[1])}) rotate(${d.rotate || 0}) ${flip}">${inner}</g>`;
 }
 
 function build(p) {
@@ -103,6 +116,7 @@ function build(p) {
   const b1 = 27 + sz * 0.74, b2 = b1 + sz * 0.88;
   const out = [
     img(GROUND === 'cream' ? p.ground : p.ground.replace('label-ground-', `label-ground-${GROUND}-`), -BLEED, -BLEED, w + 2 * BLEED, h + 2 * BLEED),
+    ...(p.deco || []).map(sprig),
     art(p.art),
     logo(w / 2 - 6.5, 6.5, 13),
     label(p.over, L, 25.2),
@@ -111,7 +125,8 @@ function build(p) {
     ...[].concat(p.under).map((u, i) => text('sans', u, 2.2, L, b2 + 5 + i * 3)),
   ];
   // Net weight on the line with "Authentic Ceylon", right-aligned.
-  out.push(text('display', '100 g', 4.4, w - L, 25.6, { anchor: 'end' }));
+  if (p.weightUnder) out.push(text('display', '100 g', 4.6, L, b2 + 13.5));
+  else out.push(text('display', '100 g', 4.4, w - L, 25.6, { anchor: 'end' }));
   // One slim strip at the foot: barcode on white at the left, batch fields beside it.
   const fy = h - 12.6;
   out.push(`<rect x="${-BLEED}" y="${fy - 5.4}" width="${w + 2 * BLEED}" height="${h - fy + 5.4 + BLEED}" fill="#FFFBF2" fill-opacity="0.9"/>`);
