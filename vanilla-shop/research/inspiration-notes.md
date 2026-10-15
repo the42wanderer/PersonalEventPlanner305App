@@ -15,17 +15,20 @@ Dose of Island (doseofisland.com).
   brand, like The Vanilla Shop; the packaging is the cafe's signature, the character carries it.
 - Matcha pairs green with pink because they sit opposite on the colour wheel: maximum life
   without black. The lesson is "find your hero colour's partner", not "use pink".
-- Dose of Island: the can performs the claim. A white can, a wordmark, one coloured hairline per
+- Dose of Island (a signal of what is possible in Sri Lanka, not a template): the can performs the claim. A white can, a wordmark, one coloured hairline per
   flavour and three numbers says "clean label" before you read anything; clutter would contradict
   it. The expressive layer (saturated colour fields, sunlight, fruit) lives in photography, not on
   the can. The range scales by changing one line colour.
 
 ## Applied to The Vanilla Shop (hypothesis to test)
-- The claim to perform is "real vanilla, not synthetic vanillin". The visible proof of real
+- Main sources: the matcha and tea references and the Ceylon black-tea box. Dose of Island only
+  shows that restraint and modern design can work locally.
+- One hypothesis (from the matcha set's "draw the substance" logic): the visible proof of real
   vanilla is the seed specks. A stipple/speck field (vanilla caviar) on cream, forming one bold
   shape per product, could do for vanilla what the halftone does for matcha.
 - Brand world already exists: espresso #1E1511, cream #FBF6EC, gold #C6A668, italic serif
-  (website, shop sign). Packaging = quiet signature; the expressive layer = the café and the Reels.
+  (website, shop sign). Other directions worth testing alongside: a heritage line drawing in an unexpected colour
+  (Botanik), and one character or idea carried across the range (Godcha).
 
 ## Fonts
 - Fontshare (ITF Free Font License): commercial use incl. print, packaging, logos, free.
