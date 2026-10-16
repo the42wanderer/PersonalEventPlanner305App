@@ -103,7 +103,7 @@ const LABELS = {
     pieces: COMMON },
   // Same layout; the vanilla-and-cinnamon painting sits over the vine's base. "Tea" moves up into
   // the descriptor so the name stays clear of the vine.
-  'vanilla-cinnamon-tea-100g': { ground: 'v6-label-ground-cinnamon.jpg', over: 'Authentic Ceylon', flavour: ['Vanilla &', 'Cinnamon'], under: ['Vanilla and cinnamon blended', 'with pure Ceylon tea'], gtin: '4796034220250',
+  'vanilla-cinnamon-tea-100g': { ground: 'v6-label-ground-cinnamon.jpg', over: 'Authentic Ceylon', flavour: ['Vanilla &', 'Cinnamon'], under: ['Vanilla and cinnamon', 'blended with pure', 'Ceylon tea'], gtin: '4796034220250',
     // The same vine with cinnamon quills painted in at its base.
     pieces: [COMMON[0], COMMON[1], { piece: 'vineCinnamon', at: [28, 12], height: 94 }] },
 };
@@ -157,9 +157,11 @@ function build(p) {
   // TYPE picks the name treatment: standard, woven (a vine leaf grows over the name), editorial
   // (big italic over tracked capitals between rules), arched (the old tagline along the arch).
   const dy = TYPE === 'arched' ? 3.2 : 0;
+  // Woven: the vine moves 2.5 mm left so it crosses the name.
+  const pieces = TYPE === 'woven' ? p.pieces.map((q) => (q.piece.startsWith('vine') ? { ...q, at: [q.at[0] - 2.5, q.at[1]] } : q)) : p.pieces;
   const out = [
     img(GROUND === 'cream' ? p.ground : p.ground.replace('label-ground-', `label-ground-${GROUND}-`), -BLEED, -BLEED, w + 2 * BLEED, h + 2 * BLEED),
-    ...p.pieces.map(art),
+    ...pieces.map(art),
     logo(w / 2 - 6.5, 6.5 + dy, 13),
     label(p.over, L, 25.2 + dy),
   ];
@@ -178,15 +180,18 @@ function build(p) {
     out.push(`<path d="M${n(L + 10 + cw)} ${n(cy - 1.2)}H${n(L + 16 + cw)}" stroke="${C.ink}" stroke-width="0.2"/>`);
     next = cy + 6;
   } else {
-    const sz = rangeSize(TYPE === 'woven' ? 18 : 12.5, TYPE === 'woven' ? 52 : 46, true), lead = sz * 0.88;
+    // Woven sizes each label's name on its own (as large as its lines allow) so it crosses the vine:
+    // the upper leaf's tip passes in front of the type, its body and the stem run behind it.
+    const sz = TYPE === 'woven' ? Math.min(18, ...lines.map((l) => 57 / width(F.display, l, 1))) : rangeSize(12.5, 46, true), lead = sz * 0.88;
     const b1 = 27 + dy + sz * 0.74;
     lines.forEach((l, i) => out.push(text('display', l, sz, L - 0.5, b1 + i * lead)));
     next = b1 + (lines.length - 1) * lead + 5;
     if (TYPE === 'woven') {
-      // Redraw the vine's lower-left leaf on top of the name, clipped to that leaf's area.
-      const v = p.pieces.find((q) => q.piece.startsWith('vine')), a = PIECE[v.piece], sc = v.height / (a.box[3] - a.box[1]);
+      // Redraw only the tip of the upper-left leaf on top of the name (source px 385-520, 415-540), so the
+      // leaf goes over one stroke and under the next: over-under, and every letter still reads.
+      const v = pieces.find((q) => q.piece.startsWith('vine')), a = PIECE[v.piece], sc = v.height / (a.box[3] - a.box[1]);
       const mm = (px, py) => [v.at[0] + (px - a.box[0]) * sc, v.at[1] + (py - a.box[1]) * sc];
-      const [x0, y0] = mm(370, 410), [x1, y1] = mm(640, 600);
+      const [x0, y0] = mm(385, 415), [x1, y1] = mm(520, 540);
       out.push(`<clipPath id="leaf"><rect x="${n(x0)}" y="${n(y0)}" width="${n(x1 - x0)}" height="${n(y1 - y0)}"/></clipPath><g clip-path="url(#leaf)">${art(v)}</g>`);
     }
   }
