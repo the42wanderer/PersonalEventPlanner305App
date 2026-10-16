@@ -13,7 +13,7 @@ const K = SIDE / 60, BLEED = 2;                                // the two labels
 // Per scent: where the painting sits in the label (mm): the plant comes in from the right, as on the box front,
 // leaving the left and the foot clear for the logo and the name.
 const CROP = { aura: -36, zest: -32, velvet: -38, harmony: -30 };
-const NAME_SIZE = 10;                                          // one size for all four (HARMONY just fits 52 mm)
+const NAME_SIZE = 14;                                          // one size for all four (HARMONY just fits 52 mm)
 
 const logoSrc = fs.readFileSync(path.join(root, 'brand', 'vanilla-shop-logo-cream.svg'), 'utf8');
 const logoD = logoSrc.match(/ d="([^"]+)"/)[1];
@@ -35,8 +35,8 @@ function label(key, ox) {
     type: `<g id="Label_${key}">` +
       `<path d="${logoD}" fill="${ink}" fill-rule="evenodd" transform="translate(${X(4.5)} ${Y(4.5)}) scale(${n(S(lw) / 933, 6)})"/>` +
       text('wide', c.no, 55.5, 7.2, 1.75, { track: 0.22, anchor: 'end' }) +
-      rule(4.5, 42.5, 55.5, 42.5) +
-      text('name', c.name, 4.1, 52.2, NAME_SIZE, { track: -0.25 }) +
+      rule(4.5, 40.2, 55.5, 40.2) +
+      text('name', c.name, 4.1, 52.6, NAME_SIZE, { track: -0.1 }) +
       text('wide', 'VANILLA SCENTED CANDLE', 4.5, 56.8, 1.75, { track: 0.22 }) +
       '</g>',
     marks: [[0, 0], [60, 0], [0, 60], [60, 60]].map(([x, y]) => {
@@ -69,7 +69,7 @@ for (const [a, b] of [['aura', 'zest'], ['velvet', 'harmony']]) {
   const svg = sheet(a, b), f = `vanilla-candle-labels-${a}-${b}`;
   fs.writeFileSync(path.join(dir, `${f}_EDITABLE.svg`), svg);
   if (process.env.PREVIEW_DIR) {
-    const ff = Object.values(FONT).map((x) => `@font-face{font-family:'${x.ps}';src:url(file://${path.join(process.env.CANDLE_FONTS, x.file)})}`).join('');
+    const ff = Object.values(FONT).map((x) => `@font-face{font-family:'${x.ps}';src:url(file://${path.isAbsolute(x.file) ? x.file : path.join(process.env.CANDLE_FONTS, x.file)})}`).join('');
     fs.writeFileSync(path.join(process.env.PREVIEW_DIR, `${f}.html`), `<html><head><meta charset="utf-8"><style>${ff}html,body{margin:0}</style></head><body>${svg}</body></html>`);
   }
   console.log('wrote', f);
