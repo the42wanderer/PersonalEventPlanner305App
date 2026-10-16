@@ -99,13 +99,13 @@ const COMMON = [
   { piece: 'vine', at: [28, 12], height: 94 },
 ];
 const LABELS = {
-  'natural-vanilla-tea-100g': { ground: 'v6-label-ground-vanilla.jpg', over: 'Authentic Ceylon', lines: ['Vanilla', 'Tea'], under: ['with Natural Vanilla'], gtin: '4796034220243',
+  'natural-vanilla-tea-100g': { ground: 'v6-label-ground-vanilla.jpg', over: 'Authentic Ceylon', flavour: ['Vanilla'], under: ['with Natural Vanilla'], gtin: '4796034220243',
     pieces: COMMON },
   // Same layout; the vanilla-and-cinnamon painting sits over the vine's base. "Tea" moves up into
   // the descriptor so the name stays clear of the vine.
-  'vanilla-cinnamon-tea-100g': { ground: 'v6-label-ground-cinnamon.jpg', over: 'Authentic Ceylon tea', lines: ['Vanilla &', 'Cinnamon'], under: ['Vanilla and cinnamon blended', 'with pure Ceylon tea'], gtin: '4796034220250',
+  'vanilla-cinnamon-tea-100g': { ground: 'v6-label-ground-cinnamon.jpg', over: 'Authentic Ceylon', flavour: ['Vanilla &', 'Cinnamon'], under: ['Vanilla and cinnamon blended', 'with pure Ceylon tea'], gtin: '4796034220250',
     // The same vine with cinnamon quills painted in at its base.
-    pieces: [COMMON[0], COMMON[1], { piece: 'vineCinnamon', at: [28, 12], height: 94 }], wovenWidth: 50 },
+    pieces: [COMMON[0], COMMON[1], { piece: 'vineCinnamon', at: [28, 12], height: 94 }] },
 };
 
 // Place an artwork by its painted area (box, in source pixels): top-left at `at` (mm), sized by height or width.
@@ -141,6 +141,13 @@ function arcText(str, cx, cy, r, sz, track) {
   }).join('');
 }
 
+// Shared name size across all labels: largest size (up to cap) at which every line fits maxW mm.
+function rangeSize(cap, maxW, withTea) {
+  let sz = cap;
+  for (const q of Object.values(LABELS)) for (const l of withTea ? [...q.flavour, 'Tea'] : q.flavour) sz = Math.min(sz, maxW / width(F.display, l, 1));
+  return sz;
+}
+
 function build(p) {
   const { w, h } = SIZE;
   const VINE = { file: 'v6-vine-2x.png', pw: 3808, ph: 1651 };
@@ -156,23 +163,25 @@ function build(p) {
     logo(w / 2 - 6.5, 6.5 + dy, 13),
     label(p.over, L, 25.2 + dy),
   ];
-  let next;                                                       // baseline of the line under the name
+  // The flavour changes per product; "Tea" is the constant, set the same way and size on every label.
+  // One name size for the whole range: the size at which every label's longest line fits.
+  let next;
+  const lines = [...p.flavour, 'Tea'];
   if (TYPE === 'editorial') {
-    const sz = Math.min(15, 50 / width(F.display, p.lines[0], 1));
-    const b1 = 27 + dy + sz * 0.74;
-    out.push(text('display', p.lines[0], sz, L - 0.6, b1));
-    const cap = p.lines[1].replace(/^Tea$/, 'Tea').toUpperCase(), cy = b1 + 6.2, csz = 3.3, tr = 0.55;
-    const cw = width(F.medium, cap, csz, tr);
+    const sz = rangeSize(16, 50, false), lead = sz * 0.86;
+    let y = 27 + dy + sz * 0.74;
+    p.flavour.forEach((l, i) => out.push(text('display', l, sz, L - 0.6, y + i * lead)));
+    y += (p.flavour.length - 1) * lead;
+    const cap = 'TEA', cy = y + 6.4, csz = 3.4, tr = 0.6, cw = width(F.medium, cap, csz, tr);
     out.push(`<path d="M${n(L)} ${n(cy - 1.2)}H${n(L + 6)}" stroke="${C.ink}" stroke-width="0.2"/>`);
     out.push(text('medium', cap, csz, L + 8, cy, { track: tr }));
     out.push(`<path d="M${n(L + 10 + cw)} ${n(cy - 1.2)}H${n(L + 16 + cw)}" stroke="${C.ink}" stroke-width="0.2"/>`);
     next = cy + 6;
   } else {
-    const nw = TYPE === 'woven' ? (p.wovenWidth || 57) : (p.nameWidth || 42);
-    const sz = Math.min(TYPE === 'woven' ? 18 : 12.5, nw / width(F.display, p.lines[0], 1), nw / width(F.display, p.lines[1], 1));
-    const b1 = 27 + dy + sz * 0.74, b2 = b1 + sz * 0.88;
-    out.push(text('display', p.lines[0], sz, L - 0.5, b1), text('display', p.lines[1], sz, L - 0.5, b2));
-    next = b2 + 5;
+    const sz = rangeSize(TYPE === 'woven' ? 18 : 12.5, TYPE === 'woven' ? 52 : 46, true), lead = sz * 0.88;
+    const b1 = 27 + dy + sz * 0.74;
+    lines.forEach((l, i) => out.push(text('display', l, sz, L - 0.5, b1 + i * lead)));
+    next = b1 + (lines.length - 1) * lead + 5;
     if (TYPE === 'woven') {
       // Redraw the vine's lower-left leaf on top of the name, clipped to that leaf's area.
       const v = p.pieces.find((q) => q.piece.startsWith('vine')), a = PIECE[v.piece], sc = v.height / (a.box[3] - a.box[1]);
