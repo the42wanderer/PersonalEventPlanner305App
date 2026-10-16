@@ -1,8 +1,8 @@
 // Candle boxes (90 x 90 x 95 mm, one per scent) laid out on the supplied dieline, as Illustrator-ready SVG.
 // Type stays live text named after the Adobe Fonts faces (IvyPresto Text, Roc Grotesk), so it opens editable
 // on a machine with those fonts active; the barcode digits and the logo are outlines.
-// Layers: Background (ground colour, editable), Painting, Name, Weave (the plant over the name), Type_and_Icons,
-// Barcode, Texture (tiled paper grain), Dieline (cut and fold, magenta, do not print).
+// Layers: Background (ground colour, editable), Painting, Name, Weave (the plant over the name), Texture (tiled
+// paper grain, under the small type), Type_and_Icons, Barcode, Dieline (cut and fold, magenta, do not print).
 //
 // The fonts themselves are not in the repo. CANDLE_FONTS points at a folder with ivy.otf, roc-wide-light.otf,
 // roc-wide-regular.otf and roc-regular.otf, used only to measure lines and draw the preview.
@@ -85,8 +85,8 @@ function build(key) {
     const rule = (x1, y1, x2, y2, op = 0.55) => `<path d="M${X(x1)} ${Y(y1)}L${X(x2)} ${Y(y2)}" stroke="${line}" stroke-opacity="${op}" stroke-width="${S(0.18)}" fill="none"/>`;
     return { X, Y, S, text, para, rule };
   };
-  const caps = (F, s, x, y, o = {}) => F.text('wide', s, x, y, o.size || 1.75, { track: 0.32, ...o });
-  const label = (F, s, x, y) => F.text('wideR', s, x, y, 1.6, { track: 0.32, opacity: 0.65 });
+  const caps = (F, s, x, y, o = {}) => F.text('wide', s, x, y, o.size || 2.05, { track: 0.3, ...o });
+  const label = (F, s, x, y) => F.text('wideR', s, x, y, 1.85, { track: 0.3, opacity: 0.7 });
   const logoSrc = fs.readFileSync(path.join(root, 'brand', 'vanilla-shop-logo-cream.svg'), 'utf8');
   const logoD = logoSrc.match(/ d="([^"]+)"/)[1], LVW = 933, LVH = 963;
   const logo = (F, cx, cy, w) => `<path d="${logoD}" fill="${ink}" fill-rule="evenodd" transform="translate(${n(F.X(cx - w / 2))} ${n(F.Y(cy - w * LVH / LVW / 2))}) scale(${n(F.S(w) / LVW, 6)})"/>`;
@@ -138,8 +138,8 @@ function build(key) {
       ['FOR BEST RESULTS', 'Trim the wick to ¼ inch before use. Dispose of contents and container according to local regulations.'],
     ]) {
       t.push(label(F, k, 9, y));
-      const p = F.para('body', s, 9, y + 3.4, 2.05, 72, 2.9);
-      t.push(p.svg); y += 3.4 + p.h + 1.6;
+      const p = F.para('body', s, 9, y + 3.6, 2.3, 72, 3.1);
+      t.push(p.svg); y += 3.6 + p.h + 1.3;
     }
     t.push(iconRow(F, 75, ['warning', 'unattended', 'children', 'distance', 'flammable'],
       ['READ THE WARNINGS', 'NEVER LEAVE UNATTENDED', 'AWAY FROM CHILDREN, PETS', '7 CM APART', 'AWAY FROM FABRICS'], ink));
@@ -152,9 +152,9 @@ function build(key) {
     t.push(F.rule(9, 15, 81, 15), caps(F, 'VANILLA SCENTED CANDLE', 9, 12), caps(F, c.name, 81, 12, { anchor: 'end' }));
     t.push(iconRow(F, 15, ['sun', 'wind', 'trim', 'dispose'], ['NO DIRECT SUN', 'NO DRAFTS', 'TRIM WICK ¼ IN', 'DISPOSE RESPONSIBLY'], ink, true));
     t.push(F.rule(9, 36.5, 81, 36.5), label(F, 'MARKETED AND DISTRIBUTED BY', 9, 41));
-    t.push(F.para('body', 'Agro Ventures Exports (Pvt) Ltd\nNo. 48, Sir Marcus Fernando Mawatha\nColombo 07, Sri Lanka', 9, 45, 2.05, 72, 2.9).svg);
-    t.push(F.para('body', 'www.agroventuresexports.com\ninfo@agroventuresexports.com\nHotline 011 2 187287', 9, 55.5, 2.05, 72, 2.9).svg);
-    t.push(caps(F, c.no, 9, 82.6, { size: 1.6 }), caps(F, 'THE VANILLA SHOP', 9, 85.3, { size: 1.6 }));
+    t.push(F.para('body', 'Agro Ventures Exports (Pvt) Ltd\nNo. 48, Sir Marcus Fernando Mawatha\nColombo 07, Sri Lanka', 9, 45.5, 2.3, 72, 3.1).svg);
+    t.push(F.para('body', 'www.agroventuresexports.com\ninfo@agroventuresexports.com\nHotline 011 2 187287', 9, 56.5, 2.3, 72, 3.1).svg);
+    t.push(caps(F, c.no, 9, 82.2, { size: 1.8 }), caps(F, 'THE VANILLA SHOP', 9, 85.3, { size: 1.8 }));
     layers.Type_and_Icons.push(`<g id="Left_side">${t.join('')}</g>`);
     layers.Barcode.push(barcode(F, c.gtin, 81, 87));
   }
@@ -174,11 +174,12 @@ function build(key) {
     `<title>The Vanilla Shop candle box: ${c.name}</title><defs>${defs}</defs>` +
     g('Background', `<path d="${DL.BLEED}" fill="${c.ground}"/>`) +
     g('Painting', layers.Painting.join('')) + g('Name', layers.Name.join('')) + g('Weave', layers.Weave.join('')) +
+    // Grain sits over the painting and the big name but under the small type, icons and barcode, so they print crisp.
+    g('Texture', `<rect x="0" y="0" width="${DL.W}" height="${DL.H}" fill="url(#grain)" clip-path="url(#clip-bleed)"/>`) +
     g('Type_and_Icons', layers.Type_and_Icons.join('')) + g('Barcode', layers.Barcode.join('')) +
     // An unstroked copy of the lid circle: Illustrator flattens imported text on a path, so this is there to
     // click with the Type on a Path tool if the slogan needs retyping.
     g('Lid_ring_path', `<path d="${ringPath}" fill="none" stroke="none"/>`) +
-    g('Texture', `<rect x="0" y="0" width="${DL.W}" height="${DL.H}" fill="url(#grain)" clip-path="url(#clip-bleed)"/>`) +
     g('Dieline', DL.LINES.map((d) => `<path d="${d}" fill="none" stroke="#E4007C" stroke-width="0.5"/>`).join('')) + '</svg>';
 }
 
@@ -205,7 +206,7 @@ function iconRow(F, top, keys, caps, ink, shareTopRule = false) {
     const cx = x0 + cw * (i + 0.5), s = is / 10;
     if (i) out.push(F.rule(x0 + cw * i, top, x0 + cw * i, top + 15.5, 0.35));
     out.push(`<g fill="none" stroke="${ink}" stroke-width="0.42" stroke-linecap="round" stroke-linejoin="round" transform="translate(${F.X(cx - is / 2)} ${F.Y(top + 2)}) scale(${n(F.S(s), 5)})">${iconPaths(k).replace(/<circle cx="5" cy="7.3" r=".22"\/>/, `<circle cx="5" cy="7.3" r=".22" fill="${ink}"/>`)}</g>`);
-    out.push(F.para('wide', caps[i], cx, top + 12.4, 1.25, cw - 1.6, 1.75, { track: 0.15, anchor: 'middle' }).svg);
+    out.push(F.para('wide', caps[i], cx, top + 12.2, 1.45, cw - 1.2, 1.9, { track: 0.1, anchor: 'middle' }).svg);
   });
   return out.join('');
 }
@@ -260,7 +261,8 @@ function plantCutout(art, key) {
   return f;
 }
 // Seamless grain: light and dark specks with alpha, 512 px over 43.35 mm (300 dpi), tiled across the sheet.
-function grainTile() {
+// dpi sets the speck size (600 = finer than the eye reads as dots at label size); clump adds paper tooth.
+function grainTile({ dpi = 600, clump = 0.7 } = {}) {
   const N = 512; let s = 7;
   const rnd = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
   const a = new Float32Array(N * N).map(() => rnd() + rnd() + rnd() - 1.5);
@@ -271,24 +273,29 @@ function grainTile() {
   }
   const px = Buffer.alloc(N * N * 4);
   for (let i = 0; i < N * N; i++) {
-    const v = b[i] * 1.6 + a[i] * 0.35;                                   // clumped tooth + fine grain
-    const light = v > 0, al = Math.min(255, Math.abs(v) * 110);
+    const v = b[i] * clump * 1.6 + a[i] * 0.45;                           // clumped tooth + fine grain
+    const light = v > 0, al = Math.min(255, Math.abs(v) * 85);
     px[i * 4] = px[i * 4 + 1] = px[i * 4 + 2] = light ? 255 : 0; px[i * 4 + 3] = n(al * (light ? 0.55 : 0.8), 0);
   }
-  return { mm: N / 300 * 25.4, href: 'data:image/png;base64,' + png(N, N, px).toString('base64') };
+  return { mm: N / dpi * 25.4, href: 'data:image/png;base64,' + png(N, N, px).toString('base64') };
 }
 
 // ---------------- output
-const keys = process.argv[2] ? [process.argv[2]] : Object.keys(SCENTS);
-for (const key of keys) {
-  const svg = build(key);
-  const dir = path.join(root, 'export', 'candles', key);
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, `vanilla-candle-${key}_EDITABLE.svg`), svg);
-  // Browser preview (PREVIEW_DIR, outside the repo): the same SVG with the font names mapped to the local files.
-  if (process.env.PREVIEW_DIR) {
-    const ff = Object.values(FONT).map((f) => `@font-face{font-family:'${f.ps}';src:url(file://${path.join(FD, f.file)})}`).join('');
-    fs.writeFileSync(path.join(process.env.PREVIEW_DIR, `${key}.html`), `<html><head><meta charset="utf-8"><style>${ff}html,body{margin:0}</style></head><body>${svg}</body></html>`);
+export { SCENTS, FONT, MONO, width, esc, n, grainTile, root };
+
+// Run as a script (not when imported by tools/candle_label.mjs).
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const keys = process.argv[2] ? [process.argv[2]] : Object.keys(SCENTS);
+  for (const key of keys) {
+    const svg = build(key);
+    const dir = path.join(root, 'export', 'candles', key);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, `vanilla-candle-${key}_EDITABLE.svg`), svg);
+    // Browser preview (PREVIEW_DIR, outside the repo): the same SVG with the font names mapped to the local files.
+    if (process.env.PREVIEW_DIR) {
+      const ff = Object.values(FONT).map((f) => `@font-face{font-family:'${f.ps}';src:url(file://${path.join(FD, f.file)})}`).join('');
+      fs.writeFileSync(path.join(process.env.PREVIEW_DIR, `${key}.html`), `<html><head><meta charset="utf-8"><style>${ff}html,body{margin:0}</style></head><body>${svg}</body></html>`);
+    }
+    console.log('wrote', key, Math.round(svg.length / 1e6 * 10) / 10, 'MB');
   }
-  console.log('wrote', key, Math.round(svg.length / 1e6 * 10) / 10, 'MB');
 }
