@@ -1,6 +1,7 @@
 // 100 g pouch labels in the vine system: Natural Vanilla Tea and Vanilla & Cinnamon Tea.
 // The arched outline follows the current labels; SIZE is a working size until the real one is confirmed.
-// Usage: node tools/label.mjs  ->  export/labels/<name>.svg (+ .pdf via the render step)
+// Usage: node tools/label.mjs  ->  export/labels-final/<name>.svg  (the approved design: Dusk ground, woven name)
+//        LABEL_GROUND=cream|golden|dusk|sage|lilac LABEL_TYPE=standard|woven|editorial|arched  ->  study variants
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,9 +16,11 @@ const n = (v, d = 3) => Math.round(v * 10 ** d) / 10 ** d;
 
 const SIZE = { w: 70, h: 110, shoulder: 8.5 };  // mm, matched to the current label on the kraft pouch; arch rises from the shoulders to the top edge
 const BLEED = 3;
-// LABEL_GROUND picks the ground: cream (default), golden (the boxes'), or a tools/label_ground.py preset.
-const GROUND = process.env.LABEL_GROUND || 'cream';
-const TYPE = process.env.LABEL_TYPE || 'standard';
+// LABEL_GROUND picks the ground: cream, golden (the boxes'), or a tools/label_ground.py preset.
+// With neither set, the approved final is built: Dusk ground, woven name.
+const FINAL = !process.env.LABEL_GROUND && !process.env.LABEL_TYPE;
+const GROUND = process.env.LABEL_GROUND || (FINAL ? 'dusk' : 'cream');
+const TYPE = process.env.LABEL_TYPE || (FINAL ? 'woven' : 'standard');
 // Barcode bar height: 18.28 mm is full height at 80%; shortened to fit the label's foot strip.
 const BAR_H = 10;
 
@@ -226,7 +229,7 @@ function build(p) {
     `<path id="Cut_line" d="${outline()}" fill="none" stroke="#E4007C" stroke-width="0.2"/></svg>`;
 }
 
-const dir = path.join(root, 'export', (GROUND === 'cream' ? 'labels' : `labels-${GROUND}`) + (TYPE === 'standard' ? '' : `-${TYPE}`));
+const dir = path.join(root, 'export', FINAL ? 'labels-final' : (GROUND === 'cream' ? 'labels' : `labels-${GROUND}`) + (TYPE === 'standard' ? '' : `-${TYPE}`));
 fs.mkdirSync(dir, { recursive: true });
 for (const [k, p] of Object.entries(LABELS)) {
   const svg = build(p);
