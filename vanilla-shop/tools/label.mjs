@@ -105,7 +105,7 @@ const LABELS = {
   // the descriptor so the name stays clear of the vine.
   'vanilla-cinnamon-tea-100g': { ground: 'v6-label-ground-cinnamon.jpg', over: 'Authentic Ceylon tea', lines: ['Vanilla &', 'Cinnamon'], under: ['Vanilla and cinnamon blended', 'with pure Ceylon tea'], gtin: '4796034220250',
     // The same vine with cinnamon quills painted in at its base.
-    pieces: [COMMON[0], COMMON[1], { piece: 'vineCinnamon', at: [28, 12], height: 94 }] },
+    pieces: [COMMON[0], COMMON[1], { piece: 'vineCinnamon', at: [28, 12], height: 94 }], wovenWidth: 50 },
 };
 
 // Place an artwork by its painted area (box, in source pixels): top-left at `at` (mm), sized by height or width.
@@ -168,7 +168,7 @@ function build(p) {
     out.push(`<path d="M${n(L + 10 + cw)} ${n(cy - 1.2)}H${n(L + 16 + cw)}" stroke="${C.ink}" stroke-width="0.2"/>`);
     next = cy + 6;
   } else {
-    const nw = TYPE === 'woven' ? 57 : (p.nameWidth || 42);
+    const nw = TYPE === 'woven' ? (p.wovenWidth || 57) : (p.nameWidth || 42);
     const sz = Math.min(TYPE === 'woven' ? 18 : 12.5, nw / width(F.display, p.lines[0], 1), nw / width(F.display, p.lines[1], 1));
     const b1 = 27 + dy + sz * 0.74, b2 = b1 + sz * 0.88;
     out.push(text('display', p.lines[0], sz, L - 0.5, b1), text('display', p.lines[1], sz, L - 0.5, b2));
