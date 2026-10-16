@@ -17,6 +17,7 @@ const SIZE = { w: 70, h: 110, shoulder: 8.5 };  // mm, matched to the current la
 const BLEED = 3;
 // LABEL_GROUND picks the ground: cream (default), golden (the boxes'), or a tools/label_ground.py preset.
 const GROUND = process.env.LABEL_GROUND || 'cream';
+const TYPE = process.env.LABEL_TYPE || 'standard';
 // Barcode bar height: 18.28 mm is full height at 80%; shortened to fit the label's foot strip.
 const BAR_H = 10;
 
@@ -126,27 +127,65 @@ function sprig(d) {
   return `<g transform="translate(${n(d.at[0])} ${n(d.at[1])}) rotate(${d.rotate || 0}) ${flip}">${inner}</g>`;
 }
 
+// Small capitals set along a circular arc (centre cx, cy; radius r), centred on the top of the circle.
+function arcText(str, cx, cy, r, sz, track) {
+  const f = F.medium, s = str.toUpperCase(), k = sz / f.unitsPerEm, g = f.stringToGlyphs(s);
+  const adv = g.map((gl) => gl.advanceWidth * k + track * sz), total = adv.reduce((a, b) => a + b, 0) - track * sz;
+  let pos = -total / 2, d = '';
+  return g.map((gl, i) => {
+    const mid = pos + adv[i] / 2 - track * sz / 2, th = mid / r;
+    const x = cx + r * Math.sin(th), y = cy - r * Math.cos(th);
+    pos += adv[i];
+    const path = gl.getPath(-gl.advanceWidth * k / 2, 0, sz).toPathData(3);
+    return path ? `<path d="${path}" fill="${C.ink}" transform="translate(${n(x)} ${n(y)}) rotate(${n(th * 180 / Math.PI, 2)})"/>` : '';
+  }).join('');
+}
+
 function build(p) {
   const { w, h } = SIZE;
   const VINE = { file: 'v6-vine-2x.png', pw: 3808, ph: 1651 };
   // The painting large, bleeding off both sides: flower right of centre, pods running off the left.
   const vw = 128, vh = vw * VINE.ph / VINE.pw;
   const L = 7;                                                    // left text edge
-  const nw = p.nameWidth || 42, sz = Math.min(12.5, nw / width(F.display, p.lines[0], 1), nw / width(F.display, p.lines[1], 1));
-  const b1 = 27 + sz * 0.74, b2 = b1 + sz * 0.88;
+  // TYPE picks the name treatment: standard, woven (a vine leaf grows over the name), editorial
+  // (big italic over tracked capitals between rules), arched (the old tagline along the arch).
+  const dy = TYPE === 'arched' ? 3.2 : 0;
   const out = [
     img(GROUND === 'cream' ? p.ground : p.ground.replace('label-ground-', `label-ground-${GROUND}-`), -BLEED, -BLEED, w + 2 * BLEED, h + 2 * BLEED),
     ...p.pieces.map(art),
-    logo(w / 2 - 6.5, 6.5, 13),
-    label(p.over, L, 25.2),
-    text('display', p.lines[0], sz, L - 0.5, b1),
-    text('display', p.lines[1], sz, L - 0.5, b2),
-    ...[].concat(p.under).map((u, i) => text('sans', u, 2.2, L, b2 + 5 + i * 3)),
+    logo(w / 2 - 6.5, 6.5 + dy, 13),
+    label(p.over, L, 25.2 + dy),
   ];
-  // Net weight on the line with "Authentic Ceylon", right-aligned.
+  let next;                                                       // baseline of the line under the name
+  if (TYPE === 'editorial') {
+    const sz = Math.min(15, 50 / width(F.display, p.lines[0], 1));
+    const b1 = 27 + dy + sz * 0.74;
+    out.push(text('display', p.lines[0], sz, L - 0.6, b1));
+    const cap = p.lines[1].replace(/^Tea$/, 'Tea').toUpperCase(), cy = b1 + 6.2, csz = 3.3, tr = 0.55;
+    const cw = width(F.medium, cap, csz, tr);
+    out.push(`<path d="M${n(L)} ${n(cy - 1.2)}H${n(L + 6)}" stroke="${C.ink}" stroke-width="0.2"/>`);
+    out.push(text('medium', cap, csz, L + 8, cy, { track: tr }));
+    out.push(`<path d="M${n(L + 10 + cw)} ${n(cy - 1.2)}H${n(L + 16 + cw)}" stroke="${C.ink}" stroke-width="0.2"/>`);
+    next = cy + 6;
+  } else {
+    const nw = TYPE === 'woven' ? 57 : (p.nameWidth || 42);
+    const sz = Math.min(TYPE === 'woven' ? 18 : 12.5, nw / width(F.display, p.lines[0], 1), nw / width(F.display, p.lines[1], 1));
+    const b1 = 27 + dy + sz * 0.74, b2 = b1 + sz * 0.88;
+    out.push(text('display', p.lines[0], sz, L - 0.5, b1), text('display', p.lines[1], sz, L - 0.5, b2));
+    next = b2 + 5;
+    if (TYPE === 'woven') {
+      // Redraw the vine's lower-left leaf on top of the name, clipped to that leaf's area.
+      const v = p.pieces.find((q) => q.piece.startsWith('vine')), a = PIECE[v.piece], sc = v.height / (a.box[3] - a.box[1]);
+      const mm = (px, py) => [v.at[0] + (px - a.box[0]) * sc, v.at[1] + (py - a.box[1]) * sc];
+      const [x0, y0] = mm(370, 410), [x1, y1] = mm(640, 600);
+      out.push(`<clipPath id="leaf"><rect x="${n(x0)}" y="${n(y0)}" width="${n(x1 - x0)}" height="${n(y1 - y0)}"/></clipPath><g clip-path="url(#leaf)">${art(v)}</g>`);
+    }
+  }
+  out.push(...[].concat(p.under).map((u, i) => text('sans', u, 2.2, L, next + i * 3)));
   // Net weight under the descriptor. (No Ceylon Tea lion: the mark needs Sri Lanka Tea Board clearance.)
-  const wy = b2 + 5 + p.under.length * 3 + 5.2;
+  const wy = next + p.under.length * 3 + 5.2;
   out.push(text('display', '100 g', 4.6, L, wy));
+  if (TYPE === 'arched') out.push(arcText('Savor the calm with vanilla-infused tea', w / 2, 46.5, 38.6, 1.75, 0.16));
   // Spec card: one compact, outlined panel at the foot, aligned to the text column. Barcode on the
   // left, the batch fields as a small ruled table on the right; one padding all round.
   // The barcode is scaled to match the size on the current pouch (bars about 21 mm wide, roughly
@@ -173,7 +212,7 @@ function build(p) {
     `<path id="Cut_line" d="${outline()}" fill="none" stroke="#E4007C" stroke-width="0.2"/></svg>`;
 }
 
-const dir = path.join(root, 'export', GROUND === 'cream' ? 'labels' : `labels-${GROUND}`);
+const dir = path.join(root, 'export', (GROUND === 'cream' ? 'labels' : `labels-${GROUND}`) + (TYPE === 'standard' ? '' : `-${TYPE}`));
 fs.mkdirSync(dir, { recursive: true });
 for (const [k, p] of Object.entries(LABELS)) {
   const svg = build(p);
