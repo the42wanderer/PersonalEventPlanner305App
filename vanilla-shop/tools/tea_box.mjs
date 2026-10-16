@@ -19,6 +19,7 @@ const TITLES = {
   'roc-bold':      { ps: 'RocGrotesk-Bold', file: 'roc-bold.otf', lines: 2 },
   'roc-wide-bold': { ps: 'RocGroteskWide-Bold', file: 'roc-wide-bold.otf', lines: 2 },
   'roc-cond-bold': { ps: 'RocGroteskCond-Bold', file: 'roc-cond-bold.otf', lines: 2 },
+  'ivy':           { ps: 'IvyPrestoText-Bold', file: 'ivy.otf', lines: 2 },                       // the candle names' face
   'instrument':    { ps: 'InstrumentSerif-Regular', file: path.join(root, 'fonts', 'instrument-serif.ttf'), lines: 2 },
 };
 const TITLE_KEY = process.env.TITLE || 'roc-bold';
