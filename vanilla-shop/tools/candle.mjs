@@ -59,7 +59,7 @@ function build(key) {
   const c = SCENTS[key];
   const ink = c.ink, line = ink, img = (f) => 'data:image/' + (f.endsWith('png') ? 'png' : 'jpeg') + ';base64,' + fs.readFileSync(f).toString('base64');
   const layers = { Painting: [], Name: [], Weave: [], Type_and_Icons: [], Barcode: [] };
-  let defs = '';
+  let defs = '', ringPath = '';
   // Face helpers: X/Y map face mm to sheet pt.
   const face = (p) => {
     const [ox, oy] = P[p], X = (x) => n(ox + x * K), Y = (y) => n(oy + y * K), S = (v) => n(v * K);
@@ -116,7 +116,8 @@ function build(key) {
   {
     const F = face('lid'), r = 22, cx = 45, cy = 45;
     const len = 2 * Math.PI * r, base = width(FONT.wide, SLOGAN, 2.6), track = (len - base) / SLOGAN.length;
-    defs += `<path id="ring-${key}" d="M${F.X(cx - r)} ${F.Y(cy)}a${F.S(r)} ${F.S(r)} 0 1 1 ${F.S(2 * r)} 0a${F.S(r)} ${F.S(r)} 0 1 1 ${F.S(-2 * r)} 0"/>`;
+    ringPath = `M${F.X(cx - r)} ${F.Y(cy)}a${F.S(r)} ${F.S(r)} 0 1 1 ${F.S(2 * r)} 0a${F.S(r)} ${F.S(r)} 0 1 1 ${F.S(-2 * r)} 0`;
+    defs += `<path id="ring-${key}" d="${ringPath}"/>`;
     layers.Type_and_Icons.push(`<g id="Lid">` +
       `<circle cx="${F.X(cx)}" cy="${F.Y(cy)}" r="${F.S(25.6)}" fill="none" stroke="${line}" stroke-opacity=".55" stroke-width="${F.S(0.18)}"/>` +
       `<circle cx="${F.X(cx)}" cy="${F.Y(cy)}" r="${F.S(18.6)}" fill="none" stroke="${line}" stroke-opacity=".55" stroke-width="${F.S(0.18)}"/>` +
@@ -174,6 +175,9 @@ function build(key) {
     g('Background', `<path d="${DL.BLEED}" fill="${c.ground}"/>`) +
     g('Painting', layers.Painting.join('')) + g('Name', layers.Name.join('')) + g('Weave', layers.Weave.join('')) +
     g('Type_and_Icons', layers.Type_and_Icons.join('')) + g('Barcode', layers.Barcode.join('')) +
+    // An unstroked copy of the lid circle: Illustrator flattens imported text on a path, so this is there to
+    // click with the Type on a Path tool if the slogan needs retyping.
+    g('Lid_ring_path', `<path d="${ringPath}" fill="none" stroke="none"/>`) +
     g('Texture', `<rect x="0" y="0" width="${DL.W}" height="${DL.H}" fill="url(#grain)" clip-path="url(#clip-bleed)"/>`) +
     g('Dieline', DL.LINES.map((d) => `<path d="${d}" fill="none" stroke="#E4007C" stroke-width="0.5"/>`).join('')) + '</svg>';
 }
