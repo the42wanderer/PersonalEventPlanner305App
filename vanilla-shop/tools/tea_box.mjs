@@ -13,11 +13,20 @@ const opentype = require('opentype.js');
 await import(path.join(root, 'dieline.js'));
 await import(path.join(root, 'dieline-long.js'));
 
+// TITLE picks the name's face while we compare (roc-bold default; instrument is the free serif in fonts/).
+// Roc Grotesk weights come from CANDLE_FONTS like the rest; Illustrator maps them to Adobe Fonts by name.
+const TITLES = {
+  'roc-bold':      { ps: 'RocGrotesk-Bold', file: 'roc-bold.otf', lines: 2 },
+  'roc-wide-bold': { ps: 'RocGroteskWide-Bold', file: 'roc-wide-bold.otf', lines: 2 },
+  'roc-cond-bold': { ps: 'RocGroteskCond-Bold', file: 'roc-cond-bold.otf', lines: 2 },
+  'instrument':    { ps: 'InstrumentSerif-Regular', file: path.join(root, 'fonts', 'instrument-serif.ttf'), lines: 2 },
+};
+const TITLE_KEY = process.env.TITLE || 'roc-bold';
 const FONT = {
-  title: { ps: 'InstrumentSerif-Regular', file: path.join(root, 'fonts', 'instrument-serif.ttf') },  // free (OFL), in the repo
+  title: TITLES[TITLE_KEY],
   wide: CFONT.wide, wideR: CFONT.wideR, body: CFONT.body,
 };
-FONT.title.ot = opentype.loadSync(FONT.title.file);
+FONT.title.ot = opentype.loadSync(path.isAbsolute(FONT.title.file) ? FONT.title.file : path.join(process.env.CANDLE_FONTS, FONT.title.file));
 const width = (f, s, sz, track = 0) => {
   const g = f.ot.stringToGlyphs(s), k = sz / f.ot.unitsPerEm;
   return g.reduce((w, gl) => w + gl.advanceWidth * k, 0) + track * Math.max(0, g.length - 1);
@@ -113,7 +122,14 @@ function build(boxKey) {
       defs += `<clipPath id="clip-weave">${B.weave.map(([x, y, w, h]) => `<rect x="${F.X(x)}" y="${F.Y(y)}" width="${F.S(w)}" height="${F.S(h)}"/>`).join('')}</clipPath>`;
       L.Weave.push(`<g clip-path="url(#clip-weave)">${vine}</g>`);
     }
-    L.Name.push(F.text('title', 'VANILLA TEA', 7, B.title.base, B.title.size));
+    // The name stays on the front (easy to find on a shelf): VANILLA over TEA at one size, the longer line
+    // filling the text column; the long box's wide front takes it on one line.
+    const colW = F.w - 16, cap = (FONT.title.ot.tables.os2.sCapHeight || 700) / FONT.title.ot.unitsPerEm;
+    const lines = boxKey === 'long' ? ['VANILLA TEA'] : ['VANILLA', 'TEA'];
+    const sz = Math.min(...lines.map((l) => (boxKey === 'long' ? 120 : colW) / width(FONT.title, l, 1)));
+    const lead = sz * cap + 2.2, top = 19;
+    lines.forEach((l, i) => L.Name.push(F.text('title', l, 7.6, top + sz * cap + i * lead, sz)));
+    B.title.base = top + sz * cap + (lines.length - 1) * lead;
   }
 
   // ---- front
@@ -130,6 +146,9 @@ function build(boxKey) {
   {
     const F = face('sideA'), x = boxKey === 'long' ? 8 : F.w - 41, t = [];   // long box: the climbing tendril takes the right edge
     if (boxKey === 'long') L.Painting.push(F.img(G('v6-climb.png'), F.w - 2 - 612 * 0.035 - 6, F.h + 1.5 - 2000 * 0.035, 667 * 0.035, 2000 * 0.035));
+    // The first tea illustration (cup of tea with a vanilla pod) above the brewing steps.
+    const cw = 30, ch = cw * 1145 / 1164;
+    L.Painting.push(F.img(G('v2-cup.png'), x + (boxKey === 'long' ? 0 : 33 - cw), 44 - ch - 1, cw, ch));
     t.push(F.label('HOW TO BREW', x, 46), F.rule(x, 48.2, F.w - 6, 48.2));
     [['cup', '150 ML', 'One 2 g tea bag in hot water'], ['timer', '5 MINUTES', 'Then lift the bag out'], ['ice', 'OVER ICE', 'Let it cool, pour over ice']].forEach(([ic, v, note], i) => {
       const y = 51.4 + i * 9.6;
