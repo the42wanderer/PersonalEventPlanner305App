@@ -10,7 +10,8 @@ const require = createRequire(import.meta.url);
 const opentype = require('opentype.js');
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const font = (f) => opentype.loadSync(path.join(root, 'fonts', f));
-const F = { display: font('fraunces-italic.ttf'), sans: font('geist-regular.ttf'), medium: font('geist-medium.ttf') };
+// The name in Instrument Serif Italic, as on the tea boxes; small type stays Geist (outlined, free).
+const F = { display: font('instrument-serif-italic.ttf'), sans: font('geist-regular.ttf'), medium: font('geist-medium.ttf') };
 const C = { ink: '#143A1D', soft: '#5C6F5F', line: '#143A1D' };
 const n = (v, d = 3) => Math.round(v * 10 ** d) / 10 ** d;
 
@@ -102,7 +103,7 @@ const COMMON = [
   { piece: 'vine', at: [28, 12], height: 94 },
 ];
 const LABELS = {
-  'natural-vanilla-tea-100g': { ground: 'v6-label-ground-vanilla.jpg', over: 'Authentic Ceylon', flavour: ['Vanilla'], under: ['with Natural Vanilla'], gtin: '4796034220243',
+  'natural-vanilla-tea-100g': { ground: 'v6-label-ground-vanilla.jpg', over: 'Authentic Ceylon', flavour: ['Vanilla'], under: ['Ceylon black tea', 'with natural vanilla'], gtin: '4796034220243',
     pieces: COMMON },
   // Same layout; the vanilla-and-cinnamon painting sits over the vine's base. "Tea" moves up into
   // the descriptor so the name stays clear of the vine.
@@ -160,13 +161,15 @@ function build(p) {
   // TYPE picks the name treatment: standard, woven (a vine leaf grows over the name), editorial
   // (big italic over tracked capitals between rules), arched (the old tagline along the arch).
   const dy = TYPE === 'arched' ? 3.2 : 0;
-  // Woven: the vine moves 2.5 mm left so it crosses the name.
-  const pieces = TYPE === 'woven' ? p.pieces.map((q) => (q.piece.startsWith('vine') ? { ...q, at: [q.at[0] - 2.5, q.at[1]] } : q)) : p.pieces;
+  // Woven: the vine stays in place; with the narrower Instrument Serif the leaf tip just overlaps the last letter.
+  const pieces = TYPE === 'woven' ? p.pieces.map((q) => (q.piece.startsWith('vine') ? { ...q, at: [q.at[0] - 0, q.at[1]] } : q)) : p.pieces;
   const out = [
     img(GROUND === 'cream' ? p.ground : p.ground.replace('label-ground-', `label-ground-${GROUND}-`), -BLEED, -BLEED, w + 2 * BLEED, h + 2 * BLEED),
     ...pieces.map(art),
     logo(w / 2 - 6.5, 6.5 + dy, 13),
-    label(p.over, L, 25.2 + dy),
+    // Ruled top bar, as on the boxes: origin left, net weight right.
+    label(p.over, L, 24.4 + dy), label('100 g', w - L, 24.4 + dy, { anchor: 'end' }),
+    `<path d="M${n(L)} ${n(26.4 + dy)}H${n(w - L)}" stroke="${C.ink}" stroke-opacity=".5" stroke-width="0.18"/>`,
   ];
   // The flavour changes per product; "Tea" is the constant, set the same way and size on every label.
   // One name size for the whole range: the size at which every label's longest line fits.
@@ -186,7 +189,7 @@ function build(p) {
     // Woven sizes each label's name on its own (as large as its lines allow) so it crosses the vine:
     // the upper leaf's tip passes in front of the type, its body and the stem run behind it.
     const sz = TYPE === 'woven' ? Math.min(18, ...lines.map((l) => 57 / width(F.display, l, 1))) : rangeSize(12.5, 46, true), lead = sz * 0.88;
-    const b1 = 27 + dy + sz * 0.74;
+    const b1 = 29.5 + dy + sz * 0.72;
     lines.forEach((l, i) => out.push(text('display', l, sz, L - 0.5, b1 + i * lead)));
     next = b1 + (lines.length - 1) * lead + 5;
     if (TYPE === 'woven') {
@@ -199,9 +202,7 @@ function build(p) {
     }
   }
   out.push(...[].concat(p.under).map((u, i) => text('sans', u, 2.2, L, next + i * 3)));
-  // Net weight under the descriptor. (No Ceylon Tea lion: the mark needs Sri Lanka Tea Board clearance.)
-  const wy = next + p.under.length * 3 + 5.2;
-  out.push(text('display', '100 g', 4.6, L, wy));
+  // Net weight sits in the top bar. (No Ceylon Tea lion: the mark needs Sri Lanka Tea Board clearance.)
   if (TYPE === 'arched') out.push(arcText('Savor the calm with vanilla-infused tea', w / 2, 46.5, 38.6, 1.75, 0.16));
   // Spec card: one compact, outlined panel at the foot, aligned to the text column. Barcode on the
   // left, the batch fields as a small ruled table on the right; one padding all round.
@@ -213,7 +214,7 @@ function build(p) {
   const bx = cx + pad + 1.2;                                  // left edge of the bars (digit "4" sits in the gap)
   const divX = bx + barsW + pad, fx = divX + pad, lineX0 = fx + 7.4, lineLen = 11.5;
   const cw = lineX0 + lineLen + pad - cx;
-  out.push(`<rect x="${n(cx)}" y="${n(cy)}" width="${n(cw)}" height="${n(ch)}" rx="1.3" fill="#FFFFFF" stroke="${C.ink}" stroke-width="0.22"/>`);
+  out.push(`<rect x="${n(cx)}" y="${n(cy)}" width="${n(cw)}" height="${n(ch)}" rx="1" fill="#FFFFFF" stroke="${C.ink}" stroke-opacity=".5" stroke-width="0.18"/>`);
   out.push(`<g transform="translate(${n(bx - 11 * M * K)} ${n(cy + pad)}) scale(${K})">${ean13(p.gtin, 0, 0)}</g>`);
   out.push(`<path d="M${n(divX)} ${n(cy + pad)}V${n(cy + ch - pad)}" stroke="${C.ink}" stroke-width="0.12"/>`);
   const rows = ['MRP Rs.', 'MFD', 'EXP', 'BTN'], top = cy + pad + 1.15, step = (ch - 2 * pad - 1.15) / (rows.length - 1);
@@ -225,7 +226,6 @@ function build(p) {
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${w + 2 * BLEED}mm" height="${h + 2 * BLEED}mm" viewBox="${-BLEED} ${-BLEED} ${w + 2 * BLEED} ${h + 2 * BLEED}">` +
     `<defs><clipPath id="bleed"><path d="${outline(-BLEED)}"/></clipPath></defs>` +
     `<g id="Artwork" clip-path="url(#bleed)">${out.join('')}</g>` +
-    `<path id="Keyline" d="${outline(2.2)}" fill="none" stroke="${C.ink}" stroke-width="0.25"/>` +
     `<path id="Cut_line" d="${outline()}" fill="none" stroke="#E4007C" stroke-width="0.2"/></svg>`;
 }
 
