@@ -1,4 +1,4 @@
-# Tote bag, Negombo: "Ceylon Post" stamp (art side)
+# Tote bag, The Vanilla Shop Negombo: "Ceylon Post" stamp (art side)
 
 Bag: natural cotton canvas, 15 × 16 in (381 × 406 mm). Art: 270 × 337 mm, centred, 48 mm below the top seam.
 
@@ -8,7 +8,8 @@ Bag: natural cotton canvas, 15 × 16 in (381 × 406 mm). Art: 270 × 337 mm, cen
   plus a canvas-colour preview layer marked "do not print". All text is outlined.
 - `vanilla-tote-stamp_FILMS.pdf`: seven pages, one positive per screen, black on white at 100%, with registration
   marks and a label on each page.
-- `vanilla-tote-stamp_preview.png` and `vanilla-tote-stamp_mockup.jpg`: for approval only.
+- `vanilla-tote-stamp_preview.png`: flat artwork. `vanilla-tote-stamp_mockup.jpg` and `_mockup-detail.jpg`: the seven
+  films printed onto canvas (texture, ink take-up, slight misregistration) for approval only.
 
 ## Inks (print in this order)
 
@@ -32,12 +33,13 @@ underbase, it should not cover those areas.
 - Smallest details are about 0.35 mm, so use a fine mesh (about 120–160 T, or 305–355 in US threads) for inks 5 and 7.
 - Seven screens is the full version. To cut cost, ink 3 (tan, about 1% of the area) can be dropped: skin and walls
   then show canvas. Proof one bag first.
-- The postmark (logo, "THE VANILLA SHOP · NEGOMBO · SRI LANKA") is part of ink 7.
+- The postmark is part of ink 7.
 
 ## Lettering
 
-CEYLON, ලංකා (Lanka) and இலங்கை (Ilangai) in the top banner, set in Gloock, Noto Serif Sinhala and Noto Serif Tamil
-(all OFL). VANILLA GARDEN in the caption strip, 25c in the value tablet. Have a native speaker check the Sinhala and
+CEYLON, ලංකා (Lanka) and இலங்கை (Ilangai) along the curve of the top banner, set in Gloock, Noto Serif Sinhala and Noto Serif Tamil
+(all OFL). VANILLA SHOP · NEGOMBO in the caption strip, 25c in the value tablet; the postmark reads THE VANILLA SHOP /
+NEGOMBO · SRI LANKA round the logo. Have a native speaker check the Sinhala and
 Tamil before films are made.
 
 The back of the bag (the postcard side) is still to design.
