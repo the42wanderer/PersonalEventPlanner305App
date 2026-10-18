@@ -29,20 +29,16 @@ const MM = 72 / 25.4, INK = '#143A1D', PAPER = '#F8E7C0';
 const R = (x0, y0, x1, y1) => ({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
 const G = (f) => path.join(root, 'plates', 'generated', f);
 const data = (f) => `data:image/${f.endsWith('png') ? 'png' : 'jpeg'};base64,` + fs.readFileSync(f).toString('base64');
-const DISTRIBUTOR = { name: 'Agro Ventures Exports (Pvt) Ltd', address: 'No. 48, Sir Marcus Fernando Mawatha,\nColombo 07, Sri Lanka', web: 'www.agroventuresexports.com', email: 'info@agroventuresexports.com', hotline: '011 2 187 287' };
+// All product and legal text is copied verbatim from the pack currently sold (Vanilla_Tea_P.pdf, 25 bags);
+// nothing is added. The 12-bag cube uses the same wording with its own count and weight.
+const DISTRIBUTOR = { intro: 'Marketed and Distributed by:', name: 'Agro Ventures Exports (Pvt) Ltd,', address: 'No.48, Sir Marcus Fernando Mawatha,\nColombo 07.', web: 'www.agroventuresexports.com', email: 'info@agroventuresexports.com', hotline: 'Hot Line: 011 2 187 287' };
 // GTIN from the current 25-bag, 50 g pack. A new pack size needs its own GTIN from GS1 Sri Lanka.
 const GTIN = '4796034220229';
-// Product declarations. INGREDIENTS must be confirmed against the actual recipe by the packer; the Sinhala and
-// Tamil storage lines are draft translations (shaped by tools/shape_labels.py) for a native speaker to check.
-const INGREDIENTS = 'Ceylon black tea, natural vanilla flavouring.';
-const STORAGE = {
-  en: 'Store in a cool, dry place, away from direct sunlight.',
-  si: ["සෘජු හිරු එළියෙන් ඈත්ව,", "සිසිල් වියළි ස්ථානයක ගබඩා කරන්න."],
-  ta: ["நேரடி சூரிய ஒளி படாத, குளிர்ந்த", "உலர்ந்த இடத்தில் சேமிக்கவும்."],
-};
 const SHAPED = JSON.parse(fs.readFileSync(path.join(root, 'brand', 'shaped-labels.json'), 'utf8'));
 const logoD = fs.readFileSync(path.join(root, 'brand', 'vanilla-shop-logo.svg'), 'utf8').match(/ d="([^"]+)"/)[1];
 const LOGO_VB = Number(fs.readFileSync(path.join(root, 'brand', 'vanilla-shop-logo.svg'), 'utf8').match(/viewBox="0 0 ([\d.]+) ([\d.]+)/)[1]);
+// The Ceylon Tea lion (Sri Lanka Tea Board quality mark, as on the current pack), one colour in the ink.
+const LION = (() => { const s = fs.readFileSync(path.join(root, 'brand', 'ceylon-tea-lion.svg'), 'utf8'); const [vw, vh] = s.match(/viewBox="0 0 ([\d.]+) ([\d.]+)/).slice(1).map(Number); return { vw, vh, d: s.match(/ d="([^"]+)"/)[1] }; })();
 
 const BOXES = {
   cube: {
@@ -102,8 +98,9 @@ function build(boxKey) {
     const body = (s, x, y, wMax, o = {}) => para('body', s, x, y, o.size || 2.3, wMax, o.lead || 3.2, o);
     const logo = (cx, cy, lw) => `<path d="${logoD}" fill="${INK}" fill-rule="evenodd" transform="translate(${X(cx - lw / 2)} ${Y(cy - lw * 0.52)}) scale(${n(S(lw) / LOGO_VB, 6) * (rot ? -1 : 1)})"/>`;
     const icon = (key, x, y, s) => `<g fill="none" stroke="${INK}" stroke-width="0.42" stroke-linecap="round" stroke-linejoin="round" transform="translate(${X(x)} ${Y(y)}) scale(${n(S(s), 5)})">${ICON[key]}</g>`;
+    const lion = (x, y, lw) => `<path id="Ceylon_Tea_lion" d="${LION.d}" fill="${INK}" fill-rule="evenodd" transform="translate(${X(x)} ${Y(y)}) scale(${n(S(lw) / LION.vw, 6)})"/>`;
     const img = (f, x, y, wmm, hmm) => `<image xlink:href="${data(f)}" x="${X(x)}" y="${Y(y)}" width="${S(wmm)}" height="${S(hmm)}" preserveAspectRatio="none"/>`;
-    return { w, h, X, Y, S, text, para, rule, caps, label, body, logo, icon, img };
+    return { w, h, X, Y, S, text, para, rule, caps, label, body, logo, lion, icon, img };
   };
 
   // ---- grounds: paper colour on every panel and flap; the painted golden ground on the four walls
@@ -134,6 +131,8 @@ function build(boxKey) {
       t.push(F.caps('AUTHENTIC CEYLON', 8, 10.4), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, r, 10.4, { anchor: 'end' }), F.rule(8, 12.8, r, 12.8));
       L.Name.push(F.text('title', 'Vanilla', 7, b1, sz), F.text('title', 'Tea', 7, b2, sz));
       t.push(F.body('Ceylon black tea\nwith natural vanilla', 8, b2 + 8.8, 40, { size: 2.5, lead: 3.4 }).svg);
+      // The lion top right, its top level with the name's capitals and its right edge on the bar's end.
+      t.push(F.lion(r - 14, top, 14));
       const lw = 13.5;
       t.push(F.logo(8 + lw / 2, F.h - 7.5 - lw * 963 / 933 + lw * 0.52, lw));
     } else {
@@ -143,6 +142,8 @@ function build(boxKey) {
       t.push(F.label('BLEND', 9, 23), F.caps('CEYLON BLACK TEA', 9, 27), F.caps('NATURAL VANILLA', 9, 30.4));
       t.push(F.label('ORIGIN', 48, 23), F.caps('AUTHENTIC CEYLON', 48, 27));
       t.push(F.label('CONTENTS', 9, 36.4), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, 9, 40.4));
+      // The lion heads a third column: right edge on the bar's end, top level with the labels' capitals.
+      t.push(F.lion(bar - 15, 23 - 1.85 * 0.658, 15));
       L.Name.push(F.text('title', 'Vanilla Tea', 8, F.h - 9, sz));
       t.push(F.rule(9, F.h - 5, bar + 50, F.h - 5));
     }
@@ -186,10 +187,10 @@ function build(boxKey) {
     });
     return t.join('');
   };
-  // Mandatory declarations are set at the 2026 Sri Lankan minimum of 1.5 mm letter height (regulation 5(e)):
-  // body text by its x-height, labels in capitals by their cap height. See research/label-text-rules.md.
-  const DECL = { body: 3.05, caps: 2.3, si: 2.8, ta: 2.75, lead: 4.2, leadIndic: 4.5 };
-  // What's inside: the three icons, then ingredients and storage (storage in English, Sinhala and Tamil).
+  // Declarations are set at 1.5 mm letter height (x-height for body text, cap height for capitals), the Sri
+  // Lankan 2026 minimum; see research/label-text-rules.md.
+  const DECL = { body: 3.05, caps: 2.3, lead: 4.2 };
+  // What's inside: the three icons, then the bag count and net weight as worded on the current pack.
   const inside = (F, ox, w) => {
     const t = [], r = ox + w - 8, cw = (w - 16) / 3;
     t.push(head(F, 'What’s inside', ox + 8, r));
@@ -199,14 +200,10 @@ function build(boxKey) {
       t.push(F.icon(ic, cx - 3.2, 15.6, 0.64), F.text('wide', k, cx, 26.2, 1.6, { track: 0.15, anchor: 'middle' }));
     });
     t.push(F.rule(ox + 8, 29.5, r, 29.5, 0.35));
-    t.push(F.text('wideR', 'INGREDIENTS', ox + 8, 34.4, DECL.caps, { track: 0.3, opacity: 0.75 }));
-    t.push(F.body(INGREDIENTS, ox + 8, 38.8, w - 16, { size: DECL.body, lead: DECL.lead }).svg);
-    t.push(F.text('wideR', 'STORAGE', ox + 8, 45.6, DECL.caps, { track: 0.3, opacity: 0.75 }));
-    const en = F.body(STORAGE.en, ox + 8, 50, w - 16, { size: DECL.body, lead: DECL.lead });
-    t.push(en.svg);
-    let y = 50 + en.h + 0.4;
-    for (const s of STORAGE.si) { t.push(shaped(F, s, DECL.si, ox + 8, y, 1)); y += DECL.leadIndic; }
-    for (const s of STORAGE.ta) { t.push(shaped(F, s, DECL.ta, ox + 8, y, 1)); y += DECL.leadIndic; }
+    t.push(F.text('wideR', 'TEA BAGS', ox + 8, 35, DECL.caps, { track: 0.3, opacity: 0.75 }));
+    t.push(F.body(`${pack.bags} tagged unbleached sachet tea bags`, ox + 8, 39.6, w - 16, { size: DECL.body, lead: DECL.lead }).svg);
+    t.push(F.text('wideR', 'NET WEIGHT', ox + 8, 48, DECL.caps, { track: 0.3, opacity: 0.75 }));
+    t.push(F.body(`${pack.net}g (2g x ${pack.bags})`, ox + 8, 52.6, w - 16, { size: DECL.body, lead: DECL.lead }).svg);
     return t.join('');
   };
   // Batch block (Sinhala, English, Tamil), barcode, distributor.
@@ -214,7 +211,7 @@ function build(boxKey) {
     const t = [], r = ox + w - 8;
     t.push(head(F, 'Vanilla Tea', ox + 8, r, 'BATCH DETAILS'));
     [['කා.අ.', 'B.N.', 'தொகுதி இல'], ['නි.දි.', 'MFD.', 'பொ.செ திகதி'],
-      ['කා.ඉ.දි.', 'EXP.', 'மு.திகதி'], ['උ.සි.මි.රු.', 'MRP RS.', 'விலை ரூபா']].forEach(([si, en, ta], i) => {
+      ['කා.ඉ.දි.', 'EXP.', 'மு.திகதி'], ['උ.සි.මි.රු.', 'MRP. Rs.', 'விலைரூபா']].forEach(([si, en, ta], i) => {
       // English label on the line with the stamp line; Sinhala and Tamil together underneath.
       const y = 20.2 + i * 7.4, wsi = SHAPED[si].advance * 2.2;
       t.push(F.text('wideR', en, ox + 8, y, DECL.caps, { track: 0.25 }), shaped(F, si, 2.2, ox + 8, y + 3.6), shaped(F, ta, 2.0, ox + 8 + wsi + 2, y + 3.6));
@@ -222,9 +219,9 @@ function build(boxKey) {
     });
     L.Barcode.push(barcode(F, GTIN, r, 46));
     // Name and address are mandatory (1.5 mm); web, email and hotline are extra and set smaller.
-    t.push(F.rule(ox + 8, 52.4, r, 52.4), F.text('wideR', 'MARKETED AND DISTRIBUTED BY', ox + 8, 57, DECL.caps, { track: 0.25, opacity: 0.75 }));
-    t.push(F.body(`${DISTRIBUTOR.name}\n${DISTRIBUTOR.address}`, ox + 8, 61.6, w - 16, { size: DECL.body, lead: DECL.lead }).svg);
-    t.push(F.body(`${DISTRIBUTOR.web}  ·  Hotline ${DISTRIBUTOR.hotline}\n${DISTRIBUTOR.email}`, ox + 8, 75.4, w - 16, { size: 2.2, lead: 3.0 }).svg);
+    t.push(F.rule(ox + 8, 50.6, r, 50.6), F.body(DISTRIBUTOR.intro, ox + 8, 55.2, w - 16, { size: DECL.body }).svg);
+    t.push(F.body(`${DISTRIBUTOR.name}\n${DISTRIBUTOR.address}`, ox + 8, 59.6, w - 16, { size: DECL.body, lead: DECL.lead }).svg);
+    t.push(F.body(`${DISTRIBUTOR.web}\n${DISTRIBUTOR.email}\n${DISTRIBUTOR.hotline}`, ox + 8, 73, w - 16, { size: 2.2, lead: 3.0 }).svg);
     return t.join('');
   };
 

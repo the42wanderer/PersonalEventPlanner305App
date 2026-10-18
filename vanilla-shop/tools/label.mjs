@@ -40,7 +40,7 @@ const label = (s, x, y, o = {}) => text('medium', s, o.size || 1.9, x, y, { caps
 const svgMark = (f) => { const s = fs.readFileSync(path.join(root, 'brand', f), 'utf8'); return { vw: Number(s.match(/viewBox="0 0 ([\d.]+) ([\d.]+)/)[1]), vh: Number(s.match(/viewBox="0 0 [\d.]+ ([\d.]+)/)[1]), d: s.match(/ d="([^"]+)"/)[1] }; };
 const LOGO = svgMark('vanilla-shop-logo.svg');
 const LION = svgMark('ceylon-tea-lion.svg');
-const lion = (x, y, w) => `<path fill="#9C6F1E" fill-rule="evenodd" d="${LION.d}" transform="translate(${n(x)} ${n(y)}) scale(${n(w / LION.vw, 6)})"/>`;
+const lion = (x, y, w) => `<path id="Ceylon_Tea_lion" fill="${C.ink}" fill-rule="evenodd" d="${LION.d}" transform="translate(${n(x)} ${n(y)}) scale(${n(w / LION.vw, 6)})"/>`;
 const logo = (x, y, w) => `<path fill="${C.ink}" fill-rule="evenodd" d="${LOGO.d}" transform="translate(${n(x)} ${n(y)}) scale(${n(w / LOGO.vw, 6)})"/>`;
 const img = (f, x, y, w, h) => {
   const b = fs.readFileSync(path.join(root, 'plates', 'generated', f));
@@ -94,7 +94,7 @@ const PIECE = {
   tip:      { file: 'v8-crop-climb-tip.png', pw: 580, ph: 680, box: [76, 20, 523, 679] },       // back-panel tendril tip, stem cut at bottom
   trail:    { file: 'v8-crop-vine-trail.png', pw: 1219, ph: 859, box: [0, 367, 1047, 770] },    // the main vine's trailing leaves, cut at left
 };
-// Shared composition: name, weight and the Ceylon Tea lion on the left; the upright vine down the
+// Shared composition: name and weight on the left, the Ceylon Tea lion top right; the upright vine down the
 // right (running on under the spec card); the tendril tip curling into the top-left corner and the
 // vine's trailing leaves coming in from the left edge.
 const COMMON = [
@@ -167,6 +167,8 @@ function build(p) {
     img(GROUND === 'cream' ? p.ground : p.ground.replace('label-ground-', `label-ground-${GROUND}-`), -BLEED, -BLEED, w + 2 * BLEED, h + 2 * BLEED),
     ...pieces.map(art),
     logo(w / 2 - 6.5, 6.5 + dy, 13),
+    // The Ceylon Tea lion top right, as on the boxes: right edge on the bar's end, foot level with the logo's.
+    lion(w - L - 12, 6.5 + dy + 13 * LOGO.vh / LOGO.vw - 12 * LION.vh / LION.vw, 12),
     // Ruled top bar, as on the boxes: origin left, net weight right.
     label(p.over, L, 24.4 + dy), label('100 g', w - L, 24.4 + dy, { anchor: 'end' }),
     `<path d="M${n(L)} ${n(26.4 + dy)}H${n(w - L)}" stroke="${C.ink}" stroke-opacity=".5" stroke-width="0.18"/>`,
@@ -202,7 +204,7 @@ function build(p) {
     }
   }
   out.push(...[].concat(p.under).map((u, i) => text('sans', u, 2.2, L, next + i * 3)));
-  // Net weight sits in the top bar. (No Ceylon Tea lion: the mark needs Sri Lanka Tea Board clearance.)
+  // Net weight sits in the top bar.
   if (TYPE === 'arched') out.push(arcText('Savor the calm with vanilla-infused tea', w / 2, 46.5, 38.6, 1.75, 0.16));
   // Spec card: one compact, outlined panel at the foot, aligned to the text column. Barcode on the
   // left, the batch fields as a small ruled table on the right; one padding all round.

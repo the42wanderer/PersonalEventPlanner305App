@@ -42,10 +42,20 @@ Our panels: cube front 8.8 × 8.5 cm = 74 cm² (Schedule II: 1.5 mm); long-box f
 - Sinhala (Noto Sans Sinhala) at 2.8 mm and Tamil (Noto Sans Tamil) at 2.75 mm, both ≈ 1.5 mm x-height.
 - Text sits on the plain part of each panel, never over the painting; the grain layer runs under the type.
 
+## What the packs carry
+
+The legal and product text is copied from the pack on sale now (Vanilla_Tea_P.pdf, 25 bags): the bag
+description, "Net Weight - 50g (2g x 25)", the batch block (B.N., MFD., EXP., MRP. Rs. in Sinhala, English and
+Tamil), the barcode and the distributor block, word for word. That pack has no ingredients list or storage line,
+so the new packs add none. The design sections (How to brew, "Vanilla was never plain", What's inside) stay; they
+are not declarations.
+
+The Ceylon Tea lion is on every tea pack, as on the current one: cube and long-box fronts (top right, 14 and
+15 mm wide) and both pouch labels (top right, 12 mm). It is the Sri Lanka Tea Board's quality mark and needs the
+packer's licence from the Board; check the licence covers these packs and any minimum size or colour rules.
+
 ## Open points
 
-- Ingredient wording is a placeholder from the product description; the packer must confirm the recipe and the
-  exact flavouring name (and any percentage if vanilla is emphasised as a characterising ingredient, 7(2)).
-- Sinhala and Tamil storage lines are draft translations; have a native speaker check them.
+- The 12-bag cube uses the 25-bag wording with its own count and weight, and needs its own GTIN.
 - Main panels still to check against 4(1) and 5(a), 5(d): the common name in bold and in two or three languages,
   and net contents in bold at the Schedule II height (3 mm on the long box).

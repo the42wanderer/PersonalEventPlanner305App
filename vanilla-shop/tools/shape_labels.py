@@ -15,10 +15,9 @@ from fontTools.pens.transformPen import TransformPen
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LABELS = {
-    # Batch block field labels, then the tea boxes' storage line (DRAFT translations of "Store in a cool,
-    # dry place, away from direct sunlight." - to be checked by a native speaker before print).
-    'sinhala': ['කා.අ.', 'නි.දි.', 'කා.ඉ.දි.', 'උ.සි.මි.රු.', 'සෘජු හිරු එළියෙන් ඈත්ව,', 'සිසිල් වියළි ස්ථානයක ගබඩා කරන්න.'],
-    'tamil': ['தொகுதி இல', 'பொ.செ திகதி', 'மு.திகதி', 'விலை ரூபா', 'நேரடி சூரிய ஒளி படாத, குளிர்ந்த', 'உலர்ந்த இடத்தில் சேமிக்கவும்.'],
+    # Batch block field labels, as on the current pack.
+    'sinhala': ['කා.අ.', 'නි.දි.', 'කා.ඉ.දි.', 'උ.සි.මි.රු.'],
+    'tamil': ['தொகுதி இல', 'பொ.செ திகதி', 'மு.திகதி', 'விலை ரூபா', 'விலைரூபா'],
 }
 FONTS = {'sinhala': 'noto-sans-sinhala.ttf', 'tamil': 'noto-sans-tamil.ttf'}
 
