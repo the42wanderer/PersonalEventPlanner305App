@@ -94,8 +94,9 @@ function build(boxKey) {
     const body = (s, x, y, wMax, o = {}) => para('body', s, x, y, o.size || 2.3, wMax, o.lead || 3.2, o);
     const logo = (cx, cy, lw) => `<path d="${logoD}" fill="${INK}" fill-rule="evenodd" transform="translate(${X(cx - lw / 2)} ${Y(cy - lw * 0.52)}) scale(${n(S(lw) / LOGO_VB, 6) * (rot ? -1 : 1)})"/>`;
     const icon = (key, x, y, s) => `<g fill="none" stroke="${INK}" stroke-width="0.42" stroke-linecap="round" stroke-linejoin="round" transform="translate(${X(x)} ${Y(y)}) scale(${n(S(s), 5)})">${ICON[key]}</g>`;
+    const oldIcon = (k, cx, cy, r, sc) => `<circle cx="${X(cx)}" cy="${Y(cy)}" r="${S(r)}" fill="#FFFBF2" fill-opacity=".55"/><g transform="translate(${X(cx)} ${Y(cy)}) scale(${n(S(sc), 5)})">${OLD_ICONS[k]}</g>`;
     const img = (f, x, y, wmm, hmm) => `<image xlink:href="${data(f)}" x="${X(x)}" y="${Y(y)}" width="${S(wmm)}" height="${S(hmm)}" preserveAspectRatio="none"/>`;
-    return { w, h, X, Y, S, text, para, rule, caps, label, body, logo, icon, img };
+    return { w, h, X, Y, S, text, para, rule, caps, label, body, logo, icon, oldIcon, img };
   };
 
   // ---- grounds: paper colour on every panel and flap; the painted golden ground on the four walls
@@ -146,13 +147,14 @@ function build(boxKey) {
     const F = face('sideA'), t = [], sx = boxKey === 'cube' ? 40 : 8, r = boxKey === 'cube' ? F.w - 8 : F.w - 30, sy = 18;
     if (boxKey === 'long') L.Painting.push(F.img(G('v6-climb.png'), F.w - 2 - 612 * 0.035, F.h + 1.5 - 2000 * 0.035, 667 * 0.035, 2000 * 0.035));
     t.push(head(F, 'How to brew', sx, r));
-    const steps = [['BOIL', '150 ml of fresh water'], ['STEEP', 'One tea bag for 5 minutes'], ['SERVE', 'Lift the bag out,\nor cool and pour over ice']];
-    t.push(`<path d="M${F.X(sx + 2.2)} ${F.Y(sy + 2.2)}V${F.Y(sy + 2.2 + 28)}" stroke="${INK}" stroke-opacity=".4" stroke-width="${F.S(0.25)}"/>`);
-    steps.forEach(([h, d], i) => {
-      const y = sy + i * 14, on = i === 1;
-      t.push(`<circle cx="${F.X(sx + 2.2)}" cy="${F.Y(y + 2.2)}" r="${F.S(2.2)}" fill="${on ? INK : '#FFF8EA'}" stroke="${INK}" stroke-width="${F.S(0.25)}"/>`);
-      t.push(F.text('wideR', String(i + 1), sx + 2.2, y + 2.95, 1.9, { anchor: 'middle', fill: on ? '#FFF8EA' : INK }));
-      t.push(F.text('wideR', h, sx + 6.6, y + 3, 2.2, { track: 0.3 }), F.body(d, sx + 6.6, y + 6.3, 34, { size: 2.1, lead: 2.9 }).svg);
+    // The vine set's three brewing icons on light discs, joined by a fine line between the discs.
+    const steps = [['cup', '150 ML', 'One tea bag in hot water'], ['timer', '5 MINUTES', 'Then lift the bag out'], ['ice', 'OVER ICE', 'Let it cool, pour over ice']];
+    const rD = 3.6, cxD = sx + rD, gap = 14;
+    steps.forEach(([ic, h, d], i) => {
+      const y = sy + i * gap, cy = y + rD;
+      if (i) t.push(`<path d="M${F.X(cxD)} ${F.Y(cy - gap + rD + 0.8)}V${F.Y(cy - rD - 0.8)}" stroke="${INK}" stroke-opacity=".35" stroke-width="${F.S(0.22)}"/>`);
+      t.push(F.oldIcon(ic, cxD, cy, rD, 0.5));
+      t.push(F.text('wideR', h, sx + 2 * rD + 2.4, y + 2.6, 2.2, { track: 0.3 }), F.body(d, sx + 2 * rD + 2.4, y + 5.9, 30, { size: 2.1, lead: 2.9 }).svg);
     });
     t.push(F.rule(sx, F.h - 11.4, r, F.h - 11.4), F.caps(`${pack.bags} TEA BAGS · 2 G EACH · ${pack.net} G`, sx, F.h - 7.5, { size: 1.9 }));
     L.Type.push(`<g id="Side_How_to_brew">${t.join('')}</g>`);
@@ -187,7 +189,7 @@ function build(boxKey) {
     [['tea', 'CEYLON TEA'], ['pod', 'NATURAL VANILLA'], ['teabag', `${pack.bags} TEA BAGS`]].forEach(([ic, k], i) => {
       const cx = ox + 8 + cw * (i + 0.5);
       if (i) t.push(F.rule(ox + 8 + cw * i, 28, ox + 8 + cw * i, 42, 0.35));
-      t.push(F.icon(ic, cx - 4, 29.5, 0.8), F.text('wide', k, cx, 41, 1.6, { track: 0.15, anchor: 'middle' }));
+      t.push(F.oldIcon(ic, cx, 33.6, 4.2, 0.66), F.text('wide', k, cx, 41.2, 1.6, { track: 0.15, anchor: 'middle' }));
     });
     let y = 45.5;
     for (const [k, v, soft] of [['INGREDIENTS', 'To be confirmed before print', true], ['NET WEIGHT', `${pack.net} g (${pack.bags} tea bags × 2 g)`], ['STORAGE', 'To be confirmed before print', true], ['DISTRIBUTOR', `${DISTRIBUTOR.name} — see ${seeWhere}`]]) {
@@ -265,6 +267,22 @@ function shaped(F, s, sz, x, y) {
   if (!gl) throw new Error('Label not shaped: ' + s);
   return `<path d="${gl.d}" fill="${INK}" opacity=".8" transform="translate(${F.X(x)} ${F.Y(y)}) scale(${n(F.S(sz), 5)})"/>`;
 }
+
+// The vine set's icons (tools/box.mjs), drawn round their centre, set on a light disc.
+const STROKE = `fill="none" stroke="${INK}" stroke-width="0.32" stroke-linecap="round" stroke-linejoin="round"`;
+const OLD_ICONS = {
+  cup: `<path ${STROKE} d="M-5 4.3Q0 5.7 5 4.3"/><path ${STROKE} d="M-3.8 -1.2H3.2Q3.2 3.9 -0.3 3.9Q-3.8 3.9 -3.8 -1.2Z"/><path ${STROKE} d="M3.15 -0.3q2.1 0 2.1 1.3t-2.35 1.6"/>` +
+    `<path ${STROKE} d="M1.3 -1.2L2.5 -4.1"/><rect ${STROKE} x="1.75" y="-5.95" width="1.7" height="1.9" rx="0.2" transform="rotate(12 2.6 -5)"/><path ${STROKE} d="M-2.1 -2.4q-0.8 -1 0 -2M-0.5 -2.4q-0.8 -1 0 -2"/>`,
+  timer: `<path d="M0 0.7L0 -3.2A3.9 3.9 0 0 1 1.95 -2.68Z" fill="${INK}" opacity="0.18"/><circle ${STROKE} cx="0" cy="0.7" r="3.9"/><path ${STROKE} d="M-0.9 -4.6H0.9M0 -4.6V-3.2M3 -2.5l0.7 -0.7"/>` +
+    `<path ${STROKE} d="M0 0.7L1.6 -2.1"/><circle cx="0" cy="0.7" r="0.35" fill="${INK}"/><path ${STROKE} d="M0 -2.6v0.5M3.3 0.7h-0.5M0 4v-0.5M-3.3 0.7h0.5"/>`,
+  ice: `<path ${STROKE} d="M-3.1 -4.4L-2.4 4.6H2.4L3.1 -4.4"/><path ${STROKE} d="M-2.85 -1.1H2.85"/><rect ${STROKE} x="-2.3" y="-0.3" width="2.1" height="2.1" rx="0.3" transform="rotate(14 -1.25 0.75)"/>` +
+    `<rect ${STROKE} x="0.1" y="1.6" width="1.9" height="1.9" rx="0.3" transform="rotate(-10 1.05 2.55)"/><path ${STROKE} d="M1 -1.1L2.3 -6.1"/>`,
+  tea: `<path ${STROKE} d="M0 4.8C0 2 0.3 -0.5 0.6 -3.4"/><path ${STROKE} d="M0.6 -3.4C-0.4 -4 -0.3 -5.3 0.6 -5.8C1.5 -5.3 1.6 -4 0.6 -3.4Z"/>` +
+    `<path ${STROKE} d="M0.3 -1C-1.4 -0.3 -3.8 -1 -4.4 -3.3C-2.2 -3.9 -0.4 -3 0.3 -1Z"/><path ${STROKE} d="M0.3 -1L-3.3 -2.9"/><path ${STROKE} d="M0.1 2.2C1.8 3.2 4.3 2.6 5 0.2C2.7 -0.5 0.8 0.3 0.1 2.2Z"/><path ${STROKE} d="M0.1 2.2L3.9 0.6"/>`,
+  pod: [-90, -18, 54, 126, 198].map((a) => `<path ${STROKE} d="M0 -1.2C0.95 -2.2 1 -3.9 0 -5.4C-1 -3.9 -0.95 -2.2 0 -1.2Z" transform="rotate(${a + 90})"/>`).join('') +
+    `<circle ${STROKE} cx="0" cy="0" r="1.25"/><circle cx="0" cy="0" r="0.42" fill="${INK}"/>`,
+  teabag: `<rect ${STROKE} x="-3.4" y="-1.2" width="5" height="6" rx="0.6"/><path ${STROKE} d="M-3.4 0.2H1.6"/><path ${STROKE} d="M-0.9 -1.2C-0.9 -3.6 1.2 -4.6 2.6 -3.4"/><rect ${STROKE} x="2.3" y="-4.2" width="2.4" height="2.8" rx="0.3" transform="rotate(-14 3.5 -2.8)"/>`,
+};
 
 // Line icons on a 10 x 10 grid.
 const ICON = {
