@@ -40,4 +40,13 @@ THE VANILLA SHOP / NEGOMBO. Postmark, top left: THE VANILLA SHOP / NEGOMBO · SR
 Gloock, Geist, Noto Serif Sinhala and Noto Serif Tamil (all OFL). Have a native speaker check the Sinhala and
 Tamil before films are made.
 
-The back of the bag is still to design.
+## Back (one ink)
+
+- `vanilla-tote-back_EDITABLE.svg`, `vanilla-tote-back_FILM.pdf`, `vanilla-tote-back_preview.png`,
+  `vanilla-tote-back_mockup.jpg`; both sides together in `vanilla-tote_both-sides.jpg`.
+- One screen, the same green as the front (Pantone 7743 C), so no extra ink colour.
+- Layout follows the packaging: ruled top bar (THE VANILLA SHOP / NEGOMBO · SRI LANKA), "Vanilla was never
+  plain." in Instrument Serif Italic (outlined), a drawn cured vanilla pod, the tea boxes' line icons for the range
+  (natural vanilla, Ceylon tea, vanilla tea, scented candles), and the logo with AUTHENTIC CEYLON VANILLA.
+- The small capitals are Roc Grotesk (Adobe Fonts), kept as live text in the editable SVG. Open it in Illustrator
+  with Roc Grotesk active, outline the type, and export the film from there; the PDF here is a proof.
