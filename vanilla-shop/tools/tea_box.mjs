@@ -1,7 +1,7 @@
 // Natural Vanilla Tea boxes: the vine set's painting, golden ground, diagram and lid sprigs, with the candle
 // range's structure (ruled bars, spaced Roc Grotesk labels, sentence-case body) and a numbered brewing stepper.
 // The name and panel headings are Instrument Serif Italic. Cube front: name high, logo bottom left.
-// Long front: data columns on top, vine across the top right, the name along the foot.
+// Long front: data columns on top, vine across the top right, the name along the foot, logo and lion bottom right.
 // Output is Illustrator-ready SVG on the supplied dielines, type live, layers as in tools/candle.mjs.
 // Usage: CANDLE_FONTS=/path node tools/tea_box.mjs [cube|long]
 //   -> export/tea/<box>/vanilla-tea-<box>_EDITABLE.svg   (PREVIEW_DIR=... also writes <box>.html for a browser)
@@ -142,10 +142,13 @@ function build(boxKey) {
       t.push(F.label('BLEND', 9, 23), F.caps('CEYLON BLACK TEA', 9, 27), F.caps('NATURAL VANILLA', 9, 30.4));
       t.push(F.label('ORIGIN', 48, 23), F.caps('AUTHENTIC CEYLON', 48, 27));
       t.push(F.label('CONTENTS', 9, 36.4), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, 9, 40.4));
-      // The lion heads a third column: right edge on the bar's end, top level with the labels' capitals.
-      t.push(F.lion(bar - 15, 23 - 1.85 * 0.658, 15));
       L.Name.push(F.text('title', 'Vanilla Tea', 8, F.h - 9, sz));
-      t.push(F.rule(9, F.h - 5, bar + 50, F.h - 5));
+      // Bottom right, under the painting: the logo and the Ceylon Tea lion standing on the name's baseline,
+      // split by a fine rule, the lion's right edge on the panel margin; the foot rule runs the full width.
+      const base = F.h - 9, rx = F.w - 8, ln = 15, lnh = ln * LION.vh / LION.vw, lw = 14, lh = lw * 963 / 933;
+      t.push(F.lion(rx - ln, base - lnh, ln), F.rule(rx - ln - 4.5, base - lnh, rx - ln - 4.5, base, 0.4));
+      t.push(F.logo(rx - ln - 9 - lw / 2, base - lh + lw * 0.52, lw));
+      t.push(F.rule(9, F.h - 5, rx, F.h - 5));
     }
     L.Type.push(`<g id="Front">${t.join('')}</g>`);
   }

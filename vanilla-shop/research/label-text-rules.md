@@ -50,8 +50,8 @@ Tamil), the barcode and the distributor block, word for word. That pack has no i
 so the new packs add none. The design sections (How to brew, "Vanilla was never plain", What's inside) stay; they
 are not declarations.
 
-The Ceylon Tea lion is on every tea pack, as on the current one: cube and long-box fronts (top right, 14 and
-15 mm wide) and both pouch labels (top right, 12 mm). It is the Sri Lanka Tea Board's quality mark and needs the
+The Ceylon Tea lion is on every tea pack, as on the current one: cube front (top right, 14 mm wide), long-box
+front (bottom right beside the logo, 15 mm) and both pouch labels (top right, 12 mm). It is the Sri Lanka Tea Board's quality mark and needs the
 packer's licence from the Board; check the licence covers these packs and any minimum size or colour rules.
 
 ## Open points
