@@ -32,6 +32,14 @@ const data = (f) => `data:image/${f.endsWith('png') ? 'png' : 'jpeg'};base64,` +
 const DISTRIBUTOR = { name: 'Agro Ventures Exports (Pvt) Ltd', address: 'No. 48, Sir Marcus Fernando Mawatha,\nColombo 07, Sri Lanka', web: 'www.agroventuresexports.com', email: 'info@agroventuresexports.com', hotline: '011 2 187 287' };
 // GTIN from the current 25-bag, 50 g pack. A new pack size needs its own GTIN from GS1 Sri Lanka.
 const GTIN = '4796034220229';
+// Product declarations. INGREDIENTS must be confirmed against the actual recipe by the packer; the Sinhala and
+// Tamil storage lines are draft translations (shaped by tools/shape_labels.py) for a native speaker to check.
+const INGREDIENTS = 'Ceylon black tea, natural vanilla flavouring.';
+const STORAGE = {
+  en: 'Store in a cool, dry place, away from direct sunlight.',
+  si: ["සෘජු හිරු එළියෙන් ඈත්ව,", "සිසිල් වියළි ස්ථානයක ගබඩා කරන්න."],
+  ta: ["நேரடி சூரிய ஒளி படாத, குளிர்ந்த", "உலர்ந்த இடத்தில் சேமிக்கவும்."],
+};
 const SHAPED = JSON.parse(fs.readFileSync(path.join(root, 'brand', 'shaped-labels.json'), 'utf8'));
 const logoD = fs.readFileSync(path.join(root, 'brand', 'vanilla-shop-logo.svg'), 'utf8').match(/ d="([^"]+)"/)[1];
 const LOGO_VB = Number(fs.readFileSync(path.join(root, 'brand', 'vanilla-shop-logo.svg'), 'utf8').match(/viewBox="0 0 ([\d.]+) ([\d.]+)/)[1]);
@@ -178,24 +186,27 @@ function build(boxKey) {
     });
     return t.join('');
   };
-  // What's inside: intro, three icons, details table.
-  const inside = (F, ox, w, seeWhere) => {
-    const t = [], r = ox + w - 8;
+  // Mandatory declarations are set at the 2026 Sri Lankan minimum of 1.5 mm letter height (regulation 5(e)):
+  // body text by its x-height, labels in capitals by their cap height. See research/label-text-rules.md.
+  const DECL = { body: 3.05, caps: 2.3, si: 2.8, ta: 2.75, lead: 4.2, leadIndic: 4.5 };
+  // What's inside: the three icons, then ingredients and storage (storage in English, Sinhala and Tamil).
+  const inside = (F, ox, w) => {
+    const t = [], r = ox + w - 8, cw = (w - 16) / 3;
     t.push(head(F, 'What’s inside', ox + 8, r));
-    t.push(F.body(`Ceylon black tea with natural vanilla, in ${pack.bags} tagged, unbleached tea bags of 2 g each.`, ox + 8, 19.6, w - 16).svg);
-    const cw = (w - 16) / 3;
-    t.push(F.rule(ox + 8, 28, r, 28));
     [['tea', 'CEYLON TEA'], ['pod', 'NATURAL VANILLA'], ['teabag', `${pack.bags} TEA BAGS`]].forEach(([ic, k], i) => {
       const cx = ox + 8 + cw * (i + 0.5);
-      if (i) t.push(F.rule(ox + 8 + cw * i, 28, ox + 8 + cw * i, 42, 0.35));
-      t.push(F.icon(ic, cx - 4, 29.5, 0.8), F.text('wide', k, cx, 41, 1.6, { track: 0.15, anchor: 'middle' }));
+      if (i) t.push(F.rule(ox + 8 + cw * i, 15.5, ox + 8 + cw * i, 27.5, 0.35));
+      t.push(F.icon(ic, cx - 3.2, 15.6, 0.64), F.text('wide', k, cx, 26.2, 1.6, { track: 0.15, anchor: 'middle' }));
     });
-    let y = 45.5;
-    for (const [k, v, soft] of [['INGREDIENTS', 'To be confirmed before print', true], ['NET WEIGHT', `${pack.net} g (${pack.bags} tea bags × 2 g)`], ['STORAGE', 'To be confirmed before print', true], ['DISTRIBUTOR', `${DISTRIBUTOR.name} — see ${seeWhere}`]]) {
-      t.push(F.rule(ox + 8, y, r, y, 0.35), F.label(k, ox + 8, y + 3.6), F.body(v, ox + 30, y + 3.6, w - 38, { size: 2.15, opacity: soft ? 0.6 : 1 }).svg);
-      y += 6.4 + (width(FONT.body, v, 2.15) > w - 38 ? 3.2 : 0);
-    }
-    t.push(F.rule(ox + 8, y, r, y, 0.35));
+    t.push(F.rule(ox + 8, 29.5, r, 29.5, 0.35));
+    t.push(F.text('wideR', 'INGREDIENTS', ox + 8, 34.4, DECL.caps, { track: 0.3, opacity: 0.75 }));
+    t.push(F.body(INGREDIENTS, ox + 8, 38.8, w - 16, { size: DECL.body, lead: DECL.lead }).svg);
+    t.push(F.text('wideR', 'STORAGE', ox + 8, 45.6, DECL.caps, { track: 0.3, opacity: 0.75 }));
+    const en = F.body(STORAGE.en, ox + 8, 50, w - 16, { size: DECL.body, lead: DECL.lead });
+    t.push(en.svg);
+    let y = 50 + en.h + 0.4;
+    for (const s of STORAGE.si) { t.push(shaped(F, s, DECL.si, ox + 8, y, 1)); y += DECL.leadIndic; }
+    for (const s of STORAGE.ta) { t.push(shaped(F, s, DECL.ta, ox + 8, y, 1)); y += DECL.leadIndic; }
     return t.join('');
   };
   // Batch block (Sinhala, English, Tamil), barcode, distributor.
@@ -204,25 +215,26 @@ function build(boxKey) {
     t.push(head(F, 'Vanilla Tea', ox + 8, r, 'BATCH DETAILS'));
     [['කා.අ.', 'B.N.', 'தொகுதி இல'], ['නි.දි.', 'MFD.', 'பொ.செ திகதி'],
       ['කා.ඉ.දි.', 'EXP.', 'மு.திகதி'], ['උ.සි.මි.රු.', 'MRP RS.', 'விலை ரூபா']].forEach(([si, en, ta], i) => {
-      const y = 21.4 + i * 8;
-      t.push(shaped(F, si, 1.75, ox + 8, y - 2.5), F.text('wideR', en, ox + 8, y, 1.85, { track: 0.25 }), shaped(F, ta, 1.6, ox + 8, y + 2.3));
-      t.push(`<path d="M${F.X(ox + 22)} ${F.Y(y + 0.6)}H${F.X(ox + 44)}" stroke="${INK}" stroke-opacity=".6" stroke-width="${F.S(0.15)}" stroke-dasharray="${F.S(0.4)} ${F.S(0.4)}" fill="none"/>`);
+      // English label on the line with the stamp line; Sinhala and Tamil together underneath.
+      const y = 20.2 + i * 7.4, wsi = SHAPED[si].advance * 2.2;
+      t.push(F.text('wideR', en, ox + 8, y, DECL.caps, { track: 0.25 }), shaped(F, si, 2.2, ox + 8, y + 3.6), shaped(F, ta, 2.0, ox + 8 + wsi + 2, y + 3.6));
+      t.push(`<path d="M${F.X(ox + 21)} ${F.Y(y + 0.4)}H${F.X(ox + 42)}" stroke="${INK}" stroke-opacity=".6" stroke-width="${F.S(0.15)}" stroke-dasharray="${F.S(0.4)} ${F.S(0.4)}" fill="none"/>`);
     });
     L.Barcode.push(barcode(F, GTIN, r, 46));
-    t.push(F.rule(ox + 8, 55.5, r, 55.5), F.label('MARKETED AND DISTRIBUTED BY', ox + 8, 60));
-    t.push(F.text('wideR', DISTRIBUTOR.name.toUpperCase(), ox + 8, 64.2, 1.95, { track: 0.2 }));
-    t.push(F.body(DISTRIBUTOR.address, ox + 8, 68, (w - 16) / 2, { size: 2.1, lead: 2.9 }).svg);
-    t.push(F.body(`${DISTRIBUTOR.web}\n${DISTRIBUTOR.email}\nHotline ${DISTRIBUTOR.hotline}`, ox + 8 + (w - 16) / 2 + 2, 68, (w - 16) / 2, { size: 2.1, lead: 2.9 }).svg);
+    // Name and address are mandatory (1.5 mm); web, email and hotline are extra and set smaller.
+    t.push(F.rule(ox + 8, 52.4, r, 52.4), F.text('wideR', 'MARKETED AND DISTRIBUTED BY', ox + 8, 57, DECL.caps, { track: 0.25, opacity: 0.75 }));
+    t.push(F.body(`${DISTRIBUTOR.name}\n${DISTRIBUTOR.address}`, ox + 8, 61.6, w - 16, { size: DECL.body, lead: DECL.lead }).svg);
+    t.push(F.body(`${DISTRIBUTOR.web}  ·  Hotline ${DISTRIBUTOR.hotline}\n${DISTRIBUTOR.email}`, ox + 8, 75.4, w - 16, { size: 2.2, lead: 3.0 }).svg);
     return t.join('');
   };
 
   if (boxKey === 'cube') {
     const Fb = face('back'); L.Type.push(`<g id="Back">${backPlate(Fb, 0, Fb.w)}</g>`);
-    const Fs = face('sideB'); L.Type.push(`<g id="Side_Whats_inside">${inside(Fs, 0, Fs.w, 'base')}</g>`);
+    const Fs = face('sideB'); L.Type.push(`<g id="Side_Whats_inside">${inside(Fs, 0, Fs.w)}</g>`);
     const Fo = face('bottom'); L.Type.push(`<g id="Base">${baseInfo(Fo, 0, Fo.w)}</g>`);
   } else {
     const Fb = face('back'), half = 87.58;
-    L.Type.push(`<g id="Back">${backPlate(Fb, 0, half)}${Fb.rule(half + 1.5, 18, half + 1.5, Fb.h - 10, 0.35)}${inside(Fb, half, Fb.w - half, 'side')}</g>`);
+    L.Type.push(`<g id="Back">${backPlate(Fb, 0, half)}${Fb.rule(half + 1.5, 18, half + 1.5, Fb.h - 10, 0.35)}${inside(Fb, half, Fb.w - half)}</g>`);
     const Fs = face('sideB'); L.Type.push(`<g id="Side_Batch_and_barcode">${baseInfo(Fs, 0, Fs.w)}</g>`);
     const Fo = face('bottom');
     L.Type.push(`<g id="Base">${Fo.logo(Fo.w / 2, Fo.h / 2 - 3, 24)}${Fo.caps('AUTHENTIC CEYLON VANILLA TEA', Fo.w / 2, Fo.h / 2 + 13, { anchor: 'middle' })}</g>`);
@@ -261,10 +273,10 @@ function build(boxKey) {
     g('Dieline', B.dieline.replace(/stroke="#B[0-9A-F]{5}"/g, 'stroke="#E4007C"')) + '</svg>';
 }
 
-function shaped(F, s, sz, x, y) {
+function shaped(F, s, sz, x, y, op = 0.8) {
   const gl = SHAPED[s];
   if (!gl) throw new Error('Label not shaped: ' + s);
-  return `<path d="${gl.d}" fill="${INK}" opacity=".8" transform="translate(${F.X(x)} ${F.Y(y)}) scale(${n(F.S(sz), 5)})"/>`;
+  return `<path d="${gl.d}" fill="${INK}" opacity="${op}" transform="translate(${F.X(x)} ${F.Y(y)}) scale(${n(F.S(sz), 5)})"/>`;
 }
 
 // Line icons on a 10 x 10 grid.
