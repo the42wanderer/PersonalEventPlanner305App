@@ -1,6 +1,7 @@
-// Natural Vanilla Tea boxes in the candle range's system: the existing vine painting and golden ground,
-// the name in Instrument Serif running across the front and round the corner, everything else in the
-// candle boxes' Roc Grotesk style (spaced capitals for labels, sentence case for anything read).
+// Natural Vanilla Tea boxes: the vine set's painting, golden ground, diagram and lid sprigs, with the candle
+// range's structure (ruled bars, spaced Roc Grotesk labels, sentence-case body) and a numbered brewing stepper.
+// The name and panel headings are Instrument Serif Italic. Cube front: name high, logo bottom left.
+// Long front: data columns on top, vine across the top right, the name along the foot.
 // Output is Illustrator-ready SVG on the supplied dielines, type live, layers as in tools/candle.mjs.
 // Usage: CANDLE_FONTS=/path node tools/tea_box.mjs [cube|long]
 //   -> export/tea/<box>/vanilla-tea-<box>_EDITABLE.svg   (PREVIEW_DIR=... also writes <box>.html for a browser)
@@ -13,21 +14,13 @@ const opentype = require('opentype.js');
 await import(path.join(root, 'dieline.js'));
 await import(path.join(root, 'dieline-long.js'));
 
-// TITLE picks the name's face while we compare (roc-bold default; instrument is the free serif in fonts/).
-// Roc Grotesk weights come from CANDLE_FONTS like the rest; Illustrator maps them to Adobe Fonts by name.
-const TITLES = {
-  'roc-bold':      { ps: 'RocGrotesk-Bold', file: 'roc-bold.otf', lines: 2 },
-  'roc-wide-bold': { ps: 'RocGroteskWide-Bold', file: 'roc-wide-bold.otf', lines: 2 },
-  'roc-cond-bold': { ps: 'RocGroteskCond-Bold', file: 'roc-cond-bold.otf', lines: 2 },
-  'ivy':           { ps: 'IvyPrestoText-Bold', file: 'ivy.otf', lines: 2 },                       // the candle names' face
-  'instrument':    { ps: 'InstrumentSerif-Regular', file: path.join(root, 'fonts', 'instrument-serif.ttf'), lines: 2 },
-};
-const TITLE_KEY = process.env.TITLE || 'roc-bold';
+// The name and the panel headings are in Instrument Serif Italic (free, OFL, in fonts/); labels and body
+// text are the candle boxes' Roc Grotesk (Adobe Fonts, measured from CANDLE_FONTS, mapped by name).
 const FONT = {
-  title: TITLES[TITLE_KEY],
+  title: { ps: 'InstrumentSerif-Italic', file: path.join(root, 'fonts', 'instrument-serif-italic.ttf') },
   wide: CFONT.wide, wideR: CFONT.wideR, body: CFONT.body,
 };
-FONT.title.ot = opentype.loadSync(path.isAbsolute(FONT.title.file) ? FONT.title.file : path.join(process.env.CANDLE_FONTS, FONT.title.file));
+FONT.title.ot = opentype.loadSync(FONT.title.file);
 const width = (f, s, sz, track = 0) => {
   const g = f.ot.stringToGlyphs(s), k = sz / f.ot.unitsPerEm;
   return g.reduce((w, gl) => w + gl.advanceWidth * k, 0) + track * Math.max(0, g.length - 1);
@@ -55,7 +48,7 @@ const BOXES = {
       inner: { panel: R(145.50, 630.22, 393.53, 871.09), region: R(142.715, 628.051, 393.961, 929.191) },
       bottom: { panel: R(633.68, 631.07, 881.70, 870.00), region: R(629.184, 629.949, 881.703, 881.480) },
     },
-    vine: { x: -10.4, y: -0.6, s: 0.0525 }, title: { size: 32, base: 41 }, weave: [], lidTurn: false,
+    vine: { x: -6.4, y: -3, s: 0.0525 }, lidTurn: false,
   },
   long: {
     sheet: { w: 1642.42, h: 941.328 }, dieline: globalThis.VS_DIELINE_LONG, pack: { bags: 25, net: 50 },
@@ -68,7 +61,7 @@ const BOXES = {
       inner: { panel: R(850.5, 622.9, 1349.2, 862.7), region: R(842, 622.9, 1357.7, 871.2) },
       bottom: { panel: R(114.9, 622.9, 611, 862.4), region: R(106.4, 622.9, 619.5, 922.3) },
     },
-    vine: { x: 30, y: -2.4, s: 0.052 }, title: { size: 37, base: 43 }, weave: [], lidTurn: true,   // the long front is wide enough to hold the whole name
+    vine: { x: 60, y: -24, s: 0.052 }, lidTurn: true,
   },
 };
 
@@ -84,7 +77,7 @@ function build(boxKey) {
     const tr = (x, y) => rot ? ` transform="rotate(180 ${X(x)} ${Y(y)})"` : '';
     const text = (f, s, x, y, sz, o = {}) => {
       const a = o.anchor ? ` text-anchor="${o.anchor}"` : '';
-      return `<text x="${X(x)}" y="${Y(y)}" font-family="'${FONT[f].ps}'" font-size="${S(sz)}"${o.track ? ` letter-spacing="${S(o.track)}"` : ''} fill="${INK}"${o.opacity ? ` opacity="${o.opacity}"` : ''}${a}${tr(x, y)}>${esc(s)}</text>`;
+      return `<text x="${X(x)}" y="${Y(y)}" font-family="'${FONT[f].ps}'" font-size="${S(sz)}"${o.track ? ` letter-spacing="${S(o.track)}"` : ''} fill="${o.fill || INK}"${o.opacity ? ` opacity="${o.opacity}"` : ''}${a}${tr(x, y)}>${esc(s)}</text>`;
     };
     const para = (f, s, x, y, sz, wMax, lead, o = {}) => {
       const lines = [];
@@ -113,65 +106,71 @@ function build(boxKey) {
     L.Ground.push(`<g clip-path="url(#clip-${k})">${F.img(G(`v6-ground-golden${boxKey === 'long' ? '-long' : ''}-${k}.jpg`), -3, -3, F.w + 6, F.h + 6)}</g>`);
   }
 
-  // ---- painting: one placement for the vine across front and right side; the weave redraws the stem over the name
+  // ---- painting: one placement for the vine across front and right side
   {
-    const F = face('front'), V = B.vine, vw = 3808 * V.s, vh = 1651 * V.s, vine = F.img(G('v6-vine-faded.png'), V.x, V.y, vw, vh);
+    const F = face('front'), V = B.vine, vine = F.img(G('v6-vine-faded.png'), V.x, V.y, 3808 * V.s, 1651 * V.s);
     const fa = P.front.panel, sa = P.sideA.panel;
     defs += `<clipPath id="clip-walls"><rect x="${n(fa.x - 3 * MM)}" y="${n(fa.y - 0.5 * MM)}" width="${n(sa.x + sa.w - fa.x + 3 * MM)}" height="${n(fa.h + 3.5 * MM)}"/></clipPath>`;
     L.Painting.push(`<g id="Vine" clip-path="url(#clip-walls)">${vine}</g>`);
-    if (B.weave.length) {
-      defs += `<clipPath id="clip-weave">${B.weave.map(([x, y, w, h]) => `<rect x="${F.X(x)}" y="${F.Y(y)}" width="${F.S(w)}" height="${F.S(h)}"/>`).join('')}</clipPath>`;
-      L.Weave.push(`<g clip-path="url(#clip-weave)">${vine}</g>`);
-    }
-    // The name stays on the front (easy to find on a shelf): VANILLA over TEA at one size, the longer line
-    // filling the text column; the long box's wide front takes it on one line.
-    const colW = F.w - 16, cap = (FONT.title.ot.tables.os2.sCapHeight || 700) / FONT.title.ot.unitsPerEm;
-    const lines = boxKey === 'long' ? ['VANILLA TEA'] : ['VANILLA', 'TEA'];
-    const sz = Math.min(...lines.map((l) => (boxKey === 'long' ? 120 : colW) / width(FONT.title, l, 1)));
-    const lead = sz * cap + 2.2, top = 19;
-    lines.forEach((l, i) => L.Name.push(F.text('title', l, 7.6, top + sz * cap + i * lead, sz)));
-    B.title.base = top + sz * cap + (lines.length - 1) * lead;
   }
+  // A panel heading in the serif italic sitting on a rule, at the height of the front's top bar, so the bars
+  // read as one band round the box.
+  const head = (F, s, x0, x1, right) => F.text('title', s, x0, 10.9, 6) + F.rule(x0, 12.8, x1, 12.8) + (right ? F.caps(right, x1, 10.4, { anchor: 'end', size: 1.85 }) : '');
 
   // ---- front
   {
-    const F = face('front'), r = F.w - 8, t = [];
-    // Pack count in the top bar, so the foot stays clear for the pods.
-    t.push(F.caps('THE VANILLA SHOP', 8, 12), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, r, 12, { anchor: 'end' }), F.rule(8, 15, r, 15));
-    const by = B.title.base + 7;
-    t.push(F.label('AUTHENTIC CEYLON', 8, by), F.body('Black tea with\nnatural vanilla', 8, by + 4, 40).svg);
+    const F = face('front'), t = [];
+    if (boxKey === 'cube') {
+      // Top bar; the name high, two lines; the product line; the logo bottom left on the same edge.
+      const r = F.w - 8, sz = 20, asc = 0.72 * sz, top = 16.5, b1 = top + asc, b2 = b1 + 0.78 * sz;
+      t.push(F.caps('AUTHENTIC CEYLON', 8, 10.4), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, r, 10.4, { anchor: 'end' }), F.rule(8, 12.8, r, 12.8));
+      L.Name.push(F.text('title', 'Vanilla', 7, b1, sz), F.text('title', 'Tea', 7, b2, sz));
+      t.push(F.body('Ceylon black tea\nwith natural vanilla', 8, b2 + 8.8, 40, { size: 2.5, lead: 3.4 }).svg);
+      const lw = 13.5;
+      t.push(F.logo(8 + lw / 2, F.h - 7.5 - lw * 963 / 933 + lw * 0.52, lw));
+    } else {
+      // Ruled bar and data columns on top, the vine across the top right, the name along the foot.
+      const bar = 96, sz = 26;
+      t.push(F.caps('THE VANILLA SHOP', 9, 12), F.caps('NO. 01', bar, 12, { anchor: 'end' }), F.rule(9, 15, bar, 15));
+      t.push(F.label('BLEND', 9, 23), F.caps('CEYLON BLACK TEA', 9, 27), F.caps('NATURAL VANILLA', 9, 30.4));
+      t.push(F.label('ORIGIN', 48, 23), F.caps('AUTHENTIC CEYLON', 48, 27));
+      t.push(F.label('CONTENTS', 9, 36.4), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, 9, 40.4));
+      L.Name.push(F.text('title', 'Vanilla Tea', 8, F.h - 9, sz));
+      t.push(F.rule(9, F.h - 5, bar + 50, F.h - 5));
+    }
     L.Type.push(`<g id="Front">${t.join('')}</g>`);
   }
 
-  // ---- right side: how to brew, in the clear lower part
+  // ---- right side: how to brew as a numbered stepper; pack line at the foot
   {
-    const F = face('sideA'), x = boxKey === 'long' ? 8 : F.w - 41, t = [];   // long box: the climbing tendril takes the right edge
-    if (boxKey === 'long') L.Painting.push(F.img(G('v6-climb.png'), F.w - 2 - 612 * 0.035 - 6, F.h + 1.5 - 2000 * 0.035, 667 * 0.035, 2000 * 0.035));
-    // The first tea illustration (cup of tea with a vanilla pod) above the brewing steps.
-    const cw = 30, ch = cw * 1145 / 1164;
-    L.Painting.push(F.img(G('v2-cup.png'), x + (boxKey === 'long' ? 0 : 33 - cw), 44 - ch - 1, cw, ch));
-    t.push(F.label('HOW TO BREW', x, 46), F.rule(x, 48.2, F.w - 6, 48.2));
-    [['cup', '150 ML', 'One 2 g tea bag in hot water'], ['timer', '5 MINUTES', 'Then lift the bag out'], ['ice', 'OVER ICE', 'Let it cool, pour over ice']].forEach(([ic, v, note], i) => {
-      const y = 51.4 + i * 9.6;
-      t.push(F.icon(ic, x, y, 0.66), F.text('wideR', v, x + 8.6, y + 3.4, 2.3, { track: 0.3 }), F.body(note, x + 8.6, y + 6.8, 32, { size: 2.15 }).svg);
+    const F = face('sideA'), t = [], sx = boxKey === 'cube' ? 40 : 8, r = boxKey === 'cube' ? F.w - 8 : F.w - 30, sy = 18;
+    if (boxKey === 'long') L.Painting.push(F.img(G('v6-climb.png'), F.w - 2 - 612 * 0.035, F.h + 1.5 - 2000 * 0.035, 667 * 0.035, 2000 * 0.035));
+    t.push(head(F, 'How to brew', sx, r));
+    const steps = [['BOIL', '150 ml of fresh water'], ['STEEP', 'One tea bag for 5 minutes'], ['SERVE', 'Lift the bag out,\nor cool and pour over ice']];
+    t.push(`<path d="M${F.X(sx + 2.2)} ${F.Y(sy + 2.2)}V${F.Y(sy + 2.2 + 28)}" stroke="${INK}" stroke-opacity=".4" stroke-width="${F.S(0.25)}"/>`);
+    steps.forEach(([h, d], i) => {
+      const y = sy + i * 14, on = i === 1;
+      t.push(`<circle cx="${F.X(sx + 2.2)}" cy="${F.Y(y + 2.2)}" r="${F.S(2.2)}" fill="${on ? INK : '#FFF8EA'}" stroke="${INK}" stroke-width="${F.S(0.25)}"/>`);
+      t.push(F.text('wideR', String(i + 1), sx + 2.2, y + 2.95, 1.9, { anchor: 'middle', fill: on ? '#FFF8EA' : INK }));
+      t.push(F.text('wideR', h, sx + 6.6, y + 3, 2.2, { track: 0.3 }), F.body(d, sx + 6.6, y + 6.3, 34, { size: 2.1, lead: 2.9 }).svg);
     });
+    t.push(F.rule(sx, F.h - 11.4, r, F.h - 11.4), F.caps(`${pack.bags} TEA BAGS · 2 G EACH · ${pack.net} G`, sx, F.h - 7.5, { size: 1.9 }));
     L.Type.push(`<g id="Side_How_to_brew">${t.join('')}</g>`);
   }
 
-  // ---- back: the line, then the labelled plate of vanilla (the long box adds the information panel beside it)
+  // ---- back: the line, then the labelled plate of vanilla
   const backPlate = (F, ox, w) => {
     const t = [], s = 56 / 1485, x0 = ox + w - 5 - 1000 * s, y0 = 19;
     const at = (px, py) => [x0 + px * s, y0 + py * s];
     L.Painting.push(F.img(G('v6-diagram-soft.png'), x0, y0, 1000 * s, 1485 * s));
-    t.push(F.caps('THE VANILLA SHOP', ox + 8, 12), F.caps('VANILLA TEA', ox + w - 8, 12, { anchor: 'end' }), F.rule(ox + 8, 15, ox + w - 8, 15));
-    t.push(F.text('wideR', 'VANILLA WAS', ox + 8, 22.4, 3.1, { track: 0.4 }), F.text('wideR', 'NEVER PLAIN.', ox + 8, 26.6, 3.1, { track: 0.4 }));
-    t.push(F.body('The delicate sweetness of natural vanilla unfolds through warm, comforting notes and a smooth, mellow aroma.', ox + 8, 31.6, 37, { size: 2.2, lead: 3.0 }).svg);
+    t.push(head(F, 'Vanilla was never plain.', ox + 8, ox + w - 8));
+    t.push(F.body('The delicate sweetness of natural vanilla unfolds through warm, comforting notes and a smooth, mellow aroma.', ox + 8, 19.6, 37, { size: 2.2, lead: 3.0 }).svg);
     [['VANILLA ORCHID', 'Hand-pollinated; open for one day', at(545, 330)],
       ['AERIAL ROOTS', 'The vine climbs by them', at(165, 560)],
       ['CEYLON TEA', 'Two leaves and a bud', at(330, 1065)],
       ['GREEN PODS', 'Ripen for about nine months', at(470, 980)],
       ['CURED POD', 'Sweated and dried for months', at(585, 1270)]].forEach(([k, note, [px, py]], i) => {
-      const y = 50 + i * 6.6, lw = Math.max(width(FONT.wide, k, 1.75, 0.25), width(FONT.body, note, 2.0));
+      const y = 46 + i * 6.8, lw = Math.max(width(FONT.wide, k, 1.75, 0.25), width(FONT.body, note, 2.0));
       t.push(F.text('wide', k, ox + 8, y, 1.75, { track: 0.25 }), F.text('body', note, ox + 8, y + 2.7, 2.0, { opacity: 0.85 }));
       const sx = ox + 8 + lw + 1.6, sy = y - 0.6;
       t.push(`<path d="M${F.X(sx)} ${F.Y(sy)}H${F.X(Math.min(px - 3, sx + 4))}L${F.X(px)} ${F.Y(py)}" fill="none" stroke="${INK}" stroke-width="${F.S(0.14)}"/><circle cx="${F.X(px)}" cy="${F.Y(py)}" r="${F.S(0.55)}" fill="${INK}"/>`);
@@ -181,16 +180,16 @@ function build(boxKey) {
   // What's inside: intro, three icons, details table.
   const inside = (F, ox, w, seeWhere) => {
     const t = [], r = ox + w - 8;
-    t.push(F.caps('WHAT’S INSIDE', ox + 8, 12), F.caps('VANILLA TEA', r, 12, { anchor: 'end' }), F.rule(ox + 8, 15, r, 15));
-    t.push(F.body(`Ceylon black tea with natural vanilla, in ${pack.bags} tagged, unbleached tea bags of 2 g each.`, ox + 8, 21, w - 16).svg);
+    t.push(head(F, 'What’s inside', ox + 8, r));
+    t.push(F.body(`Ceylon black tea with natural vanilla, in ${pack.bags} tagged, unbleached tea bags of 2 g each.`, ox + 8, 19.6, w - 16).svg);
     const cw = (w - 16) / 3;
+    t.push(F.rule(ox + 8, 28, r, 28));
     [['tea', 'CEYLON TEA'], ['pod', 'NATURAL VANILLA'], ['teabag', `${pack.bags} TEA BAGS`]].forEach(([ic, k], i) => {
       const cx = ox + 8 + cw * (i + 0.5);
-      if (i) t.push(F.rule(ox + 8 + cw * i, 29, ox + 8 + cw * i, 43, 0.35));
-      t.push(F.icon(ic, cx - 4, 30, 0.8), F.text('wide', k, cx, 42, 1.6, { track: 0.15, anchor: 'middle' }));
+      if (i) t.push(F.rule(ox + 8 + cw * i, 28, ox + 8 + cw * i, 42, 0.35));
+      t.push(F.icon(ic, cx - 4, 29.5, 0.8), F.text('wide', k, cx, 41, 1.6, { track: 0.15, anchor: 'middle' }));
     });
-    t.push(F.rule(ox + 8, 29, r, 29));
-    let y = 46.5;
+    let y = 45.5;
     for (const [k, v, soft] of [['INGREDIENTS', 'To be confirmed before print', true], ['NET WEIGHT', `${pack.net} g (${pack.bags} tea bags × 2 g)`], ['STORAGE', 'To be confirmed before print', true], ['DISTRIBUTOR', `${DISTRIBUTOR.name} — see ${seeWhere}`]]) {
       t.push(F.rule(ox + 8, y, r, y, 0.35), F.label(k, ox + 8, y + 3.6), F.body(v, ox + 30, y + 3.6, w - 38, { size: 2.15, opacity: soft ? 0.6 : 1 }).svg);
       y += 6.4 + (width(FONT.body, v, 2.15) > w - 38 ? 3.2 : 0);
@@ -201,10 +200,10 @@ function build(boxKey) {
   // Batch block (Sinhala, English, Tamil), barcode, distributor.
   const baseInfo = (F, ox, w) => {
     const t = [], r = ox + w - 8;
-    t.push(F.caps('VANILLA TEA', ox + 8, 12), F.caps('BATCH DETAILS', r, 12, { anchor: 'end' }), F.rule(ox + 8, 15, r, 15));
+    t.push(head(F, 'Vanilla Tea', ox + 8, r, 'BATCH DETAILS'));
     [['කා.අ.', 'B.N.', 'தொகுதி இல'], ['නි.දි.', 'MFD.', 'பொ.செ திகதி'],
       ['කා.ඉ.දි.', 'EXP.', 'மு.திகதி'], ['උ.සි.මි.රු.', 'MRP RS.', 'விலை ரூபா']].forEach(([si, en, ta], i) => {
-      const y = 22.4 + i * 8;
+      const y = 21.4 + i * 8;
       t.push(shaped(F, si, 1.75, ox + 8, y - 2.5), F.text('wideR', en, ox + 8, y, 1.85, { track: 0.25 }), shaped(F, ta, 1.6, ox + 8, y + 2.3));
       t.push(`<path d="M${F.X(ox + 22)} ${F.Y(y + 0.6)}H${F.X(ox + 44)}" stroke="${INK}" stroke-opacity=".6" stroke-width="${F.S(0.15)}" stroke-dasharray="${F.S(0.4)} ${F.S(0.4)}" fill="none"/>`);
     });
@@ -222,25 +221,30 @@ function build(boxKey) {
     const Fo = face('bottom'); L.Type.push(`<g id="Base">${baseInfo(Fo, 0, Fo.w)}</g>`);
   } else {
     const Fb = face('back'), half = 87.58;
-    L.Type.push(`<g id="Back">${backPlate(Fb, 0, half)}${Fb.rule(half + 1.5, 12, half + 1.5, Fb.h - 10, 0.35)}${inside(Fb, half, Fb.w - half, 'side')}</g>`);
+    L.Type.push(`<g id="Back">${backPlate(Fb, 0, half)}${Fb.rule(half + 1.5, 18, half + 1.5, Fb.h - 10, 0.35)}${inside(Fb, half, Fb.w - half, 'side')}</g>`);
     const Fs = face('sideB'); L.Type.push(`<g id="Side_Batch_and_barcode">${baseInfo(Fs, 0, Fs.w)}</g>`);
     const Fo = face('bottom');
     L.Type.push(`<g id="Base">${Fo.logo(Fo.w / 2, Fo.h / 2 - 3, 24)}${Fo.caps('AUTHENTIC CEYLON VANILLA TEA', Fo.w / 2, Fo.h / 2 + 13, { anchor: 'middle' })}</g>`);
   }
 
-  // ---- lid: the emblem, as on the candles (a long-box lid hangs off the back, so it is turned)
+  // ---- lid: two sprigs reaching in from opposite corners (from the vine set) frame the emblem ring (from the
+  // candles). A long-box lid hangs off the back, so its whole group is turned to read from the front.
   {
-    const F = face('top', B.lidTurn), cx = F.w / 2, cy = 42.5, r = 22, ring = 'SAVOR THE CALM · AUTHENTIC CEYLON VANILLA TEA · ';
+    const F = face('top'), cx = F.w / 2, cy = F.h / 2 - 2, r = 22, ring = 'SAVOR THE CALM · AUTHENTIC CEYLON VANILLA TEA · ';
     const len = 2 * Math.PI * r, track = (len - width(FONT.wide, ring, 2.5)) / ring.length;
-    // Ring path drawn clockwise from the left as seen by the reader (reversed when the lid is turned).
-    const [ax, ay, bx] = [F.X(cx - r), F.Y(cy), F.X(cx + r)];
-    ringPath = `M${ax} ${ay}A${F.S(r)} ${F.S(r)} 0 1 1 ${bx} ${ay}A${F.S(r)} ${F.S(r)} 0 1 1 ${ax} ${ay}`;
+    ringPath = `M${F.X(cx - r)} ${F.Y(cy)}A${F.S(r)} ${F.S(r)} 0 1 1 ${F.X(cx + r)} ${F.Y(cy)}A${F.S(r)} ${F.S(r)} 0 1 1 ${F.X(cx - r)} ${F.Y(cy)}`;
     defs += `<path id="ring" d="${ringPath}"/>`;
+    const ss = 0.024, sw = 1448 * ss, sh = 1086 * ss, p = P.top.panel, pcx = n(p.x + p.w / 2), pcy = n(p.y + p.h / 2);
+    const sprig = F.img(G('v6-sprig.png'), F.w + 1.5 - sw, 1.5 - 168 * ss, sw, sh);
+    defs += `<clipPath id="clip-lid"><rect x="${p.x}" y="${p.y}" width="${n(p.w)}" height="${n(p.h)}"/></clipPath>`;
+    const turn = B.lidTurn ? ` transform="rotate(180 ${pcx} ${pcy})"` : '';
+    L.Painting.push(`<g id="Lid_sprigs" clip-path="url(#clip-lid)"><g${turn}>${sprig}<g transform="rotate(180 ${pcx} ${pcy})">${sprig}</g></g></g>`);
     const fy = F.h - 8.6;
-    L.Type.push(`<g id="Lid"><circle cx="${F.X(cx)}" cy="${F.Y(cy)}" r="${F.S(25.6)}" fill="none" stroke="${INK}" stroke-opacity=".5" stroke-width="${F.S(0.18)}"/>` +
+    L.Type.push(`<g id="Lid"${turn}><circle cx="${F.X(cx)}" cy="${F.Y(cy)}" r="${F.S(25.6)}" fill="none" stroke="${INK}" stroke-opacity=".5" stroke-width="${F.S(0.18)}"/>` +
       `<circle cx="${F.X(cx)}" cy="${F.Y(cy)}" r="${F.S(18.6)}" fill="none" stroke="${INK}" stroke-opacity=".5" stroke-width="${F.S(0.18)}"/>` +
       `<text font-family="'${FONT.wide.ps}'" font-size="${F.S(2.5)}" letter-spacing="${F.S(track)}" fill="${INK}"><textPath xlink:href="#ring">${esc(ring)}</textPath></text>` +
-      F.logo(cx, cy, 19) + F.rule(8, fy - 3.6, F.w - 8, fy - 3.6) + F.caps('VANILLA TEA', 8, fy) + F.caps(`${pack.bags} TEA BAGS`, F.w - 8, fy, { anchor: 'end' }) + '</g>');
+      F.logo(cx, cy, 19) + '</g>');
+    if (B.lidTurn) ringPath = `M0 0`;   // the turned ring is inside a transformed group; no free guide path
   }
 
   const tile = grainTile({ dpi: 600, clump: 0.5 });
