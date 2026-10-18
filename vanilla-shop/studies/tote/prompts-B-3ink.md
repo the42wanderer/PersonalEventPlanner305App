@@ -2,7 +2,7 @@
 
 Attach `stamp-3ink-references.jpg`:
 1. Our current stamp (the scene to keep).
-2. The layout guide: grey is the picture, red bands and cream boxes stay empty.
+2. The layout guide: grey is the picture, red bands and cream boxes stay empty, dark green marks the vine breaking out.
 3–6. Ceylon stamps from the Pinterest board (Kandyan Dancer 4c, Star Orchid 35c, Vesak Orchid 15c, Adam's Peak 10c).
 
 `stamp-3ink-layout-preview.jpg` shows how the lettering will sit, using the current art as a stand-in.
@@ -32,17 +32,24 @@ Exactly three flat inks on a warm cream paper ground, like a stamp printed in a 
 Tones come from hatching density, not from new colours. Leaves are green hatching over cream, not a second green.
 No gradients, no halftone dots, no other colours.
 
-Layout (reference 2):
-- A toothed, perforated paper edge all round, with a narrow cream paper margin inside it.
-- A solid vermilion frame. Across the top, a deep plain vermilion band, about a seventh of the stamp's height,
-  completely empty: no ornament, no letters.
-- The picture sits in a window below the band, with a fine cream rule round it.
+Layout (reference 2), with the proportions of the real Ceylon stamps in references 3 to 6:
+- Perforations: about 15 large, deep, round teeth across the top and bottom and about 19 down each side, evenly
+  spaced, with clean corners, as on references 3 to 6. Not a fine, busy edge.
+- A clear cream paper margin between the teeth and the frame.
+- A wide, solid vermilion frame that is a big part of the design. Across the top, a deep plain band about a sixth
+  of the stamp's height. Side bars about a sixteenth of the width. Across the bottom, a deep band about a seventh
+  of the height. All of it plain and empty: no ornament, no letters.
+- The picture sits in a window inside the frame, with a fine cream rule round it.
 - Down the window's left edge, a narrow plain cream strip, completely empty.
-- Across the bottom, a plain vermilion band holding a square value tablet in each corner, outlined by a fine cream
-  rule and empty inside, and between them a plain cream caption box, completely empty.
-- The vine breaks out of the window: leaves and a flower curl over the right side of the red frame and over the
-  perforated edge at the top right, and two pod bunches hang down over the bottom band at the right. Everything
-  else stays inside the window.
+- In the bottom band: one square value tablet in the bottom-left corner, outlined by a fine cream rule and empty
+  inside, and next to it a plain cream caption box running about two-thirds of the way across, completely empty.
+  The bottom-right corner of the band is left plain for the vine to hang over.
+- The vine breaks out of the stamp, as in reference 1, and this is the most important part. It is big, about a
+  third of the stamp's width. It climbs up the right side of the picture and grows out over the right frame bar,
+  across the top-right corner and past the perforated edge into the space beyond. Large leaves and a flower spill
+  over the outside. Long pod bunches hang down over the bottom-right of the frame and below the stamp's bottom edge.
+  The dark green shape in reference 2 only marks where the vine goes: draw it as the detailed vine from
+  reference 1.
 
 There must be no letters, numbers or symbols anywhere: the red bands, tablets, caption box and left strip stay
 plain and empty, because the lettering is added afterwards. Keep every line thick enough to screen print at 27 cm
@@ -52,8 +59,8 @@ wide.
 
 - Top band: CEYLON in large cream letters, with ලංකා on the left and இலங்கை on the right beneath it.
 - Left strip: VANILLA PLANIFOLIA, reading upwards.
-- Tablets: 25c in each, in cream.
+- Tablet: 25c, in cream.
 - Caption box: THE VANILLA SHOP, with NEGOMBO beneath.
-- Postmark over the bottom-left corner: the logo with THE VANILLA SHOP / NEGOMBO · SRI LANKA round it.
+- Postmark over the top-left corner, clear of the vine: the logo with THE VANILLA SHOP / NEGOMBO · SRI LANKA round it.
 
 Then it is separated into three films: green, vermilion and marigold.
