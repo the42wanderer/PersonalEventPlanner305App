@@ -45,8 +45,8 @@ Tamil before films are made.
 - `vanilla-tote-back_EDITABLE.svg`, `vanilla-tote-back_FILM.pdf`, `vanilla-tote-back_preview.png`,
   `vanilla-tote-back_mockup.jpg`; both sides together in `vanilla-tote_both-sides.jpg`.
 - One screen, the same green as the front (Pantone 7743 C), so no extra ink colour.
-- Layout follows the packaging: ruled top bar (THE VANILLA SHOP / NEGOMBO · SRI LANKA), "Vanilla was never
-  plain." in Instrument Serif Italic (outlined), a drawn cured vanilla pod, the tea boxes' line icons for the range
-  (natural vanilla, Ceylon tea, vanilla tea, scented candles), and the logo with AUTHENTIC CEYLON VANILLA.
+- Layout: the range across the top as the tea boxes' line icons (natural vanilla, Ceylon tea, vanilla tea, scented
+  candles); the logo large in the middle, inside the lid's emblem ring "SAVOR THE CALM · AUTHENTIC CEYLON VANILLA"
+  (the brand's existing line); Instagram @the_vanillashop and NEGOMBO · SRI LANKA along the foot.
 - The small capitals are Roc Grotesk (Adobe Fonts), kept as live text in the editable SVG. Open it in Illustrator
   with Roc Grotesk active, outline the type, and export the film from there; the PDF here is a proof.
