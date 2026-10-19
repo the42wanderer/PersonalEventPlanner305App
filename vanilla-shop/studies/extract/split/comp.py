@@ -86,36 +86,45 @@ def make_bunch(seed=5,n=13):
     pods.append(dict(spread=-11,arch=0.9,L=40,W=1.7,drift=-3,swing=0.4,bulge=0.6,depth=0.55,tone=0.05))
     pods.append(dict(spread=6,arch=0.5,L=50,W=1.85,drift=-8,swing=-0.3,bulge=0.55,depth=0.9,tone=0.12))
     return sorted(pods,key=lambda q:q['depth'])
-def soft_pod(top,ang,L,W,bend):
-    """a broad, simple pod shape: narrow where it joins, full through the body, blunt end"""
-    sp=draw.arc(top,ang,L,bend,5)
+# Pods traced from Agro Ventures' own plantation photo (agroventuresexports.com, home/img3.JPG, read at 664 x 1000 px):
+# each is its centre line from the node to the tip, its width in px, and its depth (0 back .. 1 front).
+TRACE=[
+ ([(352,216),(356,300),(368,400),(380,480),(386,553)],21,0.15),
+ ([(346,216),(337,285),(340,380),(352,470),(358,548)],21,0.25),
+ ([(355,218),(362,330),(371,432),(379,555)],20,0.10),
+ ([(333,214),(303,242),(293,300),(298,382),(318,465)],22,0.45),
+ ([(359,216),(376,320),(410,420),(446,520),(466,604)],24,0.55),
+ ([(368,214),(395,290),(425,380),(458,470),(490,566)],24,0.65),
+ ([(365,212),(390,282),(414,362),(440,442),(462,506)],23,0.75),
+ ([(360,212),(375,290),(395,380),(415,450),(428,488)],24,0.85),
+ ([(372,210),(402,262),(442,332),(490,422),(535,520)],24,0.95)]
+REMNANT={4:[(466,604),(463,628),(461,652),(463,672)],7:[(428,488),(431,500),(436,508)]}   # dried flowers still on the tips
+def traced_pod(pts,wpx,S,O):
+    P=[(O[0]+(x-350)*S,O[1]+(y-212)*S) for x,y in pts]; sp=draw.cr(P,20); W=wpx*S/2*1.3
     def prof(t):
-        w=W*min(1,0.35+t*4.5)*(1+0.08*np.sin(np.pi*t))
-        if t>0.92: w*=np.sqrt(max(0,1-((t-0.92)/0.08)**2))*0.8+0.2
-        return w+0.05
-    return draw.ribbon(sp,prof), sp[-1]
+        w=W*min(1,0.35+t*5.5)*(1+0.06*np.sin(np.pi*t))
+        if t>0.93: w*=np.sqrt(max(0,1-((t-0.93)/0.07)**2))*0.75+0.25
+        return w+0.04
+    return draw.ribbon(sp,prof), P[-1]
 def comp03(W=60,H=70,ox=0):
-    """No. 03, syrup: drawn like Nos. 01 and 02, a few big soft forms. A hand of green pods hangs from above the
-    frame, one flower open at its top; the pods glow light near the flower and deepen towards their ends,
-    two of them ripening gold"""
+    """No. 03, syrup: the bunch traced from Agro Ventures' own vine photo, drawn like Nos. 01 and 02:
+    soft glow from light near the node to deeper tips, back pods softer, dried flowers on two tips, one flower open"""
     p=PAL['03']; cv=Canvas(W,H,ox)
-    node=(27,-6)
-    # the backing leaf, soft and deep
-    cv.add([leaf((node[0]+6,node[1]+8),70,62,10.5,-0.25)],'#4C8650','#24482A',2.2,alpha=0.9,glow=0.8)
-    # back pods first, softer and deeper; then the front ones
-    spec=[  # (dx, angle, length, half-width, bend, depth 0 back .. 1 front)
-        (-14, 97, 58, 2.3, 0.05, 0.15),( 13, 84, 62, 2.3,-0.04, 0.2),( -4, 92, 76, 2.6, 0.02, 0.45),
-        (  7, 87, 69, 2.5,-0.03, 0.55),(-10, 99, 66, 2.45,0.06, 0.75),(  2, 90, 60, 2.55,-0.02,0.9),( 17, 80, 52, 2.3,-0.06,0.35)]
-    light=(node[0]+2,14)
-    golds=[]
-    for dx,ang,L,w,bend,dep in sorted(spec,key=lambda q:q[5]):
-        poly,end=soft_pod((node[0]+dx*0.55,node[1]+abs(dx)*0.25),ang,L,w,bend)
-        core=mix('#B8D492','#7EA866',(1-dep)*0.55); edge=mix('#6E9C5C','#477644',(1-dep)*0.6)
-        cv.add([poly],core,edge,0.45+(1-dep)*0.7,alpha=1.0,centre=light,R=66,glow=0.85,halo=0.06)
-        if L>=64: golds.append((poly,end,dep))
-    for poly,end,dep in golds[:2]:
-        cv.add([poly],'#F0CF66','#B9D48E',0.5+(1-dep)*0.6,alpha=0.85,centre=tuple(end),R=24,glow=0.8,halo=0.0)
-    flower(cv,(28,15),75,1.5,p,blurs=(0.45,0.38,0.75))
+    S=0.158; O=(25,2)                      # 400 px of bunch -> about 63 mm; node near the top edge
+    cv.add([leaf((-6,74),-62,64,10.5,0.25)],'#4C8650','#24482A',2.4,alpha=0.9,glow=0.8)
+    cv.add([stem([(O[0]-2,-6),(O[0],O[1]+0.5)],0.9)],mix(p['stem'],'#FFFFFF',0.15),p['stem'],0.9)
+    light=(O[0]+4,O[1]+8)
+    tips=[]
+    for i,(pts,wpx,dep) in sorted(enumerate(TRACE),key=lambda q:q[1][2]):
+        poly,tip=traced_pod(pts,wpx,S,O)
+        core=mix('#C2DC9C','#86AE6C',(1-dep)*0.55); edge=mix('#557F4A','#3C6438',(1-dep)*0.6)
+        cv.add([poly],core,edge,0.3+(1-dep)*0.7,alpha=1.0,glow=1.15,halo=0.04)
+        if i in (5,8): cv.add([poly],'#F0CF66','#B9D48E',0.45,alpha=0.8,centre=tuple(tip),R=13,glow=0.8,halo=0.0)
+        if i in REMNANT:
+            R_=[(O[0]+(x-350)*S,O[1]+(y-212)*S) for x,y in REMNANT[i]]
+            cv.add([draw.stem(R_,0.32)],'#8A6A3A','#5A4424',0.35,alpha=0.9)
+    cv.add([ellipse_ruffle((O[0],O[1]+0.4),1.6,1.1,0,0.06,5)],mix(p['stem'],'#FFFFFF',0.2),p['stem'],0.6)
+    flower(cv,(44,9),40,1.05,p,blurs=(0.5,0.42,0.8))
     return cv.render(p['ground'],seed=13)
 if __name__=='__main__':
     import sys
