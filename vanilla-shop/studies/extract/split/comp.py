@@ -122,6 +122,9 @@ def comp03(W=60,H=70,ox=0):
     import podpaths as pp
     p=PAL['03']; cv=Canvas(W,H,ox); X,Y=pp.TOP
     cv.add([leaf((X-1,Y+5),114,50,9.6,0.2)],'#6AA463','#2A5230',1.0,alpha=1.0,glow=0.9,halo=0.1)
+    # its own flower, the hero as on Nos. 01 and 02: open above the sweep of pods, behind them, lip to the card
+    cv.add([stem([(X,Y),(X+7,Y+2),(40,15)],0.55)],mix(p['stem'],'#FFFFFF',0.2),p['stem'],0.7)
+    flower(cv,(41,16),24,1.42,p,blurs=(0.42,0.36,0.72))
     cv.add([stem([(X-7,-3),(X-3,3),(X,Y)],0.7)],mix(p['stem'],'#FFFFFF',0.15),p['stem'],0.8)
     for i,(P,w,dep) in enumerate(sorted(pp.PODS,key=lambda q:q[2])):
         poly,cl=pp.outline(P,w)
@@ -135,7 +138,7 @@ def comp03(W=60,H=70,ox=0):
         if dep>=1.0:
             cv.add([poly],'#F0D47A','#B8D48E',0.6,alpha=0.6,centre=tuple(cl[-1]),R=13,glow=0.8,halo=0.0)
     cv.add([bud((X-3,2),-130,11,2.3,-0.25)],p['bud_core'],p['bud_edge'],0.6,glow=1.2)
-    flower(cv,(13,10),20,1.1,p,blurs=(0.45,0.38,0.75))
+
     return cv.render(p['ground'],seed=13)
 if __name__=='__main__':
     import sys
