@@ -86,45 +86,36 @@ def make_bunch(seed=5,n=13):
     pods.append(dict(spread=-11,arch=0.9,L=40,W=1.7,drift=-3,swing=0.4,bulge=0.6,depth=0.55,tone=0.05))
     pods.append(dict(spread=6,arch=0.5,L=50,W=1.85,drift=-8,swing=-0.3,bulge=0.55,depth=0.9,tone=0.12))
     return sorted(pods,key=lambda q:q['depth'])
-# Pods traced from Agro Ventures' own plantation photo (agroventuresexports.com, home/img3.JPG, read at 664 x 1000 px):
-# each is its centre line from the node to the tip, its width in px, and its depth (0 back .. 1 front).
-TRACE=[
- ([(352,216),(356,300),(368,400),(380,480),(386,553)],21,0.15),
- ([(346,216),(337,285),(340,380),(352,470),(358,548)],21,0.25),
- ([(355,218),(362,330),(371,432),(379,555)],20,0.10),
- ([(333,214),(303,242),(293,300),(298,382),(318,465)],22,0.45),
- ([(359,216),(376,320),(410,420),(446,520),(466,604)],24,0.55),
- ([(368,214),(395,290),(425,380),(458,470),(490,566)],24,0.65),
- ([(365,212),(390,282),(414,362),(440,442),(462,506)],23,0.75),
- ([(360,212),(375,290),(395,380),(415,450),(428,488)],24,0.85),
- ([(372,210),(402,262),(442,332),(490,422),(535,520)],24,0.95)]
-REMNANT={4:[(466,604),(463,628),(461,652),(463,672)],7:[(428,488),(431,500),(436,508)]}   # dried flowers still on the tips
-def traced_pod(pts,wpx,S,O):
-    P=[(O[0]+(x-350)*S,O[1]+(y-212)*S) for x,y in pts]; sp=draw.cr(P,20); W=wpx*S/2*1.3
+def tidy_pod(top,dx,L,W,lean,seed):
+    """a botanical-plate pod: leaves the shared stalk narrow, swells to a full body, ends in a rounded tip"""
+    x0,y0=top
+    pts=[(x0,y0),(x0+dx*0.35,y0+L*0.18),(x0+dx*0.8+lean*0.3,y0+L*0.45),(x0+dx+lean*0.7,y0+L*0.75),(x0+dx*1.05+lean,y0+L)]
+    sp=draw.cr(pts,22)
     def prof(t):
-        w=W*min(1,0.35+t*5.5)*(1+0.06*np.sin(np.pi*t))
-        if t>0.93: w*=np.sqrt(max(0,1-((t-0.93)/0.07)**2))*0.75+0.25
-        return w+0.04
-    return draw.ribbon(sp,prof), P[-1]
+        w=W*min(1,(t/0.26))**0.75 if t<0.26 else W*(1+0.05*np.sin(np.pi*(t-0.26)/0.74))
+        if t>0.88: w*=np.sqrt(max(0,1-((t-0.88)/0.12)**2))
+        return w+0.06
+    return draw.ribbon(sp,prof)
 def comp03(W=60,H=70,ox=0):
-    """No. 03, syrup: the bunch traced from Agro Ventures' own vine photo, drawn like Nos. 01 and 02:
-    soft glow from light near the node to deeper tips, back pods softer, dried flowers on two tips, one flower open"""
+    """No. 03, syrup: drawn the way a botanical illustrator would, after their liberties: five full pods packed
+    almost parallel into one elegant bunch on a short stalk, rounded tips at staggered heights, one broad leaf
+    behind, the flower and a bud above. Painted like Nos. 01 and 02: soft glow, soft edge per pod, no streaks"""
     p=PAL['03']; cv=Canvas(W,H,ox)
-    S=0.158; O=(25,2)                      # 400 px of bunch -> about 63 mm; node near the top edge
-    cv.add([leaf((-6,74),-62,64,10.5,0.25)],'#4C8650','#24482A',2.4,alpha=0.9,glow=0.8)
-    cv.add([stem([(O[0]-2,-6),(O[0],O[1]+0.5)],0.9)],mix(p['stem'],'#FFFFFF',0.15),p['stem'],0.9)
-    light=(O[0]+4,O[1]+8)
-    tips=[]
-    for i,(pts,wpx,dep) in sorted(enumerate(TRACE),key=lambda q:q[1][2]):
-        poly,tip=traced_pod(pts,wpx,S,O)
-        core=mix('#C2DC9C','#86AE6C',(1-dep)*0.55); edge=mix('#557F4A','#3C6438',(1-dep)*0.6)
-        cv.add([poly],core,edge,0.3+(1-dep)*0.7,alpha=1.0,glow=1.15,halo=0.04)
-        if i in (5,8): cv.add([poly],'#F0CF66','#B9D48E',0.45,alpha=0.8,centre=tuple(tip),R=13,glow=0.8,halo=0.0)
-        if i in REMNANT:
-            R_=[(O[0]+(x-350)*S,O[1]+(y-212)*S) for x,y in REMNANT[i]]
-            cv.add([draw.stem(R_,0.32)],'#8A6A3A','#5A4424',0.35,alpha=0.9)
-    cv.add([ellipse_ruffle((O[0],O[1]+0.4),1.6,1.1,0,0.06,5)],mix(p['stem'],'#FFFFFF',0.2),p['stem'],0.6)
-    flower(cv,(44,9),40,1.05,p,blurs=(0.5,0.42,0.8))
+    top=(31,17)
+    # the broad leaf behind, leaning down to the right
+    cv.add([leaf((top[0]+2,top[1]+3),52,48,10.5,-0.18)],'#6AA463','#2A5230',0.9,alpha=1.0,glow=0.9,halo=0.1)
+    cv.add([stem([(top[0]-6,0),(top[0]-3,8),(top[0],top[1])],0.75)],mix(p['stem'],'#FFFFFF',0.15),p['stem'],0.8)
+    # five pods, back to front: (dx at the tip, length, half-width, lean, depth)
+    pods=[(-11.5,39,3.0,-1.4,0.25),(11.0,43,3.0,1.6,0.3),(-5.6,47,3.3,-0.6,0.6),(5.8,45,3.3,0.9,0.7),(0.2,52,3.5,0.1,1.0)]
+    for i,(dx,L,w,lean,dep) in enumerate(pods):
+        core=mix('#CDE3A6','#93B977',(1-dep)*0.6); edge=mix('#3F6B3A','#30562F',(1-dep)*0.6)
+        cv.add([tidy_pod(top,dx,L,w,lean,i)],core,edge,0.25+(1-dep)*0.4,alpha=1.0,glow=1.35,halo=0.03)
+    # ripening warmth at the tips of the two front pods
+    for dx,L,w,lean,dep in pods[3:]:
+        tip=(top[0]+dx*1.05+lean,top[1]+L)
+        cv.add([tidy_pod(top,dx,L,w,lean,0)],'#EED06A','#BFD892',0.4,alpha=0.7,centre=tip,R=13,glow=0.8,halo=0.0)
+    cv.add([bud((top[0]-3,8),-130,11,2.3,-0.25)],p['bud_core'],p['bud_edge'],0.6,glow=1.2)
+    flower(cv,(14,13),20,1.15,p,blurs=(0.45,0.38,0.75))
     return cv.render(p['ground'],seed=13)
 if __name__=='__main__':
     import sys
