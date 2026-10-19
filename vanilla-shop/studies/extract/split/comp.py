@@ -57,50 +57,57 @@ def comp02(W=60,H=70,ox=0):
     cv.add([bud((31,13),-168,12,2.6,-0.3),bud((44,3),-100,11,2.4,-0.25),bud((60,6),-5,11,2.3,0.3)],p['bud_core'],p['bud_edge'],0.55,glow=1.2)
     flower(cv,(25,45),86,1.8,p,blurs=(0.45,0.38,0.7))
     return cv.render(p['ground'],seed=12)
-def bunch_pod(o,spread,L,W,drift,seed,curve=0.0):
-    """one green pod of a hanging bunch: a short stalk leaves the node outward, turns over, then the pod hangs"""
-    ox,oy=o
-    pts=[(ox,oy),(ox+spread*2.6,oy-2.4),(ox+spread*5.2,oy-1.4),(ox+spread*6.4+drift*0.15,oy+3.2),
-         (ox+spread*6.9+drift*0.5+curve,oy+L*0.42),(ox+spread*7.1+drift*0.8+curve*1.4,oy+L*0.75),(ox+spread*7.0+drift+curve,oy+L)]
-    sp=draw.cr(pts,22)
+def bunch_pod(o,P):
+    """one pod of a hanging bunch. P: dict with spread (sideways reach of the stalk), arch (how high it rises),
+    L (length), W (half-width), drift (sideways travel of the hanging part), swing (S-curve), bulge (where it is fattest)"""
+    ox,oy=o; s=P['spread']; d=P['drift']; sw=P['swing']
+    reach=abs(s)*P['arch']
+    pts=[(ox,oy),(ox+s*0.45,oy-reach*0.55),(ox+s*0.9,oy-reach*0.35),(ox+s*1.15,oy+2.6),
+         (ox+s*1.2+d*0.35+sw,oy+P['L']*0.38),(ox+s*1.15+d*0.7-sw*0.6,oy+P['L']*0.72),(ox+s*1.1+d,oy+P['L'])]
+    sp=draw.cr(pts,24); W=P['W']; bz=P['bulge']
     def prof(t):
-        if t<0.17: return 0.42
-        if t<0.25: return 0.42+(W-0.42)*(0.5-0.5*np.cos(np.pi*(t-0.17)/0.08))
-        w=W*(1+0.06*np.sin(np.pi*(t-0.25)/0.75))
-        if t>0.94: w*=np.sqrt(max(0,1-((t-0.94)/0.06)**2))
+        if t<0.15: return 0.4
+        if t<0.24: return 0.4+(W*0.82-0.4)*(0.5-0.5*np.cos(np.pi*(t-0.15)/0.09))
+        w=W*(0.82+0.24*np.exp(-((t-bz)/0.28)**2))
+        if t>0.93: w*=np.sqrt(max(0,1-((t-0.93)/0.07)**2))*0.85+0.15*(1-(t-0.93)/0.07)
         return w+0.03
-    body=draw.ribbon(sp,prof,0.004,3,seed)
-    rib=sp[int(len(sp)*0.27):int(len(sp)*0.93)]+np.array([-W*0.38,0])
+    body=draw.ribbon(sp,prof,0.005,3,P['L'])
+    rib=sp[int(len(sp)*0.26):int(len(sp)*0.92)]+np.array([-W*0.36,0])
     return body,rib,sp[-1]
+def make_bunch(seed=5,n=13):
+    """a deterministic but irregular bunch: depth-sorted, uneven spacing, lengths, swings; two pods swing wide"""
+    rng=np.random.default_rng(seed); pods=[]
+    for i in range(n):
+        s=rng.normal(0,4.2); s=np.sign(s)*min(abs(s)+0.8,9.5)
+        pods.append(dict(spread=s,arch=rng.uniform(0.35,0.75),L=rng.uniform(33,58),W=rng.uniform(1.55,2.35),
+                         drift=s*rng.uniform(0.15,0.7)+rng.normal(0,1.8),swing=rng.normal(0,0.35),bulge=rng.uniform(0.45,0.75),
+                         depth=rng.uniform(0,1),tone=rng.uniform(-0.15,0.2)))
+    # two pods that swing wide and cross, as in the photos
+    pods.append(dict(spread=-11,arch=0.9,L=40,W=1.7,drift=-3,swing=0.4,bulge=0.6,depth=0.55,tone=0.05))
+    pods.append(dict(spread=6,arch=0.5,L=50,W=1.85,drift=-8,swing=-0.3,bulge=0.55,depth=0.9,tone=0.12))
+    return sorted(pods,key=lambda q:q['depth'])
 def comp03(W=60,H=70,ox=0):
-    """No. 03, syrup: a bunch of green pods hanging from one node, after real vines;
-    three depths of pods, the back ones deeper and softer, a few tips ripening to gold"""
+    """No. 03, syrup: an irregular bunch of green pods hanging from one node, after real vines;
+    depth-sorted so the back pods are deeper and softer, a few tips ripening to gold"""
     p=PAL['03']; cv=Canvas(W,H,ox)
-    node=(26,8.5)
+    node=(27,9)
     cv.add([leaf((node[0]+5,node[1]+2),64,52,9.6,-0.3)],'#4F8A4E','#1C3A22',1.1,glow=0.8,halo=0.15)
     sheen(cv,[leaf((node[0]+5,node[1]+2),64,52,9.6,-0.3,spine=True)],0.45,'#7FB070','#4F8A4E',1.1,0.5)
     leaves(cv,p,[((node[0]-2,node[1]-1),196,28,6.2,-0.4)],2.6,0.8)
     cv.add([stem([(-4,3),(12,6.5),(node[0],node[1]),(44,5),(66,3)],1.0)],mix(p['stem'],'#FFFFFF',0.1),p['stem'],1.2)
-    rows=[  # (spread, length, half-width, drift, curve)
-      ([(-1.7,40,1.5,-4.5,0.8),(-0.8,47,1.55,-2.2,-0.5),(0.6,45,1.55,1.4,0.6),(1.6,38,1.45,4.2,-0.6)],1.2,0.5),
-      ([(-1.25,50,1.65,-3.4,-0.7),(-0.1,56,1.7,-0.6,0.5),(1.0,52,1.65,2.6,-0.4),(2.0,43,1.55,5.0,0.7)],0.7,0.22),
-      ([(-0.55,54,1.8,-1.6,0.6),(0.5,57,1.85,1.2,-0.6),(1.45,48,1.75,3.6,0.4),(-1.6,45,1.7,-4.2,-0.5)],0.35,0.0)]
-    gold=[]
-    for ri,(row,blur,dark) in enumerate(rows):
-        parts=[bunch_pod(node,s_,L,w,d,ri*10+i,cu) for i,(s_,L,w,d,cu) in enumerate(row)]
-        core=mix(p['pod_core'],p['pod_edge'],dark); edge=mix(p['pod_edge'],p['ground'],dark*0.6)
-        tones=[0.0,0.18,-0.12,0.1,-0.06]
-        for i,q in enumerate(parts):         # each pod on its own, so it keeps its own rim; no two quite the same green
-            tj=tones[i%len(tones)]; cc=mix(core,'#E4F0C0',tj) if tj>0 else mix(core,'#7FA866',-tj)
-            cv.add([q[0]],cc,edge,blur,glow=0.65,halo=0.06)
-            sheen(cv,[q[1]],0.42,'#EEF6D8',core,blur,0.5*(1-dark))
-        if ri==2: gold=[(q[0],q[2]) for q in parts[:3]]
-        if ri==1: gold.append((parts[1][0],parts[1][2]))
-    # ripening: gold creeping up from the tip, faded into the green
-    for poly,tipxy in gold:
-        cv.add([poly],'#F2CF63',p['pod_core'],0.4,alpha=0.85,centre=tuple(tipxy),R=15,glow=0.7,halo=0.0)
+    golds=[]
+    for i,P in enumerate(make_bunch()):
+        body,rib,tip=bunch_pod(node,P)
+        dk=(1-P['depth'])*0.55; blur=0.35+(1-P['depth'])*1.0
+        core=mix(p['pod_core'],p['pod_edge'],dk); core=mix(core,'#E4F0C0',P['tone']) if P['tone']>0 else mix(core,'#7FA866',-P['tone'])
+        edge=mix(p['pod_edge'],p['ground'],dk*0.6)
+        cv.add([body],core,edge,blur,glow=0.65,halo=0.05)
+        sheen(cv,[rib],0.38,'#EEF6D8',core,blur,0.5*(1-dk))
+        if P['depth']>0.55 and P['L']>44 and len(golds)<4:
+            cv.add([body],'#F2CF63',core,blur*0.9,alpha=0.8,centre=tuple(tip),R=P['L']*0.3,glow=0.7,halo=0.0)
+            golds.append(i)
     cv.add([ellipse_ruffle(node,1.3,1.0,0,0.05,5)],mix(p['stem'],'#FFFFFF',0.2),p['stem'],0.7)
-    flower(cv,(46,17),40,0.8,p,blurs=(0.9,0.8,1.0))
+    flower(cv,(47,17),40,0.8,p,blurs=(0.9,0.8,1.0))
     return cv.render(p['ground'],seed=13)
 if __name__=='__main__':
     import sys
