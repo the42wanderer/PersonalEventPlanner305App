@@ -86,28 +86,36 @@ def make_bunch(seed=5,n=13):
     pods.append(dict(spread=-11,arch=0.9,L=40,W=1.7,drift=-3,swing=0.4,bulge=0.6,depth=0.55,tone=0.05))
     pods.append(dict(spread=6,arch=0.5,L=50,W=1.85,drift=-8,swing=-0.3,bulge=0.55,depth=0.9,tone=0.12))
     return sorted(pods,key=lambda q:q['depth'])
+def soft_pod(top,ang,L,W,bend):
+    """a broad, simple pod shape: narrow where it joins, full through the body, blunt end"""
+    sp=draw.arc(top,ang,L,bend,5)
+    def prof(t):
+        w=W*min(1,0.35+t*4.5)*(1+0.08*np.sin(np.pi*t))
+        if t>0.92: w*=np.sqrt(max(0,1-((t-0.92)/0.08)**2))*0.8+0.2
+        return w+0.05
+    return draw.ribbon(sp,prof), sp[-1]
 def comp03(W=60,H=70,ox=0):
-    """No. 03, syrup: an irregular bunch of green pods hanging from one node, after real vines;
-    depth-sorted so the back pods are deeper and softer, a few tips ripening to gold"""
+    """No. 03, syrup: drawn like Nos. 01 and 02, a few big soft forms. A hand of green pods hangs from above the
+    frame, one flower open at its top; the pods glow light near the flower and deepen towards their ends,
+    two of them ripening gold"""
     p=PAL['03']; cv=Canvas(W,H,ox)
-    node=(27,9)
-    cv.add([leaf((node[0]+5,node[1]+2),64,52,9.6,-0.3)],'#4F8A4E','#1C3A22',1.1,glow=0.8,halo=0.15)
-    sheen(cv,[leaf((node[0]+5,node[1]+2),64,52,9.6,-0.3,spine=True)],0.45,'#7FB070','#4F8A4E',1.1,0.5)
-    leaves(cv,p,[((node[0]-2,node[1]-1),196,28,6.2,-0.4)],2.6,0.8)
-    cv.add([stem([(-4,3),(12,6.5),(node[0],node[1]),(44,5),(66,3)],1.0)],mix(p['stem'],'#FFFFFF',0.1),p['stem'],1.2)
+    node=(27,-6)
+    # the backing leaf, soft and deep
+    cv.add([leaf((node[0]+6,node[1]+8),70,62,10.5,-0.25)],'#4C8650','#24482A',2.2,alpha=0.9,glow=0.8)
+    # back pods first, softer and deeper; then the front ones
+    spec=[  # (dx, angle, length, half-width, bend, depth 0 back .. 1 front)
+        (-14, 97, 58, 2.3, 0.05, 0.15),( 13, 84, 62, 2.3,-0.04, 0.2),( -4, 92, 76, 2.6, 0.02, 0.45),
+        (  7, 87, 69, 2.5,-0.03, 0.55),(-10, 99, 66, 2.45,0.06, 0.75),(  2, 90, 60, 2.55,-0.02,0.9),( 17, 80, 52, 2.3,-0.06,0.35)]
+    light=(node[0]+2,14)
     golds=[]
-    for i,P in enumerate(make_bunch()):
-        body,rib,tip=bunch_pod(node,P)
-        dk=(1-P['depth'])*0.55; blur=0.35+(1-P['depth'])*1.0
-        core=mix(p['pod_core'],p['pod_edge'],dk); core=mix(core,'#E4F0C0',P['tone']) if P['tone']>0 else mix(core,'#7FA866',-P['tone'])
-        edge=mix(p['pod_edge'],p['ground'],dk*0.6)
-        cv.add([body],core,edge,blur,glow=0.65,halo=0.05)
-        sheen(cv,[rib],0.38,'#EEF6D8',core,blur,0.5*(1-dk))
-        if P['depth']>0.55 and P['L']>44 and len(golds)<4:
-            cv.add([body],'#F2CF63',core,blur*0.9,alpha=0.8,centre=tuple(tip),R=P['L']*0.3,glow=0.7,halo=0.0)
-            golds.append(i)
-    cv.add([ellipse_ruffle(node,1.3,1.0,0,0.05,5)],mix(p['stem'],'#FFFFFF',0.2),p['stem'],0.7)
-    flower(cv,(47,17),40,0.8,p,blurs=(0.9,0.8,1.0))
+    for dx,ang,L,w,bend,dep in sorted(spec,key=lambda q:q[5]):
+        poly,end=soft_pod((node[0]+dx*0.55,node[1]+abs(dx)*0.25),ang,L,w,bend)
+        core=mix('#B8D492','#7EA866',(1-dep)*0.55); edge=mix('#6E9C5C','#477644',(1-dep)*0.6)
+        cv.add([poly],core,edge,0.45+(1-dep)*0.7,alpha=1.0,centre=light,R=66,glow=0.85,halo=0.06)
+        if L>=64: golds.append((poly,end,dep))
+    for poly,end,dep in golds[:2]:
+        cv.add([poly],'#F0CF66','#B9D48E',0.5+(1-dep)*0.6,alpha=0.85,centre=tuple(end),R=24,glow=0.8,halo=0.0)
+    flower(cv,(28,15),75,1.5,p,blurs=(0.45,0.38,0.75))
     return cv.render(p['ground'],seed=13)
 if __name__=='__main__':
     import sys
