@@ -57,8 +57,8 @@ def trumpet(base,ang,L,r0,rx,ry,ruffle=0.08):
     return tube, mouth, mouth_c
 class Canvas:
     def __init__(s,W,H,ox=0): s.W,s.H,s.ox=W,H,ox; s.layers=[]
-    def add(s,polys,core,edge,blur,depth=1.0,alpha=1.0,glow=1.0,centre=None,R=None):
-        s.layers.append((polys if isinstance(polys,list) else [polys],core,edge,blur,alpha,glow,centre,R))
+    def add(s,polys,core,edge,blur,depth=1.0,alpha=1.0,glow=1.0,centre=None,R=None,halo=0.35):
+        s.layers.append((polys if isinstance(polys,list) else [polys],core,edge,blur,alpha,glow,centre,R,halo))
     def mask(s,polys):
         im=Image.new('L',(s.W*K*SS,s.H*K*SS),0); d=ImageDraw.Draw(im)
         for p in polys: d.polygon([tuple(v) for v in ((np.asarray(p)+np.array([s.ox,0]))*K*SS)],fill=255)
@@ -66,7 +66,7 @@ class Canvas:
     def render(s,ground,grain=8,seed=1):
         g=np.array([int(ground[i:i+2],16) for i in (1,3,5)],np.float32)
         img=np.ones((s.H*K,s.W*K,3),np.float32)*g
-        for polys,core,edge,blur,alpha,glow,centre,R in s.layers:
+        for polys,core,edge,blur,alpha,glow,centre,R,halo in s.layers:
             m=s.mask(polys)
             # interior distance -> light core, saturated edge (the Bloom pin's petals)
             dist=cv2.distanceTransform((m>0.5).astype(np.uint8),cv2.DIST_L2,5)/K
@@ -80,7 +80,7 @@ class Canvas:
             sig=blur*K
             col=cv2.GaussianBlur(col,(0,0),sig*0.6+0.1)
             a=cv2.GaussianBlur(m,(0,0),sig+0.1)*alpha
-            halo=cv2.GaussianBlur(m,(0,0),sig*2.8+1)*0.35*alpha
+            halo=cv2.GaussianBlur(m,(0,0),sig*2.8+1)*halo*alpha
             a=np.clip(a+halo*(1-a),0,1)
             img=img*(1-a[...,None])+col*a[...,None]
         n=np.random.default_rng(seed).normal(0,1,img.shape[:2]).astype(np.float32)*grain
