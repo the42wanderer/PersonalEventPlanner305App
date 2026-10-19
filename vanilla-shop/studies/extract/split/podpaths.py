@@ -13,22 +13,28 @@ def outline(P,W,stalk=0.1):
     """closed outline: narrow at the stalk, full body, round cap at the end"""
     c=path(P); d=np.gradient(c,axis=0); d/=np.linalg.norm(d,axis=1,keepdims=True); nr=np.stack([-d[:,1],d[:,0]],1)
     t=np.linspace(0,1,len(c))
-    w=np.where(t<stalk, 0.35+(W-0.35)*np.sin(np.pi/2*np.clip(t/stalk,0,1))**1.6, W*(1+0.05*np.sin(np.pi*t)))
+    w=np.where(t<stalk, 0.35+(W-0.35)*np.sin(np.pi/2*np.clip(t/stalk,0,1))**1.6, W*(1+0.06*np.sin(np.pi*t)))
+    # a banana's end: the last stretch narrows into a small blunt nub
+    w=np.where(t>0.86, w*(1-0.62*np.clip((t-0.86)/0.14,0,1)**1.3), w)
     L=c+nr*w[:,None]; R=c-nr*w[:,None]
-    a0=np.arctan2(nr[-1,1],nr[-1,0]); cap=[c[-1]+W*np.array([np.cos(a0-k),np.sin(a0-k)]) for k in np.linspace(0,np.pi,24)]
+    we=w[-1]; a0=np.arctan2(nr[-1,1],nr[-1,0]); cap=[c[-1]+we*np.array([np.cos(a0-k),np.sin(a0-k)]) for k in np.linspace(0,np.pi,24)]
     return np.vstack([L,np.array(cap),R[::-1]]), c
-TOP=(31,9)
+TOP=(25,9)
 X,Y=TOP
-# (control points, half-width, depth 0 back .. 1 front). A short fan below the node, then the pods hang
-# almost parallel; two of them, of different sizes, curl up at the end like a banana.
+def crescent(spread,ang,L,bow,lift=0.0):
+    """a pod hanging from the node, slanted ang degrees to the right of vertical, bowed into a gentle crescent
+    (bow mm to the lower left of its chord), its last part easing up and right like a banana's end"""
+    a=np.radians(ang); d=np.array([np.sin(a),np.cos(a)]); n=np.array([-d[1],d[0]])   # n points lower-left
+    S=np.array([X+spread*0.3,Y]); E=S+d*L+np.array([lift*0.6,-lift])
+    P1=S+np.array([spread*1.9,L*0.22])
+    P2=S+d*L*0.72-n*(-bow)
+    return [tuple(S),tuple(P1),tuple(P2),tuple(E)]
+# (control points, half-width, depth 0 back .. 1 front)
 PODS=[
- ([(X,Y),(X-6,Y+5),(X-9,Y+22),(X-9.5,Y+50)],1.65,0.15),
- ([(X,Y),(X+6,Y+5),(X+9,Y+20),(X+9.8,Y+46)],1.65,0.2),
- ([(X,Y),(X-4.5,Y+6),(X-5.5,Y+30),(X-6,Y+56)],1.75,0.4),
- ([(X,Y),(X+4.2,Y+6),(X+5.4,Y+28),(X+5.8,Y+53)],1.75,0.5),
- # the big curl: hangs, then swings up and out to the left
- ([[(X,Y),(X-4,Y+6),(X-7,Y+26),(X-7.6,Y+44)],[(X-7.6,Y+44),(X-7.9,Y+51),(X-10.5,Y+55),(X-14.5,Y+51.5)]],1.7,0.6),
- ([(X,Y),(X-1.6,Y+6),(X-2,Y+30),(X-2.2,Y+59)],1.85,0.75),
- # a smaller curl, turning right
- ([[(X,Y),(X+2.2,Y+7),(X+3.4,Y+24),(X+3.7,Y+39)],[(X+3.7,Y+39),(X+3.9,Y+45),(X+5.6,Y+48.5),(X+8.6,Y+46.5)]],1.8,0.85),
- ([(X,Y),(X+1.2,Y+6),(X+1.6,Y+30),(X+1.8,Y+55)],1.85,1.0)]
+ (crescent(-4.2, 4,44,3.0,1.0),1.7,0.15),
+ (crescent( 4.0,34,42,3.0,1.8),1.7,0.22),
+ (crescent(-2.6,11,54,3.4,1.4),1.8,0.45),
+ (crescent( 2.6,27,51,3.4,2.0),1.8,0.55),
+ (crescent(-1.0,16,58,3.8,1.8),1.9,0.7),
+ (crescent( 1.4,23,48,3.4,2.4),1.85,0.85),
+ (crescent( 0.2,19,55,3.6,2.0),1.9,1.0)]

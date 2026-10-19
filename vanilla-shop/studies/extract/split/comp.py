@@ -121,7 +121,7 @@ def comp03(W=60,H=70,ox=0):
     one broad leaf behind, the flower and a bud above"""
     import podpaths as pp
     p=PAL['03']; cv=Canvas(W,H,ox); X,Y=pp.TOP
-    cv.add([leaf((X+2,Y+4),56,52,10.0,-0.15)],'#6AA463','#2A5230',0.9,alpha=1.0,glow=0.9,halo=0.1)
+    cv.add([leaf((X-1,Y+5),114,50,9.6,0.2)],'#6AA463','#2A5230',1.0,alpha=1.0,glow=0.9,halo=0.1)
     cv.add([stem([(X-7,-3),(X-3,3),(X,Y)],0.7)],mix(p['stem'],'#FFFFFF',0.15),p['stem'],0.8)
     for i,(P,w,dep) in enumerate(sorted(pp.PODS,key=lambda q:q[2])):
         poly,cl=pp.outline(P,w)
