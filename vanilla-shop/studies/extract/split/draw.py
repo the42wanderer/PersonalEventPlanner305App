@@ -57,8 +57,8 @@ def trumpet(base,ang,L,r0,rx,ry,ruffle=0.08):
     return tube, mouth, mouth_c
 class Canvas:
     def __init__(s,W,H,ox=0): s.W,s.H,s.ox=W,H,ox; s.layers=[]
-    def add(s,polys,core,edge,blur,depth=1.0,alpha=1.0,glow=1.0,centre=None,R=None,halo=0.35):
-        s.layers.append((polys if isinstance(polys,list) else [polys],core,edge,blur,alpha,glow,centre,R,halo))
+    def add(s,polys,core,edge,blur,depth=1.0,alpha=1.0,glow=1.0,centre=None,R=None,halo=0.35,wash=None):
+        s.layers.append((polys if isinstance(polys,list) else [polys],core,edge,blur,alpha,glow,centre,R,halo,wash))
     def mask(s,polys):
         im=Image.new('L',(s.W*K*SS,s.H*K*SS),0); d=ImageDraw.Draw(im)
         for p in polys: d.polygon([tuple(v) for v in ((np.asarray(p)+np.array([s.ox,0]))*K*SS)],fill=255)
@@ -66,7 +66,7 @@ class Canvas:
     def render(s,ground,grain=8,seed=1):
         g=np.array([int(ground[i:i+2],16) for i in (1,3,5)],np.float32)
         img=np.ones((s.H*K,s.W*K,3),np.float32)*g
-        for polys,core,edge,blur,alpha,glow,centre,R,halo in s.layers:
+        for polys,core,edge,blur,alpha,glow,centre,R,halo,wash in s.layers:
             m=s.mask(polys)
             # interior distance -> light core, saturated edge (the Bloom pin's petals)
             dist=cv2.distanceTransform((m>0.5).astype(np.uint8),cv2.DIST_L2,5)/K
@@ -83,6 +83,12 @@ class Canvas:
             halo=cv2.GaussianBlur(m,(0,0),sig*2.8+1)*halo*alpha
             a=np.clip(a+halo*(1-a),0,1)
             img=img*(1-a[...,None])+col*a[...,None]
+            if wash:
+                # watercolour: pigment gathers at the edge of a wash as it dries
+                er=cv2.erode((m>0.5).astype(np.uint8),np.ones((int(wash[1]*K)*2+1,)*2,np.uint8))
+                ring=np.clip(m-er.astype(np.float32),0,1); ring=cv2.GaussianBlur(ring,(0,0),K*0.25)
+                wc=np.array([int(wash[0][i:i+2],16) for i in (1,3,5)],np.float32); ra=ring*wash[2]
+                img=img*(1-ra[...,None])+wc*ra[...,None]
         n=np.random.default_rng(seed).normal(0,1,img.shape[:2]).astype(np.float32)*grain
         img+=n[...,None]
         return Image.fromarray(img.clip(0,255).astype(np.uint8))

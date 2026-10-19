@@ -125,12 +125,15 @@ def comp03(W=60,H=70,ox=0):
     cv.add([stem([(X-7,-3),(X-3,3),(X,Y)],0.7)],mix(p['stem'],'#FFFFFF',0.15),p['stem'],0.8)
     for i,(P,w,dep) in enumerate(sorted(pp.PODS,key=lambda q:q[2])):
         poly,cl=pp.outline(P,w)
-        core=mix('#CFE4A8','#93B977',(1-dep)*0.6); edge=mix('#41703C','#30562F',(1-dep)*0.6); bl=0.22+(1-dep)*0.4
-        cv.add([poly],core,edge,bl,alpha=1.0,glow=1.35,halo=0.03)
-        for poly_r,col,a_ in ridges(cl,w,mix(core,'#FFFFFF',0.45),mix(edge,core,0.3)):
-            cv.add([poly_r],col,col,bl*0.8,alpha=a_*(0.5+0.5*dep),halo=0.0)
+        # a watercolour wash, like the petals: pale near the node, deepening to green at the tip, translucent
+        pale=mix('#F1F7DC','#CFE2AE',(1-dep)*0.5); deep=mix('#A9CC8A','#7FA868',(1-dep)*0.55); bl=0.28+(1-dep)*0.4
+        L_=float(np.sum(np.linalg.norm(np.diff(cl,axis=0),axis=1)))
+        cv.add([poly],pale,deep,bl,alpha=0.9,centre=(X,Y-2),R=L_*1.05,glow=0.8,halo=0.02,
+               wash=(mix(deep,'#3E6A3C',0.4),0.4,0.38))
+        for poly_r,col,a_ in ridges(cl,w,mix(pale,'#FFFFFF',0.4),deep):
+            cv.add([poly_r],col,col,bl*1.1,alpha=a_*0.35*(0.5+0.5*dep),halo=0.0)
         if dep>=1.0:
-            cv.add([poly],'#EED06A','#BFD892',0.4,alpha=0.7,centre=tuple(cl[-1]),R=12,glow=0.8,halo=0.0)
+            cv.add([poly],'#F0D47A','#B8D48E',0.6,alpha=0.6,centre=tuple(cl[-1]),R=13,glow=0.8,halo=0.0)
     cv.add([bud((X-3,2),-130,11,2.3,-0.25)],p['bud_core'],p['bud_edge'],0.6,glow=1.2)
     flower(cv,(13,10),20,1.1,p,blurs=(0.45,0.38,0.75))
     return cv.render(p['ground'],seed=13)
