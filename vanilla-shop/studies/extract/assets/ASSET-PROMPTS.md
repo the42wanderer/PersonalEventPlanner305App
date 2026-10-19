@@ -1,85 +1,69 @@
-# Extract labels: new painted assets (GPT image)
+# Extract labels: paintings, in the candle way
 
-The chosen direction is cream paper with each product in one colour. The painting, the type, the two edge bands and
-the numbered neck strip are all vermilion for No. 01, ochre for No. 02 and green for No. 03. The current painting was made in
-full colour, and in one colour the flower sinks into the leaves (board 3). So the new art is painted in grey
-first, then coloured with `tone.py`.
+The last brief (a grey, centred vignette on white) asked for clip art, and that is what it produced. The candles
+work because each one is a whole colour world: the plant is painted tone-on-tone in that colour, with one light
+accent, nihonga texture on washi and a lot of quiet space. The extracts get the same treatment, with two changes
+for a bottle:
 
-Attach the three boards to every prompt, in this order:
+- **The painting is the whole label.** Cream at the top, where the name sits, deepening to the product's colour
+  at the base, and on into the dark extract below the label. Cream and one colour per product, as chosen, but
+  painted rather than printed in a single ink.
+- **The plant rises from the lower centre and fans out**, like a quiet ikebana arrangement, so the label is
+  centred on the bottle. On the candles it entered from the side.
 
-1. `board-1-style.jpg`: our painting style (the tea range).
-2. `board-2-layout.jpg`: where each asset goes and its size.
-3. `board-3-values.jpg`: why it has to be a grey value painting.
+Each product carries its own part of the vanilla story, as each candle carries its own ingredient:
 
-Generate one asset per chat turn. Ask for the highest quality. Use landscape 1536 × 1024 for assets 1 and 2 and portrait
-1024 × 1536 for asset 3.
+| | Colour world | Subject | Light accent |
+|---|---|---|---|
+| No. 01 With alcohol | Vermilion to oxblood | Cured pods, some split open: the classic, deepest extract | One pale vanilla flower |
+| No. 02 Alcohol-free | Honey to burnt amber | The vine in flower: the gentle one | Cream flowers with golden throats |
+| No. 03 Syrup | Sage to deep forest | Green pods hanging in bunches: the sweet fruit | One drop of golden syrup |
 
-## Shared block (paste at the start of every prompt)
+Attach `board-1-style.jpg` (the four candle paintings and the tea vine) and `board-2-layout.jpg` (the label
+layout). Make No. 01 first. Once it is right, attach it as well when you make No. 02 and No. 03, so all three
+share a scale and composition.
 
-Paint in exactly the style of board 1: the same smooth, softly airbrushed botanical painting, gentle gradients,
-crisp clean silhouettes, no outlines, no visible brush strokes, no paper texture. Slightly stylised but botanically
-correct Vanilla planifolia:
-- flowers with three narrow sepals and two petals, and a trumpet-shaped lip rolled round the central column with a
-  softly frilled edge;
-- thick, fleshy, oblong leaves with pointed tips, set alternately on a smooth, succulent stem;
-- cured pods that are long, slim, wrinkled and slightly flattened, with a small curled hook at the tip.
+In GPT, leave out the `--ar` and `--stylize` flags and ask for a wide landscape image. I'll extend the sides
+to the full 226 mm wrap myself.
 
-But paint it in greyscale only, as a monochrome value painting (grisaille) in neutral greys, on a pure white
-background (#FFFFFF). The art will be printed in one colour on cream paper (board 3), so the values do the work:
-- flower petals and lip: the lightest, white to pale grey, with soft grey modelling so their shape reads against
-  the white;
-- leaves: mid grey (30–60%), lighter at the edges, darker towards the midrib;
-- stems: mid grey;
-- cured pods: the darkest, near black, with lighter highlights along the wrinkles.
+## No. 01 · With alcohol
 
-Every element must separate from what is behind it by value, not by colour. No colour at all, no cast shadow, no
-ground, no frame or border, no text, letters or numbers, and nothing touching the edges of the image.
+```
+close-up of a tall spray of cured vanilla pods rising from the lower centre and fanning out like a quiet ikebana arrangement, long slender pods with soft wrinkles, two of them split open showing tiny black seeds, a few long vanilla leaves among them and a single pale waxy vanilla orchid flower near the centre, soft organic silhouettes glowing at the lower centre, smooth gradient from warm cream #FBF1DE at the top, through soft apricot #EBB08C, into vermilion #B83A24, deepening to an oxblood core #4A120C at the base, pods and leaves painted in vermilion and oxblood tones close to the ground around them, the pale cream orchid as the only light accent, soft flat Japanese nihonga painting, mineral pigments on washi paper, delicate gofun white highlights, gentle tonal washes, no glossy highlights, no 3D shading, softly painted edges, painterly nihonga texture, soft focus, fine grain, vast empty cream space across the upper half, quiet and elegant, mono-no-aware --ar 2:1 --stylize 50
+```
 
-## Asset 1: front vignette (landscape)
+## No. 02 · Alcohol-free
 
-[Shared block]
-A wide, low, centred arrangement for the front of a bottle label, about twice as wide as it is tall (board 2,
-asset 1: 40 × 18 mm). One open vanilla flower faces the viewer at the exact centre. Behind and just below it, two
-cured vanilla pods cross in a shallow X, their curled tips reaching out to the left and to the right. A pair of
-leaves sweeps out on each side, the left and right pairs balanced but not mirrored, so it looks natural rather than
-like clip art. One small closed bud on a short stem rises behind the flower, slightly to the right. The whole group
-sits in the middle of the image with generous white space all round, about 80% of the width and 45% of the
-height.
+```
+close-up of a flowering vanilla orchid vine rising from the lower centre and fanning out like a quiet ikebana arrangement, several pale waxy orchid flowers with trumpet-shaped lips and a few closed buds, long glossy leaves on smooth thin stems, two cured vanilla pods resting at the base, soft organic silhouettes glowing at the lower centre, smooth gradient from warm cream #FBF1DE at the top, through pale honey #F0CF8E, into golden ochre #D89A2E, deepening to a burnt amber core #5E3A0C at the base, leaves and stems painted in honey and ochre tones close to the ground around them, the cream flowers with golden throats as the only light accent, soft flat Japanese nihonga painting, mineral pigments on washi paper, delicate gofun white highlights, gentle tonal washes, no glossy highlights, no 3D shading, softly painted edges, painterly nihonga texture, soft focus, fine grain, vast empty cream space across the upper half, quiet and elegant, mono-no-aware --ar 2:1 --stylize 50
+```
 
-## Asset 2: back vignette, hand pollination (landscape)
+## No. 03 · Syrup
 
-[Shared block]
-A close view of a vanilla flower being pollinated by hand, as it is done in Sri Lankan home gardens (board 2,
-asset 2: 40 × 30 mm; the label's history line ends "every flower, open for a single day, is still pollinated by
-hand"). The open flower is seen from a slight angle, so the trumpet-shaped lip and the column inside it are clear.
-From the right, a hand's thumb and forefinger hold a thin, pointed bamboo sliver, its tip just inside the lip. The
-hand is relaxed and natural, with only the thumb and two fingers in view, cropped softly at the wrist. A short
-length of vine with one leaf and a green unripe pod finishes the left side. Centred, with white space all round.
+```
+close-up of a vanilla vine rising from the lower centre and arching outward like a quiet ikebana arrangement, heavy bunches of long green vanilla pods hanging from it, long glossy leaves on smooth thin stems, one small pale orchid bud, a single drop of golden syrup forming at the tip of one pod, soft organic silhouettes glowing at the lower centre, smooth gradient from warm cream #F6F2DE at the top, through soft sage #C6D3A6, into leaf green #4F7448, deepening to a deep forest core #16301C at the base, pods and leaves painted in sage and forest tones close to the ground around them, the glowing golden syrup drop as the only warm accent, soft flat Japanese nihonga painting, mineral pigments on washi paper, delicate gofun white highlights, gentle tonal washes, no glossy highlights, no 3D shading, softly painted edges, painterly nihonga texture, soft focus, fine grain, vast empty cream space across the upper half, quiet and elegant, mono-no-aware --ar 2:1 --stylize 50
+```
 
-If the hand comes out wrong after two tries, use this fallback instead: a small bundle of seven cured vanilla pods
-tied round the middle with a thin cotton string and a simple knot, lying slightly diagonally, the pod tips curling
-naturally.
+## For No. 02 and No. 03, start the prompt with
 
-## Asset 3: climbing-vine border (portrait)
+> Paint a companion to the attached No. 01 painting: the same composition, scale, framing and nihonga technique,
+> with the plant rising from the same point. Only the subject and the colour world change, as follows:
 
-[Shared block]
-A single slim vanilla vine climbing straight up through the centre of the image, for a narrow border strip
-(board 2, asset 3: 12 × 60 mm). The stem rises with a gentle zigzag. Small leaves alternate left and right, about
-seven in all, smaller towards the top. There is one short aerial root at a node and a curled growing tip at the top.
-No flowers and no pods. Keep the whole vine inside a narrow column in the middle third of the image, with white on
-both sides. We use it as it is on one side and mirrored on the other.
+## If it comes out 3D or glossy (as the first candles did)
 
-## Afterwards
+> Keep this exact composition, colours and plant. Repaint it as a flat, soft Japanese nihonga painting: mineral
+> pigment on washi paper, no glossy highlights, no 3D shading, no airbrushed gradients. Thin, smooth stems with no
+> texture or knots. Edges softly painted, not crisp. Fine paper grain throughout.
 
-1. Check each image for:
-   - five narrow tepals plus the lip on each flower;
-   - pods that stay separate;
-   - no extra flowers growing from leaves;
-   - a hand with the right number of fingers, joined naturally;
-   - pure white behind;
-   - no text or signatures.
-   Fix with "Change only the [part]: …" rather than regenerating.
-2. Download the PNG and run `python3 -I tone.py asset-1.png asset-1`. This writes three versions,
-   `asset-1_no01-with-alcohol.png`, `_no02-alcohol-free.png` and `_no03-syrup.png`, with transparent backgrounds,
-   ready to drop on the cream label.
-3. Send them back and I will place them on the labels, the wrap and the bottle mock-ups.
+## Checks
+
+- Vanilla, not some other orchid: a pale flower with a trumpet-shaped lip, long slender pods, and leaves that are
+  fleshy and alternate.
+- The upper half is empty cream: no leaves, mist shapes or birds where the name goes.
+- The colour deepens to the bottom edge. Nothing important is cut off at the bottom, because the label's base meets
+  the bottle there.
+- No text, signature or border.
+
+After that I set the name on the cream sky in the product's dark colour, add the logo and the numbered neck strip,
+extend the gradient round to the back panels, and mock all three up on the bottles. The edge bands from the last
+round probably aren't needed, because the painting already brings the colour to the base. I'll show both ways.
