@@ -86,36 +86,53 @@ def make_bunch(seed=5,n=13):
     pods.append(dict(spread=-11,arch=0.9,L=40,W=1.7,drift=-3,swing=0.4,bulge=0.6,depth=0.55,tone=0.05))
     pods.append(dict(spread=6,arch=0.5,L=50,W=1.85,drift=-8,swing=-0.3,bulge=0.55,depth=0.9,tone=0.12))
     return sorted(pods,key=lambda q:q['depth'])
-def tidy_pod(top,dx,L,W,lean,seed):
-    """a botanical-plate pod: leaves the shared stalk narrow, swells to a full body, ends in a rounded tip"""
+def tidy_pod(top,dx,L,W,lean,curl=0.0,spine=False):
+    """a slender botanical-plate pod: leaves the shared stalk narrow, a long even body, and either a rounded tip
+    or, when curl != 0, a tip that hooks round like a banana's but more so (curl = total turn in degrees, signed)"""
     x0,y0=top
     pts=[(x0,y0),(x0+dx*0.35,y0+L*0.18),(x0+dx*0.8+lean*0.3,y0+L*0.45),(x0+dx+lean*0.7,y0+L*0.75),(x0+dx*1.05+lean,y0+L)]
-    sp=draw.cr(pts,22)
+    sp=draw.cr(pts,24)
+    if curl:
+        d=sp[-1]-sp[-4]; a=np.arctan2(d[1],d[0]); step=np.linalg.norm(d)/3*0.9; tail=[sp[-1]]
+        step=1.45
+        for k in range(1,25):
+            a+=np.radians(curl)/24*(0.55+0.9*k/24); step*=0.935; tail.append(tail[-1]+step*np.array([np.cos(a),np.sin(a)]))
+        sp=np.vstack([sp,np.array(tail[1:])])
+    if spine: return sp
+    n=len(sp); body_end=24*4/ n if curl else 1.0
     def prof(t):
-        w=W*min(1,(t/0.26))**0.75 if t<0.26 else W*(1+0.05*np.sin(np.pi*(t-0.26)/0.74))
-        if t>0.88: w*=np.sqrt(max(0,1-((t-0.88)/0.12)**2))
-        return w+0.06
+        w=W*min(1,(t/0.22))**0.75 if t<0.22 else W*(1+0.04*np.sin(np.pi*(t-0.22)/0.78))
+        if curl:
+            if t>0.74: w*=max(0.2,1-((t-0.74)/0.26)**1.1*0.82)
+        elif t>0.9: w*=np.sqrt(max(0,1-((t-0.9)/0.1)**2))
+        return w+0.05
     return draw.ribbon(sp,prof)
+def ridges(sp,W,light,dark):
+    """faint lines running the length of the bean: one pale ridge, one shallow groove"""
+    s=sp[int(len(sp)*0.24):int(len(sp)*0.9)]
+    d=np.gradient(s,axis=0); d/=np.linalg.norm(d,axis=1,keepdims=True)+1e-9; nrm=np.stack([-d[:,1],d[:,0]],1)
+    out=[]
+    for off,col,a,w in ((-0.38,light,0.7,0.17),(0.2,dark,0.55,0.14),(0.6,light,0.4,0.11)):
+        out.append((draw.ribbon(s+nrm*W*off,lambda t,w=w:w*np.sin(np.pi*t)**0.4+0.02),col,a))
+    return out
 def comp03(W=60,H=70,ox=0):
-    """No. 03, syrup: drawn the way a botanical illustrator would, after their liberties: five full pods packed
-    almost parallel into one elegant bunch on a short stalk, rounded tips at staggered heights, one broad leaf
-    behind, the flower and a bud above. Painted like Nos. 01 and 02: soft glow, soft edge per pod, no streaks"""
-    p=PAL['03']; cv=Canvas(W,H,ox)
-    top=(31,17)
-    # the broad leaf behind, leaning down to the right
-    cv.add([leaf((top[0]+2,top[1]+3),52,48,10.5,-0.18)],'#6AA463','#2A5230',0.9,alpha=1.0,glow=0.9,halo=0.1)
-    cv.add([stem([(top[0]-6,0),(top[0]-3,8),(top[0],top[1])],0.75)],mix(p['stem'],'#FFFFFF',0.15),p['stem'],0.8)
-    # five pods, back to front: (dx at the tip, length, half-width, lean, depth)
-    pods=[(-11.5,39,3.0,-1.4,0.25),(11.0,43,3.0,1.6,0.3),(-5.6,47,3.3,-0.6,0.6),(5.8,45,3.3,0.9,0.7),(0.2,52,3.5,0.1,1.0)]
-    for i,(dx,L,w,lean,dep) in enumerate(pods):
-        core=mix('#CDE3A6','#93B977',(1-dep)*0.6); edge=mix('#3F6B3A','#30562F',(1-dep)*0.6)
-        cv.add([tidy_pod(top,dx,L,w,lean,i)],core,edge,0.25+(1-dep)*0.4,alpha=1.0,glow=1.35,halo=0.03)
-    # ripening warmth at the tips of the two front pods
-    for dx,L,w,lean,dep in pods[3:]:
-        tip=(top[0]+dx*1.05+lean,top[1]+L)
-        cv.add([tidy_pod(top,dx,L,w,lean,0)],'#EED06A','#BFD892',0.4,alpha=0.7,centre=tip,R=13,glow=0.8,halo=0.0)
-    cv.add([bud((top[0]-3,8),-130,11,2.3,-0.25)],p['bud_core'],p['bud_edge'],0.6,glow=1.2)
-    flower(cv,(14,13),20,1.15,p,blurs=(0.45,0.38,0.75))
+    """No. 03, syrup: hand-placed pods (podpaths.py) painted like Nos. 01 and 02: slender pods hanging almost
+    parallel from one node, two curling up at the end like a banana, faint ridges along each bean,
+    one broad leaf behind, the flower and a bud above"""
+    import podpaths as pp
+    p=PAL['03']; cv=Canvas(W,H,ox); X,Y=pp.TOP
+    cv.add([leaf((X+2,Y+4),56,52,10.0,-0.15)],'#6AA463','#2A5230',0.9,alpha=1.0,glow=0.9,halo=0.1)
+    cv.add([stem([(X-7,-3),(X-3,3),(X,Y)],0.7)],mix(p['stem'],'#FFFFFF',0.15),p['stem'],0.8)
+    for i,(P,w,dep) in enumerate(sorted(pp.PODS,key=lambda q:q[2])):
+        poly,cl=pp.outline(P,w)
+        core=mix('#CFE4A8','#93B977',(1-dep)*0.6); edge=mix('#41703C','#30562F',(1-dep)*0.6); bl=0.22+(1-dep)*0.4
+        cv.add([poly],core,edge,bl,alpha=1.0,glow=1.35,halo=0.03)
+        for poly_r,col,a_ in ridges(cl,w,mix(core,'#FFFFFF',0.45),mix(edge,core,0.3)):
+            cv.add([poly_r],col,col,bl*0.8,alpha=a_*(0.5+0.5*dep),halo=0.0)
+        if dep>=1.0:
+            cv.add([poly],'#EED06A','#BFD892',0.4,alpha=0.7,centre=tuple(cl[-1]),R=12,glow=0.8,halo=0.0)
+    cv.add([bud((X-3,2),-130,11,2.3,-0.25)],p['bud_core'],p['bud_edge'],0.6,glow=1.2)
+    flower(cv,(13,10),20,1.1,p,blurs=(0.45,0.38,0.75))
     return cv.render(p['ground'],seed=13)
 if __name__=='__main__':
     import sys
