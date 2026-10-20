@@ -71,3 +71,75 @@ def optC(W=60,H=70,ox=0):
     img=pod3d.composite(img,pods,ox,grain=0)
     cf=Canvas(W,H,ox); flower(cf,(33,30),30,1.9,P,blurs=(0.42,0.36,0.7))
     return finish(cf,img,15)
+# ---------- D: pods painted like the flower: airbrushed glow, a soft light line down the middle (like the tepals'
+# midribs), a dark halo underneath for separation, rounded tips with a small nub. Shapes after the stamp: nearly
+# straight, almost parallel, close-packed, the body swelling slightly; the leftmost only gently curved.
+def pod_shape(pts,W,n=400):
+    """a pod as an illustrator draws it: narrow out of the stalk, swelling to its widest about a third of the way
+    down, a long gentle taper, then a blunt rounded end"""
+    sp=draw.cr(pts,60)
+    L=np.concatenate([[0],np.cumsum(np.linalg.norm(np.diff(sp,axis=0),axis=1))]); u=np.linspace(0,L[-1],n)
+    sp=np.stack([np.interp(u,L,sp[:,0]),np.interp(u,L,sp[:,1])],1); t=u/L[-1]
+    w=np.where(t<0.08,0.3+(0.55*W-0.3)*t/0.08,
+       np.where(t<0.35,W*(0.55+0.45*np.sin(np.pi/2*(t-0.08)/0.27)),W*(1-0.32*((t-0.35)/0.65)**1.6)))
+    w=np.where(t>0.94,w*np.sqrt(np.clip(1-((t-0.94)/0.06)**2,0.03,1)),w)
+    d=np.gradient(sp,axis=0); d/=np.linalg.norm(d,axis=1,keepdims=True); nr=np.stack([-d[:,1],d[:,0]],1)
+    return sp,w,nr,d
+def soft_pods(cv,spec,ox=0):
+    for pts,W,dep in sorted(spec,key=lambda q:q[2]):
+        sp,w,nr,d=pod_shape(pts,W)
+        poly=np.vstack([sp+nr*w[:,None],(sp-nr*w[:,None])[::-1]])
+        bl=0.2+(1-dep)*0.7
+        wh=w+0.4; halo=np.vstack([sp+nr*wh[:,None],(sp-nr*wh[:,None])[::-1]])
+        cv.add([halo],'#183A20','#183A20',0.4+bl*0.4,alpha=0.6*(0.4+0.6*dep),halo=0.0)
+        core=mix('#CDE3A2','#A9C98A',(1-dep)*0.5); edge=mix('#5A8D4A','#4A7C42',(1-dep)*0.5)
+        cv.add([poly],core,edge,bl,glow=0.95,halo=0.04)
+        n=len(sp); i0,i1=int(n*0.1),int(n*0.9)
+        mid=sp[i0:i1]+nr[i0:i1]*(w[i0:i1,None]*0.22)
+        cv.add([draw.ribbon(mid,lambda t,ww=W:ww*0.17*np.sin(np.pi*t)**0.7+0.03)],'#F4FADF',core,bl*0.9,alpha=0.55*(0.5+0.5*dep),halo=0.0)
+        tip=sp[-1]-d[-1]*0.1
+        cv.add([ellipse_ruffle(tuple(tip),W*0.3,W*0.24,0,0.03,5)],'#B5B860',edge,bl*0.7,alpha=0.75,halo=0.0)
+def optD(W=60,H=70,ox=0):
+    s=60/1161; rp=lambda p:(p[0]*s,p[1]*s); R=lambda pts:[rp(q) for q in pts]
+    cv=Canvas(W,H,ox)
+    cv.add([leaf(rp((455,130)),116,50,8.6,0.14)],'#5C9656','#2E5C33',1.0,alpha=0.9,glow=0.9,halo=0.08)
+    ST=[[(462,0),(466,70),(458,128)],[(458,128),(445,160),(432,195)],[(458,128),(462,160),(462,185)],
+        [(470,140),(505,200),(530,250),(552,280)],[(505,200),(522,270),(528,330)],[(470,90),(560,150),(640,230),(700,320)]]
+    cv.add([stem([rp(q) for q in s_],0.8 if i==0 else 0.6) for i,s_ in enumerate(ST)],'#C2DC9E','#6E9C5C',0.35,glow=1.0,halo=0.04)
+    cv.add([ellipse_ruffle(rp(k),0.95,0.55,20,0.04,5) for k in [(458,128),(447,146),(505,200),(528,262)]],'#DCEBBA','#7FAA66',0.3,halo=0.0)
+    flower(cv,rp((805,300)),22,1.0,P,blurs=(0.42,0.36,0.72))
+    soft_pods(cv,[(R([(476,600),(472,780),(460,960)]),2.0,0.1),
+                  (R([(528,330),(540,470),(552,640),(560,780)]),2.1,0.3),
+                  (R([(500,520),(510,720),(528,900),(548,1070)]),2.3,0.45),
+                  (R([(432,195),(424,420),(410,640),(392,860)]),2.3,0.6),
+                  (R([(552,280),(588,430),(622,580),(650,740)]),2.3,0.75),
+                  (R([(462,185),(476,430),(516,720),(566,980),(604,1220)]),2.75,1.0)],ox)
+    return cv.render(G,seed=16)
+# ---------- E: the same composition, the pods painted by one of the four styles in podstyles.py
+POD_SPEC=[([(472,640),(458,800),(442,975)],1.85,0.1),([(535,360),(552,480),(575,650)],1.9,0.25),
+          ([(493,560),(505,780),(545,960),(590,1095)],2.05,0.45),([(425,195),(420,420),(408,650),(388,860)],2.05,0.6),
+          ([(560,285),(630,430),(710,600),(768,765)],2.05,0.75),([(460,185),(468,420),(560,720),(690,960),(765,1245)],2.35,1.0)]
+def optE(style,W=60,H=70,ox=0):
+    import podstyles as ps
+    s=60/1161; rp=lambda p:(p[0]*s,p[1]*s)
+    cv=Canvas(W,H,ox)
+    cv.add([leaf(rp((455,130)),116,50,8.6,0.14)],'#5C9656','#2E5C33',1.0,alpha=0.9,glow=0.9,halo=0.08)
+    ST=[[(462,0),(466,70),(458,128)],[(458,128),(440,160),(425,195)],[(458,128),(462,160),(460,185)],
+        [(470,140),(505,200),(530,260),(560,285)],[(505,200),(530,280),(535,360)],[(458,128),(480,300),(493,560)],
+        [(458,128),(470,400),(472,640)],[(470,90),(560,150),(640,230),(700,320)]]
+    cv.add([stem([rp(q) for q in s_],0.8 if i==0 else 0.6) for i,s_ in enumerate(ST)],'#C2DC9E','#6E9C5C',0.3,glow=1.0,halo=0.04)
+    cv.add([ellipse_ruffle(rp(k),0.95,0.55,20,0.04,5) for k in [(458,128),(447,146),(505,200),(538,268)]],'#DCEBBA','#7FAA66',0.25,halo=0.0)
+    flower(cv,rp((805,300)),22,1.0,P,blurs=(0.42,0.36,0.72))
+    img=cv.render(G,grain=0,raw=True)
+    for i,(pts,Wd,dep) in enumerate(sorted(POD_SPEC,key=lambda q:q[2])):
+        sp,w,nr,d=pod_shape([rp(q) for q in pts],Wd)
+        pod=ps.Pod(sp,w,nr,H*20,W*20,ox)
+        ps.halo(img,pod,dep); ps.STYLES[style](img,pod,dep,seed=i*7+3)
+        tip=sp[-1]-d[-1]*0.1+[ox,0]; cv2_tip(img,tip,Wd*0.28,dep)
+    img+=np.random.default_rng(16).normal(0,1,img.shape[:2]).astype(np.float32)[...,None]*8
+    return Image.fromarray(img.clip(0,255).astype(np.uint8))
+def cv2_tip(img,c,r,dep):
+    import cv2
+    m=np.zeros(img.shape[:2],np.float32); cv2.circle(m,(int(c[0]*20),int(c[1]*20)),int(r*20),1.0,-1,cv2.LINE_AA)
+    m=cv2.GaussianBlur(m,(0,0),2+(1-dep)*8)*0.75
+    img[:]=img*(1-m[...,None])+np.array([181,184,96],np.float32)*m[...,None]
