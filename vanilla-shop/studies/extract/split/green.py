@@ -74,10 +74,17 @@ def optC(W=60,H=70,ox=0):
 # ---------- D: pods painted like the flower: airbrushed glow, a soft light line down the middle (like the tepals'
 # midribs), a dark halo underneath for separation, rounded tips with a small nub. Shapes after the stamp: nearly
 # straight, almost parallel, close-packed, the body swelling slightly; the leftmost only gently curved.
+def hermite(top,tip,a0,a1,n=200):
+    """one cubic between two ends with a set direction at each (degrees from straight down, + towards the right).
+    With a0 <= a1 the curve turns one way only: a single clean arc, no wobble."""
+    P0,P1=np.array(top,float),np.array(tip,float); L=np.linalg.norm(P1-P0)
+    T0=np.array([np.sin(np.radians(a0)),np.cos(np.radians(a0))])*L; T1=np.array([np.sin(np.radians(a1)),np.cos(np.radians(a1))])*L
+    t=np.linspace(0,1,n)[:,None]
+    return (2*t**3-3*t**2+1)*P0+(t**3-2*t**2+t)*T0+(-2*t**3+3*t**2)*P1+(t**3-t**2)*T1
 def pod_shape(pts,W,n=400):
     """a pod as an illustrator draws it: narrow out of the stalk, swelling to its widest about a third of the way
     down, a long gentle taper, then a blunt rounded end"""
-    sp=draw.cr(pts,60)
+    sp=pts if isinstance(pts,np.ndarray) else draw.cr(pts,60)
     L=np.concatenate([[0],np.cumsum(np.linalg.norm(np.diff(sp,axis=0),axis=1))]); u=np.linspace(0,L[-1],n)
     sp=np.stack([np.interp(u,L,sp[:,0]),np.interp(u,L,sp[:,1])],1); t=u/L[-1]
     w=np.where(t<0.08,0.3+(0.55*W-0.3)*t/0.08,
@@ -116,9 +123,10 @@ def optD(W=60,H=70,ox=0):
                   (R([(462,185),(476,430),(516,720),(566,980),(604,1220)]),2.75,1.0)],ox)
     return cv.render(G,seed=16)
 # ---------- E: the same composition, the pods painted by one of the four styles in podstyles.py
-POD_SPEC=[([(472,640),(458,800),(442,975)],1.85,0.1),([(535,360),(552,480),(575,650)],1.9,0.25),
-          ([(493,560),(505,780),(545,960),(590,1095)],2.05,0.45),([(425,195),(420,420),(408,650),(388,860)],2.05,0.6),
-          ([(560,285),(630,430),(710,600),(768,765)],2.05,0.75),([(460,185),(468,420),(560,720),(690,960),(765,1245)],2.35,1.0)]
+# each pod: top (px on the reference), tip (px), direction at the top, direction at the tip, half-width (mm), depth
+POD_H=[((472,640),(446,975),-2,-6,1.85,0.1),((535,360),(572,650),4,10,1.9,0.25),
+       ((493,560),(588,1095),2,18,2.05,0.45),((425,195),(392,860),-1,-6,2.05,0.6),
+       ((560,285),(766,765),10,34,2.05,0.75),((460,185),(762,1245),-4,34,2.35,1.0)]
 def optE(style,W=60,H=70,ox=0):
     import podstyles as ps
     s=60/1161; rp=lambda p:(p[0]*s,p[1]*s)
@@ -132,8 +140,8 @@ def optE(style,W=60,H=70,ox=0):
     flower(cv,rp((805,300)),22,1.0,P,blurs=(0.42,0.36,0.72))
     img=cv.render(G,grain=0,raw=True)
     import cv2
-    for i,(pts,Wd,dep) in enumerate(sorted(POD_SPEC,key=lambda q:q[2])):
-        sp,w,nr,d=pod_shape([rp(q) for q in pts],Wd)
+    for i,(top,tip,a0,a1,Wd,dep) in enumerate(sorted(POD_H,key=lambda q:q[5])):
+        sp,w,nr,d=pod_shape(hermite(rp(top),rp(tip),a0,a1),Wd)
         pod=ps.Pod(sp,w,nr,H*20,W*20,ox)
         ps.halo(img,pod,dep)
         # paint the pod on its own layer, then give it the flower's softness
