@@ -135,11 +135,12 @@ def optE(style,W=60,H=70,ox=0):
     ST=[[(462,0),(466,70),(458,128)],[(458,128),(440,160),(425,195)],[(458,128),(462,160),(460,185)],
         [(470,140),(505,200),(530,260),(560,285)],[(505,200),(530,280),(535,360)],[(458,128),(480,300),(493,560)],
         [(458,128),(470,400),(472,640)],[(470,90),(560,150),(640,230),(700,320)]]
-    cv.add([stem([rp(q) for q in s_],0.8 if i==0 else 0.6) for i,s_ in enumerate(ST)],'#C2DC9E','#6E9C5C',0.3,glow=1.0,halo=0.04)
-    cv.add([ellipse_ruffle(rp(k),0.95,0.55,20,0.04,5) for k in [(458,128),(447,146),(505,200),(538,268)]],'#DCEBBA','#7FAA66',0.25,halo=0.0)
+    cv.add([stem([rp(q) for q in s_],0.8 if i==0 else 0.6) for i,s_ in enumerate(ST)],'#C2DC9E','#6E9C5C',0.16,glow=1.0,halo=0.04)
+    cv.add([ellipse_ruffle(rp(k),0.95,0.55,20,0.04,5) for k in [(458,128),(447,146),(505,200),(538,268)]],'#DCEBBA','#7FAA66',0.12,halo=0.0)
     flower(cv,rp((805,300)),22,1.0,P,blurs=(0.42,0.36,0.72))
     img=cv.render(G,grain=0,raw=True)
     import cv2
+    under=np.zeros(img.shape[:2],np.float32)                 # coverage of the pods painted so far
     for i,(top,tip,a0,a1,Wd,dep) in enumerate(sorted(POD_H,key=lambda q:q[5])):
         sp,w,nr,d=pod_shape(hermite(rp(top),rp(tip),a0,a1),Wd)
         pod=ps.Pod(sp,w,nr,H*20,W*20,ox)
@@ -149,16 +150,21 @@ def optE(style,W=60,H=70,ox=0):
         orig=ps.put; ps.put=lambda im,pd,rgb,a: cap.update(rgb=rgb.astype(np.float32),a=a.astype(np.float32))
         ps.STYLES[style](img,pod,dep,seed=i*7+3); ps.put=orig
         rgb,a=cap['rgb'],cap['a']
-        sharp=0.2+(1-dep)*0.55; soft=sharp+0.4+(1-dep)*0.45          # mm, as the tepals (0.42) and back tepals
+        sharp=0.2+(1-dep)*0.5; soft=sharp+0.3+(1-dep)*0.4          # mm, as the tepals (0.42) and back tepals
         r1,a1=ps.soften(rgb,a,sharp); r2,a2=ps.soften(rgb,a,soft)
         rng=np.random.default_rng(i+11); f0=rng.uniform(0.25,0.7); fw=rng.uniform(0.25,0.4)
         f=np.clip(np.exp(-((pod.tt-f0)/fw)**2)*(0.55+0.45*dep)*1.6,0,1)
-        f=cv2.GaussianBlur(f.astype(np.float32),(0,0),20)
+        f=np.maximum(f,np.exp(-(pod.tt/0.13)**2)*(0.75+0.25*dep))                    # the attachment
+        if dep>=0.55:                                                                # crisp where it crosses a pod
+            ov=under[pod.y0:pod.y1,pod.x0:pod.x1]
+            f=np.maximum(f,np.clip(ov*1.6,0,1)*0.9)
+        f=cv2.GaussianBlur(f.astype(np.float32),(0,0),14)
         rr=r1*f[...,None]+r2*(1-f[...,None]); aa=a1*f+a2*(1-f)
-        glow=cv2.GaussianBlur(a,(0,0),soft*2.8*20)*0.3*(0.5+0.5*dep)    # the faint glow past the edge
+        glow=cv2.GaussianBlur(a,(0,0),soft*2.8*20)*0.22*(0.5+0.5*dep)    # the faint glow past the edge
         lt=ps.ramp(dep)['light']
         orig(img,pod,np.broadcast_to(lt,glow.shape+(3,)).astype(np.float32),glow)
         orig(img,pod,rr,aa)
+        u=under[pod.y0:pod.y1,pod.x0:pod.x1]; u[:]=np.maximum(u,a)
         tip=sp[-1]-d[-1]*0.1+[ox,0]; cv2_tip(img,tip,Wd*0.28,dep)
     img+=np.random.default_rng(16).normal(0,1,img.shape[:2]).astype(np.float32)[...,None]*8
     return Image.fromarray(img.clip(0,255).astype(np.uint8))
