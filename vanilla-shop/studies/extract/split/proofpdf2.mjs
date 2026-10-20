@@ -13,7 +13,7 @@ for(const sp of specs){
     return `<path d="M${x+dx*3} ${y}H${x+dx*9}M${x} ${y+dy*3}V${y+dy*9}" stroke="#000" stroke-width="0.15"/>`}).join('');
   html+=`<div class="p"><img src="file://${T}${f}" style="width:${W+6}mm;height:${H+6}mm"><svg viewBox="0 0 246 100">${m}</svg>
   <div class="s" style="top:${y1+10}mm">${cap} · trim ${W} × ${H} mm · bleed 3 mm · ${label}
-  <span class="k" style="background:#FF2BA6"></span>estimate or unknown: confirm<span class="k" style="background:#12B5EA"></span>calculated or from the listings: check</div></div>`;}
+  <span class="k" style="background:#FF2BA6"></span>still unknown: confirm<span class="k" style="background:#12B5EA"></span>from the listings, not the old labels: check</div></div>`;}
 html+='</body></html>'; fs.writeFileSync(T+'proofpdf.html',html);
 const b=await chromium.launch(); const p=await b.newPage(); await p.goto('file://'+T+'proofpdf.html'); await p.waitForTimeout(1500);
 await p.pdf({path:out,width:'246mm',height:'100mm',printBackground:true}); await b.close();
