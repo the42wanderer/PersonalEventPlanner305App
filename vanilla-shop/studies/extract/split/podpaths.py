@@ -21,11 +21,11 @@ def outline(P,W,stalk=0.1):
     return np.vstack([L,np.array(cap),R[::-1]]), c
 TOP=(25,9)
 X,Y=TOP
-def crescent(spread,ang,L,bow,lift=0.0):
+def crescent(spread,ang,L,bow,lift=0.0,flip=False):
     """a pod hanging from the node, slanted ang degrees to the right of vertical, bowed into a gentle crescent
     (bow mm to the lower left of its chord), its last part easing up and right like a banana's end"""
     a=np.radians(ang); d=np.array([np.sin(a),np.cos(a)]); n=np.array([-d[1],d[0]])   # n points lower-left
-    S=np.array([X+spread*0.3,Y]); E=S+d*L+np.array([lift*0.6,-lift])
+    S=np.array([X+spread*0.3,Y]); E=S+d*L+np.array([(-1 if flip else 1)*lift*0.6,-lift])
     P1=S+np.array([spread*1.9,L*0.22])
     P2=S+d*L*0.72-n*(-bow)
     return [tuple(S),tuple(P1),tuple(P2),tuple(E)]
@@ -37,7 +37,10 @@ PODS=[
  (crescent( 2.6,27,51,3.4,2.0),1.8,0.55),
  (crescent(-1.0,16,58,3.8,1.8),1.9,0.7),
  (crescent( 1.4,23,48,3.4,2.4),1.85,0.85),
- (crescent( 0.2,19,55,3.6,2.0),1.9,1.0)]
+ (crescent( 0.2,19,55,3.6,2.0),1.9,1.0),
+ # two that curve the other way, sweeping down-left behind the bunch; the right-leaning beans cross over them
+ (crescent(-2.0,-9,50,-3.4,1.6,True),1.75,0.1),
+ (crescent(3.6,-7,57,-3.2,1.4,True),1.8,0.32)]
 
 def slices(P,W,stalk=0.1,n=40):
     """the pod cut across into n slices (polygons) with each slice's position t along the pod, for fading focus"""
