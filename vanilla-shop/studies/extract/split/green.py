@@ -141,10 +141,10 @@ def optE(style,W=60,H=70,ox=0):
         orig=ps.put; ps.put=lambda im,pd,rgb,a: cap.update(rgb=rgb.astype(np.float32),a=a.astype(np.float32))
         ps.STYLES[style](img,pod,dep,seed=i*7+3); ps.put=orig
         rgb,a=cap['rgb'],cap['a']
-        sharp=0.32+(1-dep)*0.5; soft=sharp+0.65+(1-dep)*0.4          # mm, as the tepals (0.42) and back tepals
+        sharp=0.2+(1-dep)*0.55; soft=sharp+0.4+(1-dep)*0.45          # mm, as the tepals (0.42) and back tepals
         r1,a1=ps.soften(rgb,a,sharp); r2,a2=ps.soften(rgb,a,soft)
         rng=np.random.default_rng(i+11); f0=rng.uniform(0.25,0.7); fw=rng.uniform(0.25,0.4)
-        f=np.clip(np.exp(-((pod.tt-f0)/fw)**2)*(0.55+0.45*dep)*1.25,0,1)
+        f=np.clip(np.exp(-((pod.tt-f0)/fw)**2)*(0.55+0.45*dep)*1.6,0,1)
         f=cv2.GaussianBlur(f.astype(np.float32),(0,0),20)
         rr=r1*f[...,None]+r2*(1-f[...,None]); aa=a1*f+a2*(1-f)
         glow=cv2.GaussianBlur(a,(0,0),soft*2.8*20)*0.3*(0.5+0.5*dep)    # the faint glow past the edge
