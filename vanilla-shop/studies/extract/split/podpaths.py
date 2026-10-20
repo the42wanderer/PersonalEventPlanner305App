@@ -38,3 +38,14 @@ PODS=[
  (crescent(-1.0,16,58,3.8,1.8),1.9,0.7),
  (crescent( 1.4,23,48,3.4,2.4),1.85,0.85),
  (crescent( 0.2,19,55,3.6,2.0),1.9,1.0)]
+
+def slices(P,W,stalk=0.1,n=40):
+    """the pod cut across into n slices (polygons) with each slice's position t along the pod, for fading focus"""
+    poly,c=outline(P,W,stalk); m=len(c)
+    L=poly[:m]; R=poly[m+24:][::-1]
+    out=[]
+    for i in range(n):
+        a=int(i*(m-1)/n); b=int((i+1)*(m-1)/n)+1
+        quad=np.vstack([L[a:b+1],R[a:b+1][::-1]]); out.append((quad,(i+0.5)/n))
+    out.append((poly[m-1:m+25],1.0))      # the round end
+    return out

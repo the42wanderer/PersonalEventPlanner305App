@@ -61,7 +61,11 @@ class Canvas:
         s.layers.append((polys if isinstance(polys,list) else [polys],core,edge,blur,alpha,glow,centre,R,halo,wash))
     def mask(s,polys):
         im=Image.new('L',(s.W*K*SS,s.H*K*SS),0); d=ImageDraw.Draw(im)
-        for p in polys: d.polygon([tuple(v) for v in ((np.asarray(p)+np.array([s.ox,0]))*K*SS)],fill=255)
+        for p in polys:
+            wgt=1.0
+            if isinstance(p,tuple) and len(p)==2 and np.isscalar(p[1]): p,wgt=p
+            if wgt<=0.01: continue
+            d.polygon([tuple(v) for v in ((np.asarray(p)+np.array([s.ox,0]))*K*SS)],fill=int(255*min(1,wgt)))
         return np.asarray(im.resize((s.W*K,s.H*K),Image.LANCZOS)).astype(np.float32)/255
     def render(s,ground,grain=8,seed=1):
         g=np.array([int(ground[i:i+2],16) for i in (1,3,5)],np.float32)

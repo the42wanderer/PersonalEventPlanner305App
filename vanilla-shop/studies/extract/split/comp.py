@@ -131,8 +131,16 @@ def comp03(W=60,H=70,ox=0):
         # a watercolour wash, like the petals: pale near the node, deepening to green at the tip, translucent
         pale=mix('#F1F7DC','#CFE2AE',(1-dep)*0.5); deep=mix('#A9CC8A','#7FA868',(1-dep)*0.55); bl=0.28+(1-dep)*0.4
         L_=float(np.sum(np.linalg.norm(np.diff(cl,axis=0),axis=1)))
-        cv.add([poly],pale,deep,bl,alpha=0.9,centre=(X,Y-2),R=L_*1.05,glow=0.8,halo=0.02,
-               wash=(mix(deep,'#3E6A3C',0.4),0.4,0.38))
+        # soft underlayer: the whole bean out of focus
+        cv.add([poly],pale,deep,0.6+(1-dep)*0.9,alpha=0.85,centre=(X,Y-2),R=L_*1.05,glow=0.8,halo=0.02)
+        # sharp wash on top that comes into focus along part of the bean and melts away elsewhere,
+        # at a different place on each bean; front beans mostly sharp, back ones mostly soft
+        rng=np.random.default_rng(int(dep*100)+7); f0=rng.uniform(0.3,0.75); fw=rng.uniform(0.26,0.4)
+        f1=rng.uniform(0.0,1.0); fw1=rng.uniform(0.08,0.16)
+        def focus(t): return np.clip((0.5+0.5*dep)*1.5*(np.exp(-((t-f0)/fw)**2)+0.6*np.exp(-((t-f1)/fw1)**2)),0,1)
+        sl=[(q,float(focus(t))) for q,t in pp.slices(P,w)]
+        cv.add(sl,pale,deep,0.18,alpha=1.0,centre=(X,Y-2),R=L_*1.05,glow=0.8,halo=0.0,
+               wash=(mix(deep,'#3E6A3C',0.45),0.32,0.45))
         for poly_r,col,a_ in ridges(cl,w,mix(pale,'#FFFFFF',0.4),deep):
             cv.add([poly_r],col,col,bl*1.1,alpha=a_*0.35*(0.5+0.5*dep),halo=0.0)
         if dep>=1.0:
