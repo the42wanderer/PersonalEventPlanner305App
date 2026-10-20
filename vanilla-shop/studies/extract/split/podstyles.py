@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 K=20; SS=2
 def hx(c): return np.array([int(c[i:i+2],16) for i in (1,3,5)],np.float32)
 L2=np.array([-0.6,-0.8]); L2/=np.linalg.norm(L2)
-RAMP=dict(shadow='#548A48',mid='#9CC676',light='#D2E8A6',hi='#EEF7D6')
+RAMP=dict(shadow='#5C9450',mid='#A9D082',light='#DAEEB0',hi='#F3FADF')
 def ramp(dep,ground='#2F5A33'):
     f=(1-dep)*0.42; g=hx(ground); return {k:hx(v)+(g-hx(v))*f for k,v in RAMP.items()}
 def noise2(h,w,scale,seed):
@@ -17,7 +17,7 @@ class Pod:
     def __init__(s,sp,w,nr,H,W,ox):
         s.sp,s.w,s.nr=sp,w,nr; s.t=np.linspace(0,1,len(sp))
         poly=np.vstack([sp+nr*w[:,None],(sp-nr*w[:,None])[::-1]])+[ox,0]
-        x0,y0=np.floor(poly.min(0)*K).astype(int)-30; x1,y1=np.ceil(poly.max(0)*K).astype(int)+30
+        x0,y0=np.floor(poly.min(0)*K).astype(int)-260; x1,y1=np.ceil(poly.max(0)*K).astype(int)+260
         s.x0,s.y0=max(x0,0),max(y0,0); s.x1,s.y1=min(x1,W),min(y1,H)
         h,wd=s.y1-s.y0,s.x1-s.x0; s.h,s.wd=h,wd
         m=Image.new('L',(wd*SS,h*SS),0); ImageDraw.Draw(m).polygon([tuple(((v*K)-[s.x0,s.y0])*SS) for v in poly],fill=255)

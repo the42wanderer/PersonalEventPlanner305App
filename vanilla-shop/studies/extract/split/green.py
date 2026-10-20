@@ -131,15 +131,31 @@ def optE(style,W=60,H=70,ox=0):
     cv.add([ellipse_ruffle(rp(k),0.95,0.55,20,0.04,5) for k in [(458,128),(447,146),(505,200),(538,268)]],'#DCEBBA','#7FAA66',0.25,halo=0.0)
     flower(cv,rp((805,300)),22,1.0,P,blurs=(0.42,0.36,0.72))
     img=cv.render(G,grain=0,raw=True)
+    import cv2
     for i,(pts,Wd,dep) in enumerate(sorted(POD_SPEC,key=lambda q:q[2])):
         sp,w,nr,d=pod_shape([rp(q) for q in pts],Wd)
         pod=ps.Pod(sp,w,nr,H*20,W*20,ox)
-        ps.halo(img,pod,dep); ps.STYLES[style](img,pod,dep,seed=i*7+3)
+        ps.halo(img,pod,dep)
+        # paint the pod on its own layer, then give it the flower's softness
+        cap={}
+        orig=ps.put; ps.put=lambda im,pd,rgb,a: cap.update(rgb=rgb.astype(np.float32),a=a.astype(np.float32))
+        ps.STYLES[style](img,pod,dep,seed=i*7+3); ps.put=orig
+        rgb,a=cap['rgb'],cap['a']
+        sharp=0.32+(1-dep)*0.5; soft=sharp+0.65+(1-dep)*0.4          # mm, as the tepals (0.42) and back tepals
+        r1,a1=ps.soften(rgb,a,sharp); r2,a2=ps.soften(rgb,a,soft)
+        rng=np.random.default_rng(i+11); f0=rng.uniform(0.25,0.7); fw=rng.uniform(0.25,0.4)
+        f=np.clip(np.exp(-((pod.tt-f0)/fw)**2)*(0.55+0.45*dep)*1.25,0,1)
+        f=cv2.GaussianBlur(f.astype(np.float32),(0,0),20)
+        rr=r1*f[...,None]+r2*(1-f[...,None]); aa=a1*f+a2*(1-f)
+        glow=cv2.GaussianBlur(a,(0,0),soft*2.8*20)*0.3*(0.5+0.5*dep)    # the faint glow past the edge
+        lt=ps.ramp(dep)['light']
+        orig(img,pod,np.broadcast_to(lt,glow.shape+(3,)).astype(np.float32),glow)
+        orig(img,pod,rr,aa)
         tip=sp[-1]-d[-1]*0.1+[ox,0]; cv2_tip(img,tip,Wd*0.28,dep)
     img+=np.random.default_rng(16).normal(0,1,img.shape[:2]).astype(np.float32)[...,None]*8
     return Image.fromarray(img.clip(0,255).astype(np.uint8))
 def cv2_tip(img,c,r,dep):
     import cv2
     m=np.zeros(img.shape[:2],np.float32); cv2.circle(m,(int(c[0]*20),int(c[1]*20)),int(r*20),1.0,-1,cv2.LINE_AA)
-    m=cv2.GaussianBlur(m,(0,0),2+(1-dep)*8)*0.75
+    m=cv2.GaussianBlur(m,(0,0),7+(1-dep)*10)*0.45
     img[:]=img*(1-m[...,None])+np.array([181,184,96],np.float32)*m[...,None]
