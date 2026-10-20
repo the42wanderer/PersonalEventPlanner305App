@@ -115,38 +115,48 @@ def ridges(sp,W,light,dark):
     for off,col,a,w in ((-0.38,light,0.7,0.17),(0.2,dark,0.55,0.14),(0.6,light,0.4,0.11)):
         out.append((draw.ribbon(s+nrm*W*off,lambda t,w=w:w*np.sin(np.pi*t)**0.4+0.02),col,a))
     return out
+# Composition after the reference the client supplied (ref-03-composition.webp, 1161 x 1354 px), read in px and
+# scaled onto the 60 x 70 mm panel. Pods: centre line, width in px, depth (0 back .. 1 front).
+RS=60/1161
+REF_PODS=[
+ ([(472,640),(452,800),(432,975)],46,0.05),
+ ([(535,360),(552,480),(575,650)],48,0.2),
+ ([(493,560),(505,780),(545,960),(590,1095)],58,0.35),
+ ([(425,195),(418,420),(392,650),(340,860)],58,0.55),
+ ([(560,285),(630,430),(710,600),(768,765)],58,0.7),
+ ([(460,185),(468,420),(560,720),(690,960),(765,1245)],76,1.0)]
+REF_STALKS=[[(462,0),(466,70),(458,128)],[(458,128),(440,160),(425,195)],[(458,128),(462,160),(460,185)],
+            [(470,140),(505,200),(530,260),(560,285)],[(505,200),(530,280),(535,360)],[(458,128),(480,300),(493,560)],
+            [(458,128),(470,400),(472,640)],[(470,90),(560,150),(640,230),(700,320)]]
+REF_KNOTS=[(458,128),(447,146),(505,200),(538,268)]
+def rp(p): return (p[0]*RS,p[1]*RS)
+def ref_pod(pts,wpx):
+    sp=draw.cr([rp(q) for q in pts],30); W=wpx*RS/2*1.35
+    def prof(t):
+        if t<0.06: return W*0.45+0.05
+        if t<0.16: return W*(0.45+0.55*np.sin(np.pi/2*(t-0.06)/0.1))+0.05
+        if t>0.8: return W*max(0.12,np.cos(np.pi/2*(t-0.8)/0.2)**0.8)+0.05
+        return W+0.05
+    return draw.ribbon(sp,prof), sp
 def comp03(W=60,H=70,ox=0):
-    """No. 03, syrup: hand-placed pods (podpaths.py) painted like Nos. 01 and 02: slender pods hanging almost
-    parallel from one node, two curling up at the end like a banana, faint ridges along each bean,
-    one broad leaf behind, the flower and a bud above"""
-    import podpaths as pp
-    p=PAL['03']; cv=Canvas(W,H,ox); X,Y=pp.TOP
-    cv.add([leaf((X-1,Y+5),114,50,9.6,0.2)],'#6AA463','#2A5230',1.0,alpha=1.0,glow=0.9,halo=0.1)
-    # its own flower, the hero as on Nos. 01 and 02: open above the sweep of pods, behind them, lip to the card
-    cv.add([stem([(X,Y),(X+7,Y+2),(40,15)],0.55)],mix(p['stem'],'#FFFFFF',0.2),p['stem'],0.7)
-    flower(cv,(41,16),24,1.42,p,blurs=(0.42,0.36,0.72))
-    cv.add([stem([(X-7,-3),(X-3,3),(X,Y)],0.7)],mix(p['stem'],'#FFFFFF',0.15),p['stem'],0.8)
-    for i,(P,w,dep) in enumerate(sorted(pp.PODS,key=lambda q:q[2])):
-        poly,cl=pp.outline(P,w)
-        # a watercolour wash, like the petals: pale near the node, deepening to green at the tip, translucent
-        pale=mix('#F1F7DC','#CFE2AE',(1-dep)*0.5); deep=mix('#A9CC8A','#7FA868',(1-dep)*0.55); bl=0.28+(1-dep)*0.4
-        L_=float(np.sum(np.linalg.norm(np.diff(cl,axis=0),axis=1)))
-        # soft underlayer: the whole bean out of focus
-        cv.add([poly],pale,deep,0.6+(1-dep)*0.9,alpha=0.85,centre=(X,Y-2),R=L_*1.05,glow=0.8,halo=0.02)
-        # sharp wash on top that comes into focus along part of the bean and melts away elsewhere,
-        # at a different place on each bean; front beans mostly sharp, back ones mostly soft
-        rng=np.random.default_rng(int(dep*100)+7); f0=rng.uniform(0.3,0.75); fw=rng.uniform(0.26,0.4)
-        f1=rng.uniform(0.0,1.0); fw1=rng.uniform(0.08,0.16)
-        def focus(t): return np.clip((0.5+0.5*dep)*1.5*(np.exp(-((t-f0)/fw)**2)+0.6*np.exp(-((t-f1)/fw1)**2)),0,1)
-        sl=[(q,float(focus(t))) for q,t in pp.slices(P,w)]
-        cv.add(sl,pale,deep,0.18,alpha=1.0,centre=(X,Y-2),R=L_*1.05,glow=0.8,halo=0.0,
-               wash=(mix(deep,'#3E6A3C',0.45),0.32,0.45))
-        for poly_r,col,a_ in ridges(cl,w,mix(pale,'#FFFFFF',0.4),deep):
-            cv.add([poly_r],col,col,bl*1.1,alpha=a_*0.35*(0.5+0.5*dep),halo=0.0)
-        if dep>=1.0:
-            cv.add([poly],'#F0D47A','#B8D48E',0.6,alpha=0.6,centre=tuple(cl[-1]),R=13,glow=0.8,halo=0.0)
-    cv.add([bud((X-3,2),-130,11,2.3,-0.25)],p['bud_core'],p['bud_edge'],0.6,glow=1.2)
-
+    """No. 03, syrup: green pods hanging on short stalks from a jointed stem, leaf behind on the left, flower
+    open to the right (the client's reference composition). Pods painted like No. 01's cured pods: a solid body,
+    light in the middle, deeper at the edge, a shine line running down the centre"""
+    p=PAL['03']; cv=Canvas(W,H,ox)
+    # the leaf behind, soft
+    cv.add([leaf(rp((455,130)),116,50,8.6,0.14)],'#5C9656','#2E5C33',0.9,alpha=0.95,glow=0.9,halo=0.08)
+    sheen(cv,[leaf(rp((455,130)),116,50,8.6,0.14,spine=True)],0.35,'#7AB06E','#5C9656',0.9,0.35)
+    cv.add([stem([rp(q) for q in s_],0.75 if i==0 else 0.6) for i,s_ in enumerate(REF_STALKS)],'#B4D290','#56864C',0.2,glow=1.0,halo=0.04)
+    cv.add([ellipse_ruffle(rp(k),0.95,0.55,20,0.04,5) for k in REF_KNOTS],'#D2E6AE','#6E9C5C',0.18,halo=0.0)
+    flower(cv,rp((805,300)),22,1.0,p,blurs=(0.4,0.32,0.65))
+    for pts,wpx,dep in REF_PODS:
+        poly,sp=ref_pod(pts,wpx)
+        bl=0.18+(1-dep)*0.45
+        core=mix('#CFE59E','#AACB82',(1-dep)*0.5); edge=mix('#5A8C46','#4A7A40',(1-dep)*0.5)
+        cv.add([poly],core,edge,bl,glow=0.9,halo=0.03)
+        # the shine line down the middle, as on the cured pods
+        n=len(sp); s_=sp[int(n*0.12):int(n*0.86)]+np.array([-0.18*wpx*RS/2,0])
+        cv.add([draw.ribbon(s_,lambda t,w=wpx*RS*0.07:w*np.sin(np.pi*t)**0.6+0.03)],'#F4FAE2',core,bl*0.8,alpha=0.75*(0.5+0.5*dep),halo=0.0)
     return cv.render(p['ground'],seed=13)
 if __name__=='__main__':
     import sys
