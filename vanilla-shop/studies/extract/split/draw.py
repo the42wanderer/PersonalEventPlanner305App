@@ -67,9 +67,9 @@ class Canvas:
             if wgt<=0.01: continue
             d.polygon([tuple(v) for v in ((np.asarray(p)+np.array([s.ox,0]))*K*SS)],fill=int(255*min(1,wgt)))
         return np.asarray(im.resize((s.W*K,s.H*K),Image.LANCZOS)).astype(np.float32)/255
-    def render(s,ground,grain=8,seed=1):
+    def render(s,ground,grain=8,seed=1,base=None,raw=False):
         g=np.array([int(ground[i:i+2],16) for i in (1,3,5)],np.float32)
-        img=np.ones((s.H*K,s.W*K,3),np.float32)*g
+        img=np.ones((s.H*K,s.W*K,3),np.float32)*g if base is None else base.copy()
         for polys,core,edge,blur,alpha,glow,centre,R,halo,wash in s.layers:
             m=s.mask(polys)
             # interior distance -> light core, saturated edge (the Bloom pin's petals)
@@ -95,6 +95,7 @@ class Canvas:
                 img=img*(1-ra[...,None])+wc*ra[...,None]
         n=np.random.default_rng(seed).normal(0,1,img.shape[:2]).astype(np.float32)*grain
         img+=n[...,None]
+        if raw: return img
         return Image.fromarray(img.clip(0,255).astype(np.uint8))
 
 def green_pod(p0,ang,L,W,bend,curl=0):
