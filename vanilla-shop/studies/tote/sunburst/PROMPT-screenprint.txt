@@ -1,0 +1,114 @@
+Create the artwork for a one-colour screen-printed tote bag: a stylised vintage postage stamp showing a vanilla garden in Sri Lanka. Portrait 4:5, the flat artwork only, seen straight on, filling the canvas.
+
+THE MOST IMPORTANT RULE
+This is a graphic print, not a realistic illustration. Think of a hand-cut screen print or a linocut: a 1950s travel poster, a vintage South Asian matchbox label or a mid-century stamp. It is not a banknote engraving, an etching, a photograph or a digital painting. Everything is simplified into bold flat shapes. Nothing is rendered in three dimensions, nothing has realistic skin, muscle or fabric texture, and no face is drawn in detail. If a choice comes up between realistic and simple, always choose simple. The result should look charming and designed, never lifelike.
+
+INK AND PAPER
+- Exactly one ink: flat solid black (#1A1714) on warm off-white unbleached cotton (#EFE6D2). Nothing else.
+- The ink is always 100% solid. There are no greys, no tints of black, no gradients, no airbrush, no soft shadows, no glow, no blur and no photographic halftone dots.
+- Every area of the picture is one of exactly three treatments, and nothing in between:
+  1. SOLID: flat black.
+  2. LINES: a tint made of bold, evenly spaced parallel black lines. Every line is the same thickness, about 0.35% of the image width, with gaps of the same size. The lines run in one direction per shape, chosen to suit that shape, and do not change thickness to model form. This is the only "mid-tone" in the whole design.
+  3. PAPER: bare off-white, left empty.
+- Shapes are separated by a confident black outline, about 0.6% of the image width, slightly irregular as if cut by hand. Outlines are even in weight, not swelling and tapering like a pen or an engraving tool.
+- The thinnest mark anywhere is 0.35% of the image width. There are no hairlines, no fine cross-hatching, no stippling, no tiny dots, no speckle and no texture overlay.
+- A very subtle printed feel is welcome: edges a touch soft from the screen mesh, and the odd tiny pinhole in a large black area. Do not add fake distressing, scratches or a worn vintage filter.
+- Roughly 40% of the image is black overall. The design should read clearly as a black-and-cream pattern even when seen as a small thumbnail.
+
+DRAWING STYLE
+- Flat, stylised and decorative, with simple geometric rhythm, like a skilled printmaker cutting stencils. Forms are reduced to their essential silhouettes, with gently stylised curves and repeating patterns: palm fronds as a fan of identical long leaf shapes, thatch as rows of identical short strokes, sun rays as identical straight wedges.
+- There is no perspective modelling and no cast light. Depth comes only from overlapping and from the treatment: near things bold, far things lighter and simpler.
+- Plants and objects are drawn as silhouettes with a few bold interior lines. A leaf is a black or line-tint shape with one paper midrib line. A pod is a slim shape with one paper highlight line.
+
+PEOPLE: STYLISED, NEVER REALISTIC
+- Both figures are drawn like the people on a mid-century travel poster or a folk print: simple, graceful, slightly elongated silhouettes with smooth outlines, the proportions of a stylised illustration.
+- Faces are in profile or three-quarter profile, drawn with only a few marks: the outline of the profile (forehead, nose, lips, chin) and one small almond or dash for the eye. Add one curve for an eyebrow if needed. No pupils, eye whites, eyelashes, nostrils, teeth, wrinkles, pores, beard texture or facial shading. Faces stay as paper with that outline, or as a solid black silhouette with the profile edge in paper.
+- Skin is one treatment only: either flat paper inside an outline, or the LINES tint. There is no modelling of muscles, ribs, collarbones or joints, and no shading on arms or chest.
+- Hair is a single solid black shape with two or three paper lines to show its direction.
+- Hands are simple mitten-like shapes with the fingers shown by one or two short lines. They are small and tidy, holding their object clearly. No knuckles, nails or tendons.
+- Clothing is a paper shape with a few long, smooth black lines for its main folds, five to eight per garment. No fabric texture.
+- The mood is warm, calm and dignified, like an illustration of a story, not a portrait.
+
+THE STAMP (layout; x = % across from the left, y = % down from the top)
+- Outside the stamp is plain off-white paper.
+- The stamp's outline is an even row of round perforation bites: 18 along the top and bottom, 23 down each side, all the same size and evenly spaced, with clean square corners.
+- Inside the bites, a thin paper margin, then a wide frame of SOLID black, about 6% of the stamp's width.
+  - Running round the middle of the frame is a simple repeating border cut out in paper: small diamonds alternating with dots, all identical and evenly spaced, between two thin paper rules.
+  - In each corner of the frame is a square tile of black holding a simple eight-petalled paper flower, all four identical.
+- Across the top, inside the frame, is a wide banner (y 6% to 13%, x 12% to 88%) with a gently arched lower edge. It is plain paper, outlined in black, and completely empty.
+- Bottom left is a square tablet with small notched corners (x 7% to 23%, y 79% to 93%). It is plain paper, outlined with a black double rule, and completely empty.
+- Along the bottom, right of the tablet, is a long rectangular caption box (x 25% to 80%, y 82% to 91%). It is plain paper, outlined with a black double rule, and completely empty.
+- The picture fills the window inside the frame, from y 13% to y 79%, edged by one thin paper rule.
+
+THE PICTURE
+Early morning in a small vanilla garden beside a village house in the Sri Lankan hills. A wife hand-pollinates the vanilla flowers on a vine; her husband stands beside her holding a basket of picked pods and looks up at her work.
+
+Tone map, so the picture reads at a distance:
+- SOLID black: the hair of both people, the doorway and windows of the house, the coconut palm silhouettes, the shrubs behind the people, the vine's stem, the darker half of each vanilla leaf, the support tree's shadow side and the vanilla pods.
+- LINES tint: the sky (horizontal lines), the hills (lines following their slopes), the thatched roof (vertical strokes), the house walls (horizontal lines), the man's skin, the woman's skin, the lit half of each leaf, the basket (a woven crisscross of bold lines) and the tree bark (vertical lines).
+- PAPER: the sun, the people's white clothes, the vanilla flowers, the highlight line down each pod, the midrib of each leaf, and the banner, tablet and caption box.
+
+The sky and sun (upper left and centre):
+- The sun is a plain paper circle at x 31%, y 22%, about 9% of the stamp's width across.
+- Around it, 24 straight rays are drawn as alternating paper and LINES-tint wedges radiating to the edges of the sky. They are bold and graphic, like a 1950s poster sunburst.
+
+The hills: two overlapping ranges of low, smooth, rounded hills across the middle distance, from y 38% to 46%, behind the palms. The far range is paper outlined in black; the near range is the LINES tint.
+
+The palms: five coconut palms on the left, between x 8% and 45%. Each is a slim, gently curved trunk drawn as a black line with small paper notches, topped by a fan of eight to ten identical long feathered fronds in SOLID black. The nearest stands at x 15% and reaches up to y 24%; the others are shorter and further back.
+
+The house (left middle ground, x 7% to 46%, y 40% to 70%):
+- A low village house seen at a slight angle, with a big, deep thatched roof shaped like a simple tent, its eaves low at y 57%.
+- The roof is drawn as rows of identical short vertical strokes, with a solid black band under the eaves for shadow.
+- The walls are the LINES tint, with a SOLID black doorway and two small SOLID black windows.
+
+The shrubs: a band of simple, rounded SOLID black bush shapes with a few paper leaf cuts, filling the ground behind both people from y 62% to 79%, so the white clothes stand out strongly against them.
+
+The man (left foreground):
+- His head is at x 27%, y 50%. He stands from y 47% down to the caption box, which hides his legs below the knee.
+- He stands in three-quarter view facing right, his face turned up towards the woman's hands. His profile is drawn with a few marks as described under PEOPLE.
+- He is bare-chested. His skin is the LINES tint inside a smooth outline, with no muscle or rib detail. His hair is a short, wavy SOLID black shape, with a small simple beard shape in SOLID black along his jaw.
+- A plain white cloth hangs over his left shoulder and across his chest. He wears a white sarong to below the knee. Both are paper with a few long fold lines.
+- With both hands he holds a shallow round woven basket in front of his waist, centred at x 33%, y 68%. His hands are simple shapes curled under the rim, one at each side.
+- In the basket lie six or seven slim vanilla pods, laid lengthways, as SOLID black shapes, each with one paper highlight line.
+
+The woman (centre):
+- Her head is at x 53%, y 41%. She stands on the ground from y 37% down to the caption box, which hides her ankles.
+- She stands in profile, facing right, with both arms raised in front of her towards a flower above her head height. Her body is a graceful, simple upright silhouette.
+- Her hair is a SOLID black shape pulled back into a round bun at the nape of her neck, with two or three paper lines.
+- Her face is a clean profile outline with one small almond for the eye.
+- She wears a fitted white short-sleeved jacket and an ankle-length white wrapped cloth that falls in six long, smooth vertical fold lines, its end tucked at the waist. Both are paper.
+- Her arms are the LINES tint.
+- Her hands meet at x 62%, y 31%. Her left hand gently steadies a vanilla flower. Her right hand holds a thin wooden stick, drawn as one bold black line about the length of her hand, touching the centre of the flower. Her hands are simple and small.
+
+The vanilla vine (the right third, the hero of the picture):
+- A tall support tree stands from x 70% to 82%, running from the top of the picture to the bottom. Its trunk is the LINES tint (vertical lines), with a SOLID black shadow down its right side.
+- A thick, smooth vanilla vine winds up the trunk in two or three wide spirals. It is a SOLID black ribbon of even width, with short paper-outlined aerial roots at its joints.
+- Its leaves are large, thick and oval with pointed tips, set alternately along the vine, nine or ten in all. Each leaf is split along its midrib: one half SOLID, one half LINES (lines running along the leaf), with a paper midrib line. Three of them arch out over the top centre of the picture (x 45% to 70%, y 14% to 30%), above the woman's hands.
+- The vanilla flowers are pale orchids, smaller than a leaf, in PAPER with a black outline. There are four, at (x 64%, y 30%) at the woman's hands, (x 76%, y 42%), (x 85%, y 52%) and (x 80%, y 66%).
+  - Each has five narrow, pointed tepals spread like a loose five-pointed star, each with one short black line at its base.
+  - At its centre, the lip is rolled into a small tube, drawn as a short trumpet shape pointing slightly forward, with a wavy frilled mouth and a SOLID black inside.
+  - Beside two of the flowers is a small cluster of three or four round buds on short stems.
+  - These are vanilla orchids. They are not daffodils, lilies, jasmine or frangipani, and there is no wide cup at the centre.
+- The pod bunches hang from the vine at (x 88%, y 25%), (x 79%, y 52%), (x 74%, y 78%) and (x 88%, y 70%).
+  - Each bunch has eight to ten pods hanging loosely side by side from one joint, with small gaps of paper between them, some a little longer than others.
+  - Each pod is a slim SOLID black shape, pencil-thin and about 25 times longer than it is wide, round-ended, smooth and gently curved, on its own short stalk, with one thin paper highlight line down its length.
+  - No stripes, no bulges, no drops; nothing like bananas, cucumbers, beans or okra.
+- The lowest bunch and one leaf hang down over the bottom-right corner of the frame, overlapping the corner tile, as if the vine is growing out of the stamp. This is the only place anything crosses the frame.
+
+COMPOSITION AND FEEL
+- The picture reads at a glance as three clear masses:
+  - the white figures against the black shrubs, left of centre;
+  - the bold black-and-line vine with its paper flowers, down the right;
+  - the open, radiating sky above.
+- The eye moves from the woman's raised hands and the flower, down the vine's pods, across to the man looking up at her.
+- Strong contrast, clear silhouettes, generous calm space in the sky, and repeating rhythms: rays, fronds, thatch, pods.
+- The whole thing feels crafted, warm and a little playful, like a beloved old print, not busy, not lifelike and not glossy.
+
+DO NOT INCLUDE
+- Realistic or detailed faces; skin texture; muscle definition; realistic anatomy; three-dimensional shading or rendering.
+- Engraving, etching or banknote-style fine line work; cross-hatching; stippling; pencil or charcoal shading.
+- Greys, gradients, halftone dots, colour, glow or blur.
+- A ladder or stool. Any person other than the two described. Extra fingers or hands.
+- Any text, letters, numbers or symbols. The banner, tablet and caption box stay blank, because the lettering is added later.
+- A watermark, signature, logo or postmark.
+- A tote bag, mock-up, hands or table. Show the flat artwork only.
