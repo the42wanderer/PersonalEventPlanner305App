@@ -54,8 +54,9 @@ def front(s):
         l2=s['l2']; plus=l2.endswith('+')
         g.append(f'<text x="{x-0.8}" y="61" font-family="IS" font-size="21" fill="{c}">{esc(l2.rstrip("+"))}'
                  +('<tspan font-family="ISR" font-size="11" dx="0.8" dy="-8.5">+</tspan>' if plus else '')+'</text>')
-        if s['desc']: g.append(txt(s['desc'],x,67.8,5.2,c,'IS'))
-        g.append(caps('100% NATURAL · PRODUCT OF SRI LANKA',x,72.9,2.3,c,tr=0.13))
+        # the same two lines under every name: what it is (caps), then the farm line; 100% natural sits over the weight
+        g.append(caps(s['kind'] if s['desc'] else '100% NATURAL',x,72.9,2.3,c,tr=0.13))
+        if s['desc']: g.append(caps('100% NATURAL',124,72.9,2.3,c,'end',0.13))
         g.append(txt('Made with vanilla grown on our own farms.',x,77.6,4.1,c,'IS'))
         g.append(caps('NET WT. 100 g',124,77.6,4.4,c,'end',0))
     sx=(FX1-FX0)/136; sy=(FY1-FY0)/81
@@ -114,6 +115,7 @@ def bottom_wall(s):
     for i,l in enumerate(['Galaxy Manufacturers (Pvt) Ltd','No 15, Raja Mawatha,','Ja-Ela, Sri Lanka']):
         o.append(txt(l,x2,y+9.9+i*2.45,1.95 if i==0 else 1.85,c,'GB' if i==0 else 'G'))
     o.append(rule(x2-3.5,y+5,x2-3.5,y+19,c,0.15,0.4))
+    o.append(caps('PRODUCT OF SRI LANKA',x2,y+20.6,1.5,d,tr=0.25))
     return o
 def right_wall(s):
     c=s['ink']; d=s['deep']; l2=s['l2']; amp='' if l2=='Bathing Bar' else ' &amp;'

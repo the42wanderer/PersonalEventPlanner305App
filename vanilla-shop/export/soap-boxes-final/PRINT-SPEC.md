@@ -31,6 +31,7 @@ artwork's edges. Check them against the printer's die before films.
 Taken from the boxes now on sale and from thevanillashop.lk. The approved changes are:
 - Charcoal is renamed Vanilla & Charcoal+.
 - "Made exclusively with our own farmed vanilla" is reworded to "Made with vanilla grown on our own farms."
+- Under each name: the soap type in small capitals, then the farm line. "Product of Sri Lanka" is on the bottom wall.
 
 | | Vanilla | Rosette | Charcoal+ | Aloe Vera |
 |---|---|---|---|---|
