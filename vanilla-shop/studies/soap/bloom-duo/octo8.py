@@ -145,7 +145,7 @@ def front_engr(k,art=None):
        cap('MADE WITH OUR OWN',69.6,0.8), cap('FARMED VANILLA',72.6,0.8), cap('NET WT. 100 G',75.6,0.8)]
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="100%" height="100%"><defs><clipPath id="oc"><path d="{octa()}"/></clipPath></defs>'
             f'<g clip-path="url(#oc)">{"".join(b)}</g></svg>')
-FN={'vanilla':('Vanilla','Bathing Bar'),'rosette':('Vanilla &','Rosette'),'ebony':('Ebony &','Amber'),'aloe':('Vanilla &','Aloe Vera')}
+FN={'vanilla':('Vanilla','Bathing Bar'),'rosette':('Vanilla &','Rosette'),'ebony':('Vanilla &','Charcoal+'),'aloe':('Vanilla &','Aloe Vera')}
 FD={'vanilla':'','rosette':'Vanilla & rose bathing bar','ebony':'Charcoal & vanilla bathing bar','aloe':'Vanilla & aloe vera bathing bar'}
 def front_bloom(k,art=None):
     # Type sized to a hierarchy you can read at arm's length on a shelf: name ~60 pt, logo 18 mm, descriptor ~13 pt,
@@ -154,8 +154,8 @@ def front_bloom(k,art=None):
     art=art or f'D-{k}.png'
     b=[f'<image href="file:///tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/soap/b3/{art}" x="-7" y="-7" width="150" height="95" preserveAspectRatio="none"/>',
        logo(x+9,16,18,ink),
-       f'<text x="{x-0.8}" y="44" font-family="ISR" font-size="21" fill="{ink}">{l1}</text>',
-       f'<text x="{x-0.8}" y="61" font-family="IS" font-size="21" fill="url(#foil2)">{l2}</text>',
+       f'<text x="{x-0.8}" y="44" font-family="ISR" font-size="21" fill="url(#foil2)">Vanilla<tspan fill="{ink}">{l1[7:]}</tspan></text>',
+       f'<text x="{x-0.8}" y="61" font-family="IS" font-size="21" fill="{ink}">{l2}</text>',
        (f'<text x="{x}" y="67.2" font-family="IS" font-size="4.6" fill="{ink}">{FD[k]}</text>' if k!='vanilla' else ''),
        f'<text x="{x}" y="71.4" font-family="AE" font-size="2.4" fill="{ink}" letter-spacing="0.25">100% NATURAL</text>',
        f'<text x="{x}" y="74.5" font-family="AE" font-size="2.4" fill="{ink}" letter-spacing="0.25">MADE EXCLUSIVELY WITH OUR OWN</text>',

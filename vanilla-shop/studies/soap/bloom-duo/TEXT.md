@@ -4,7 +4,7 @@
 |---|---|---|
 | Natural Vanilla Soap | Vanilla Bathing Bar | (none) |
 | Rosette Soap | Vanilla & Rosette | Vanilla & rose bathing bar |
-| Charcoal Soap | Ebony & Amber | Charcoal & vanilla bathing bar |
+| Charcoal Soap | Vanilla & Charcoal+ (renamed; was Ebony & Amber) | Charcoal & vanilla bathing bar |
 | Aloe Soap | Vanilla & Aloe Vera | Vanilla & aloe vera bathing bar |
 
 Every front also says: 100% Natural · Made exclusively with our own farmed vanilla · Product of Sri Lanka.
