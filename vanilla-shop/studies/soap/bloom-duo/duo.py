@@ -7,7 +7,7 @@ O='/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-4
 K=bloom.K; W,H=150,95                       # front 136 x 81 + 7 mm round it
 CW={'vanilla':('#B5620F','#F8D79A','#D9822A','#F7EFDC'),
     'rosette':('#A8324E','#F8D3D6','#E08A6A','#F8EDE6'),
-    'ebony':  ('#2E2622','#D9C7AE','#B07A3A','#EDE6DA'),
+    'ebony':  ('#8E3A1A','#F3CFA2','#E0913A','#E4E2DE'),
     'aloe':   ('#2F5A2D','#CFE0A8','#C9A33A','#F2F1E2')}
 # (cx, cy, R, rotation) for the big and the small flower, in front mm
 LAY={'vanilla':((104,30,74,-14),(64,14,15,22)),

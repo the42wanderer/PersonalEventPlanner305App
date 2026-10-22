@@ -128,8 +128,8 @@ def front_premium(k):
 EC={'vanilla':('#F1E7D3','#7A4E1E'),'rosette':('#D3A0A4','#FBF1EA'),'ebony':('#E3DDD3','#2E2A27'),'aloe':('#7E9B73','#F6F2E4')}
 EN={'vanilla':('Pure','Vanilla'),'rosette':('Vanilla &','Rose'),'ebony':('Ebony &','Amber'),'aloe':('Vanilla &','Aloe Vera')}
 ES={'vanilla':'Bathing bar','rosette':'Vanilla & rose bathing bar','ebony':'Charcoal & vanilla bathing bar','aloe':'Vanilla & aloe vera bathing bar'}
-DK={'vanilla':'#5A3410','rosette':'#5A1426','ebony':'#1F1B19','aloe':'#16301C'}
-DG={'vanilla':'#F7EFDC','rosette':'#F8EDE6','ebony':'#EDE6DA','aloe':'#F2F1E2'}
+DK={'vanilla':'#5A3410','rosette':'#5A1426','ebony':'#141414','aloe':'#16301C'}
+DG={'vanilla':'#F7EFDC','rosette':'#F8EDE6','ebony':'#E4E2DE','aloe':'#F2F1E2'}
 def front_engr(k,art=None):
     g,ink=EC[k]; l1,l2=EN[k]; x=12
     if art: g,ink=DG[k],DK[k]
