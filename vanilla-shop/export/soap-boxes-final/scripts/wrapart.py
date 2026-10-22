@@ -31,8 +31,8 @@ def art(k):
     # veil: plain paper behind the front's type, and quieter walls so their small text reads
     # the front's own veil, read at the nearest point of the front, then eased into each wall's level over ~12 mm
     fx=np.clip(xx,FX0,FX1)-FX0; fy=np.clip(yy,FY0,FY1)-FY0
-    left=np.clip((88-fx)/50,0,1); left=left*left*(3-2*left); low=np.clip((fy-60)/10,0,1); low=low*low*(3-2*low)
-    vf=np.maximum(left*0.82,low*0.9)
+    left=np.clip((88-fx)/50,0,1); left=left*left*(3-2*left); low=np.clip((fy-46)/32,0,1); low=low**1.4
+    vf=np.maximum(left*0.82,low*0.86)
     topw=(yy<FY0)&(xx>=FX0)&(xx<=FX1); rightw=(xx>FX1)
     vw=np.where(yy<FLY,0.92,np.where(rightw,0.6,np.where(topw,0.72,0.78)))   # a faint ghost carries on over the back flap
     d=np.hypot(np.maximum(np.maximum(FX0-xx,xx-FX1),0),np.maximum(np.maximum(FY0-yy,yy-FY1),0))
