@@ -143,22 +143,29 @@ def front_engr(k,art=None):
        cap('MADE WITH OUR OWN',69.6,0.8), cap('FARMED VANILLA',72.6,0.8), cap('NET WT. 100 G',75.6,0.8)]
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="100%" height="100%"><defs><clipPath id="oc"><path d="{octa()}"/></clipPath></defs>'
             f'<g clip-path="url(#oc)">{"".join(b)}</g></svg>')
-def front_bloom(k):
+FN={'vanilla':('Vanilla','Bathing Bar'),'rosette':('Vanilla &','Rosette'),'ebony':('Ebony &','Amber'),'aloe':('Vanilla &','Aloe Vera')}
+FD={'vanilla':'','rosette':'Vanilla & rose bathing bar','ebony':'Charcoal & vanilla bathing bar','aloe':'Vanilla & aloe vera bathing bar'}
+def front_bloom(k,art=None):
     # Type sized to a hierarchy you can read at arm's length on a shelf: name ~60 pt, logo 18 mm, descriptor ~13 pt,
     # small caps ~6.5 pt, net weight ~12.5 pt (digits ~3.2 mm, the usual minimum for a front panel of this size).
-    g,ink=DG[k],DK[k]; l1,l2=EN[k]; x=12
-    b=[f'<image href="file:///tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/soap/b3/D-{k}.png" x="-7" y="-7" width="150" height="95" preserveAspectRatio="none"/>',
+    g,ink=DG[k],DK[k]; l1,l2=FN[k]; x=12
+    art=art or f'D-{k}.png'
+    b=[f'<image href="file:///tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/soap/b3/{art}" x="-7" y="-7" width="150" height="95" preserveAspectRatio="none"/>',
        logo(x+9,16,18,ink),
        f'<text x="{x-0.8}" y="44" font-family="ISR" font-size="21" fill="{ink}">{l1}</text>',
        f'<text x="{x-0.8}" y="61" font-family="IS" font-size="21" fill="{ink}">{l2}</text>',
-       f'<text x="{x}" y="68.6" font-family="IS" font-size="4.6" fill="{ink}">{ES[k]}</text>',
-       f'<text x="{x}" y="75" font-family="AE" font-size="2.3" fill="{ink}" letter-spacing="0.25">MADE WITH OUR OWN FARMED VANILLA</text>',
-       f'<text x="124" y="75" font-family="AE" font-size="4.4" fill="{ink}" text-anchor="end">NET WT. 100 g</text>']
+       (f'<text x="{x}" y="67.2" font-family="IS" font-size="4.6" fill="{ink}">{FD[k]}</text>' if k!='vanilla' else ''),
+       f'<text x="{x}" y="71.4" font-family="AE" font-size="2.3" fill="{ink}" letter-spacing="0.25">100% NATURAL</text>',
+       f'<text x="{x}" y="74.5" font-family="AE" font-size="2.3" fill="{ink}" letter-spacing="0.25">MADE EXCLUSIVELY WITH OUR OWN</text>',
+       f'<text x="{x}" y="77.6" font-family="AE" font-size="2.3" fill="{ink}" letter-spacing="0.25">FARMED VANILLA</text>',
+       f'<text x="124" y="71.4" font-family="AE" font-size="2.3" fill="{ink}" letter-spacing="0.25" text-anchor="end">PRODUCT OF SRI LANKA</text>',
+       f'<text x="124" y="77.6" font-family="AE" font-size="4.4" fill="{ink}" text-anchor="end">NET WT. 100 g</text>']
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="100%" height="100%"><defs><clipPath id="oc"><path d="{octa()}"/></clipPath></defs>'
             f'<g clip-path="url(#oc)">{"".join(b)}</g></svg>')
 def front(opt,k):
     if opt=='E': return front_engr(k)
     if opt=='F': return front_bloom(k)
+    if opt in ('F1','F2','F3'): return front_bloom('ebony','D-ebony-'+opt[1]+'.png')
     if opt=='F0': return front_engr(k,'/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/soap/b3/D-'+k+'.png')
     if opt=='R': return front_premium(k)
     if opt=='Q': return front_band(k)
@@ -234,3 +241,9 @@ flat('E-flat','E','#E6E0D5')
 page('F-bloom-duo','Bloom, two flowers','One vanilla flower large and cropped off the box, a second one small, out of the way of the type; soft watercolour glow, heavier blur and grain than the post.','F','#E6E0D5')
 flat('F-flat','F','#E6E0D5')
 print('ok')
+
+def sheet(name,items,bg='#E6E0D5'):
+    cells=''.join(f'<div style="position:absolute;left:{40+(i%2)*850}px;top:{40+(i//2)*510}px;width:816px;height:486px;filter:drop-shadow(0 10px 18px rgba(0,0,0,.18))">{front(o,k)}</div>' for i,(o,k) in enumerate(items))
+    rows=(len(items)+1)//2
+    open(O+name+'.html','w').write(f'<html><head><style>{CSS}html,body{{margin:0}}</style></head><body><div style="position:relative;width:1740px;height:{40+rows*510}px;background:{bg}">{cells}</div></body></html>')
+sheet('F-ebony-options',[('F1','ebony'),('F2','ebony'),('F3','ebony'),('F','vanilla')])
