@@ -145,7 +145,7 @@ def front_engr(k,art=None):
        cap('MADE WITH OUR OWN',69.6,0.8), cap('FARMED VANILLA',72.6,0.8), cap('NET WT. 100 G',75.6,0.8)]
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="100%" height="100%"><defs><clipPath id="oc"><path d="{octa()}"/></clipPath></defs>'
             f'<g clip-path="url(#oc)">{"".join(b)}</g></svg>')
-FN={'vanilla':('Vanilla','Bathing Bar'),'rosette':('Vanilla &','Rosé'),'ebony':('Vanilla &','Charcoal+'),'aloe':('Vanilla &','Aloe Vera')}
+FN={'vanilla':('Vanilla','Bathing Bar'),'rosette':('Vanilla &','Rose'),'ebony':('Vanilla &','Charcoal+'),'aloe':('Vanilla &','Aloe Vera')}
 FD={'vanilla':'','rosette':'Vanilla & rose bathing bar','ebony':'Charcoal & vanilla bathing bar','aloe':'Vanilla & aloe vera bathing bar'}
 def front_bloom(k,art=None):
     # Type sized to a hierarchy you can read at arm's length on a shelf: name ~60 pt, logo 18 mm, descriptor ~13 pt,

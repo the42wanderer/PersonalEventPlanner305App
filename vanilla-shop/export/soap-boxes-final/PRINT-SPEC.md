@@ -7,7 +7,7 @@ top wall and is printed upside down, so it reads correctly once folded.
 | Soap | Name on the box | Files |
 |---|---|---|
 | Natural Vanilla Soap | Vanilla Bathing Bar | `vanilla_box_*` |
-| Rosette Soap | Vanilla & Rosé (was Vanilla & Rosette) | `rosette_box_*` |
+| Rosette Soap | Vanilla & Rose (was Vanilla & Rosette) | `rosette_box_*` |
 | Charcoal Soap | Vanilla & Charcoal+ (was Ebony & Amber) | `charcoal_box_*` |
 | Aloe Soap | Vanilla & Aloe Vera | `aloe_box_*` |
 
@@ -29,7 +29,7 @@ artwork's edges. Check them against the printer's die before films.
 ## Content
 
 Taken from the boxes now on sale and from thevanillashop.lk. The approved changes are:
-- Charcoal is renamed Vanilla & Charcoal+, and Rosette is renamed Vanilla & Rosé.
+- Charcoal is renamed Vanilla & Charcoal+, and Rosette is renamed Vanilla & Rose.
 - "Made exclusively with our own farmed vanilla" is reworded to "Made with vanilla grown on our own farms."
 - Under each name: the soap type in small capitals, then the farm line. "Product of Sri Lanka" is on the bottom wall.
 
