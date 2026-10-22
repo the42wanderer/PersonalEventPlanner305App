@@ -28,6 +28,12 @@ for k in (sys.argv[1:] or CW):
     if k=="ebony": base.paste(bg,p,bg.getchannel("A").point(lambda v:int(v*0.6)))   # black needs one more pass to sit as strong as the colours   # a second pass deepens the colour
     # a wide halo of the whole picture laid back over it, so the light bleeds like wet paint
     a=np.asarray(base.convert('RGB')).astype(np.float32); h,w=a.shape[:2]
+    # a veil of plain paper where the type sits: the flower fades out behind the name column and along the details row
+    yy,xx=np.mgrid[0:h,0:w].astype(np.float32)/K-7
+    left=np.clip((88-xx)/50,0,1); left=left*left*(3-2*left)
+    low=np.clip((yy-60)/10,0,1); low=low*low*(3-2*low)
+    v=np.maximum(left*0.82,low*0.9)[...,None]
+    a=a*(1-v)+hx(g)*v
     rng=np.random.default_rng(11)
     mott=np.asarray(Image.fromarray(rng.normal(128,40,(h//60,w//60)).clip(0,255).astype(np.uint8)).resize((w,h),Image.BICUBIC)).astype(np.float32)-128
     a*=(1+0.008*mott/40)[...,None]                               # paper mottling
