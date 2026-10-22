@@ -39,7 +39,7 @@ Start here when we pick this up again.
    - no proof highlights;
    - vector text;
    - CMYK, as the printer specifies.
-3. Restyle the neck strip: "100% pure natural vanilla", as on the old strip.
+3. Neck seal: done (22 Oct). `neck.py` draws it on the original over-the-cap die shape (strip with fishtails, disc on the cap), 99.1 × 18.6 mm at the wraps' scale; `neck-seal-0*.png`. Scales with the wraps if the sheet size changes.
 
 ## How to rebuild
 
