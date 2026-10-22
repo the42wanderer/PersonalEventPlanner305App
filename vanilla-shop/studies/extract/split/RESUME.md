@@ -31,6 +31,10 @@ Start here when we pick this up again.
 4. **Font licence: resolved (22 Oct).** The small capitals now use Archivo Expanded (OFL, in `vanilla-shop/fonts`)
    instead of the Roc Grotesk demo. Roc is no longer needed to rebuild the labels.
 
+## Print files (22 Oct)
+
+`vanilla-shop/export/extract-labels/`: every label as a print PDF with bleed and crop marks, plus cut lines and `PRINT-SPEC.md`. The 500 ml wraps and neck seals are at the current labels' size (274 × 85 mm); the 200 and 100 ml wraps are scaled estimates, which the printer adjusts after measuring. Barcodes on 200/100 ml are placeholders.
+
 ## Next steps
 
 1. Get the real sizes, re-set the 200 and 100 ml layouts in `wrap_small()`, and scale the 500 ml if needed.

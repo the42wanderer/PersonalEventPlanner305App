@@ -1,0 +1,78 @@
+# The Vanilla Shop extract labels: print files
+
+Ten labels, each a PDF in `print/`:
+- **Wraps:** No. 01 and No. 02 at 500, 200 and 100 ml; No. 03 at 500 ml.
+- **Neck seals:** one per product.
+
+Each page has:
+- the artwork at actual size, with 3 mm bleed on every side;
+- crop marks at the trim;
+- a note under it with the product, size and status.
+
+Text is live vector type with the fonts embedded, so it stays sharp at any size. The colour artwork is an image at
+over 400 dpi at these sizes.
+
+`cutlines/` holds one matching file per label, with only the cut line in magenta in the same position as the artwork.
+Use it to make the die, or redraw the die from your own template.
+
+## Sizes
+
+| Label | Trim size | Status |
+|---|---|---|
+| 500 ml wraps (No. 01, 02, 03) | 274.0 × 84.9 mm | **The size of the current labels** (`vanilla_labeels__final-01.pdf`, marked 8.5 cm) |
+| 200 ml wraps (No. 01, 02) | 201.3 × 50.9 mm | **Estimated.** Measure the bottle and adjust |
+| 100 ml wraps (No. 01, 02) | 160.0 × 42.4 mm | **Estimated.** Measure the bottle and adjust |
+| Neck seals (No. 01, 02, 03) | 120.1 × 22.6 mm | **The current seal's size and die shape** |
+
+How the 200 and 100 ml sizes were estimated: the 500 ml wrap goes once round the bottle. The smaller bottles were
+scaled from it by volume and checked against a photo of all three. The details are in
+`studies/extract/split/SIZES.md`.
+
+### Adjusting the 200 and 100 ml labels
+
+- Measure the bottle's circumference at the label and the height of the flat label band.
+- **If the real size is close (a few millimetres either way):** scale the artwork to fit, keeping its proportions.
+- **If the proportions are clearly different:** don't stretch it. Ask us for a re-set file, which is quick to make.
+- **The neck seal is the same for all three bottle sizes,** like the current one. If the 100 ml and 200 ml necks are
+  narrower, shorten its arms.
+
+## Placeholders to replace before printing
+
+- **Barcodes on the 200 and 100 ml labels** are placeholders: they repeat the 500 ml code. Each size needs its own
+  EAN-13.
+- **The 500 ml barcodes** are from the current labels: …0007 (No. 01), …0038 (No. 02) and …0083 (No. 03). Confirm
+  they still belong to these products.
+- **MFD and EXP** (01/02/2025, 31/01/2027) are as printed on the current labels. Change them for each print run.
+- **MRP for 200 and 100 ml** is taken from the shop's website and Glomark. Check it.
+
+## Colour and finish
+
+- **Colour:** the files are RGB. Convert to CMYK, or match to your press, with your own profile.
+- **Product colours:**
+
+  | Product | Colour |
+  |---|---|
+  | No. 01 | vermilion #B83A24 |
+  | No. 02 | honey #C98A22 |
+  | No. 03 | green #2F5A33 |
+  | Cream | #F7EFDC |
+
+  The cream half was designed to look like the paper, so on a cream or uncoated stock you could leave it unprinted.
+  Tell us if you do.
+- **Stock and finish:** a matt or uncoated label stock suits the soft artwork. If you print on clear film, the cream
+  areas need a white underprint.
+- **Run a proof first.** Check the smallest type: the 100 ml back goes down to about 1.4 mm at this size. Check the
+  barcodes with a scanner.
+
+## Fonts (all free to use in print)
+
+- Instrument Serif;
+- Geist;
+- Archivo Expanded (the spaced capitals).
+
+All are under the SIL Open Font License; the files are in `vanilla-shop/fonts`.
+
+## Rebuilding
+
+`scripts/export.py` makes these files from the design (`splitwrap.py` for the wraps, `neck.py` for the seals).
+`studies/extract/split/RESUME.md` explains the setup.
