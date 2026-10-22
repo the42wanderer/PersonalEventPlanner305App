@@ -128,10 +128,13 @@ def front_premium(k):
 EC={'vanilla':('#F1E7D3','#7A4E1E'),'rosette':('#D3A0A4','#FBF1EA'),'ebony':('#E3DDD3','#2E2A27'),'aloe':('#7E9B73','#F6F2E4')}
 EN={'vanilla':('Pure','Vanilla'),'rosette':('Vanilla &','Rose'),'ebony':('Ebony &','Amber'),'aloe':('Vanilla &','Aloe Vera')}
 ES={'vanilla':'Bathing bar','rosette':'Vanilla & rose bathing bar','ebony':'Charcoal & vanilla bathing bar','aloe':'Vanilla & aloe vera bathing bar'}
-def front_engr(k):
+DK={'vanilla':'#5A3410','rosette':'#5A1426','ebony':'#1F1B19','aloe':'#16301C'}
+DG={'vanilla':'#F7EFDC','rosette':'#F8EDE6','ebony':'#EDE6DA','aloe':'#F2F1E2'}
+def front_engr(k,art=None):
     g,ink=EC[k]; l1,l2=EN[k]; x=12
+    if art: g,ink=DG[k],DK[k]
     cap=lambda t,y,op=1: f'<text x="{x}" y="{y}" font-family="AL" font-size="2.2" fill="{ink}" letter-spacing="0.42" opacity="{op}">{t}</text>'
-    b=[f'<image href="file://{O}E-{k}.png" x="-7" y="-7" width="150" height="95" preserveAspectRatio="none"/>',
+    b=[f'<image href="file://{art or O+'E-'+k+'.png'}" x="-7" y="-7" width="150" height="95" preserveAspectRatio="none"/>',
        f'<text x="{x-0.4}" y="24" font-family="ISR" font-size="12.5" fill="{ink}">{l1}</text>',
        f'<text x="{x-0.4}" y="35.5" font-family="IS" font-size="12.5" fill="{ink}">{l2}</text>',
        logo(x+4.6,52,9.2,ink),
@@ -142,6 +145,7 @@ def front_engr(k):
             f'<g clip-path="url(#oc)">{"".join(b)}</g></svg>')
 def front(opt,k):
     if opt=='E': return front_engr(k)
+    if opt=='F': return front_engr(k,'/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/soap/b3/D-'+k+'.png')
     if opt=='R': return front_premium(k)
     if opt=='Q': return front_band(k)
     if opt=='P': return front_candle_layout(k)
@@ -172,6 +176,7 @@ WALLM2={'vanilla':'#F1DDB5','rosette':'#F2D3D9','ebony':'#E8E1D6','aloe':'#DAE8C
 WALLM={'vanilla':'#E8B65E','rosette':'#E58BA0','ebony':'#2A2522','aloe':'#86B98A'}
 def wallcol(opt,k):
     if opt=='E': return EC[k][0]
+    if opt=='F': return DG[k]
     if opt=='R': return PG[k]
     if opt=='Q': return WALLM2[k]
     return WALLM[k] if opt in 'MNP' else (SOAPS[k]['bgB'] if opt in 'BDG' else '#F1E6CF')
@@ -212,4 +217,6 @@ def flat(name,opt,bg):
 
 page('E-engraved','After the board: engraved vanilla, one ink, colour-blocked','As on the Sowvital, Taini and Lomenai pins: our vanilla drawn in line engraving in a single ink, large and cropped by the box; cream and soft-colour boxes alternating; the name in serif, mixed case; a small details block.','E','#E6E0D5')
 flat('E-flat','E','#E6E0D5')
+page('F-bloom-duo','Bloom, two flowers','One vanilla flower large and cropped off the box, a second one small, out of the way of the type; soft watercolour glow, heavier blur and grain than the post.','F','#E6E0D5')
+flat('F-flat','F','#E6E0D5')
 print('ok')
