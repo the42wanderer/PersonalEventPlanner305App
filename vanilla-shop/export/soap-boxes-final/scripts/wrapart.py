@@ -39,6 +39,14 @@ def art(k):
     t=(d>0).astype(np.float32)          # each wall keeps its own level from the fold
     v=vf*(1-t)+vw*t
     a=a*(1-v[...,None])+hx(g)*v[...,None]
+    # back panel: our engraved vanilla spray as a faint watermark in the soap's ink (about 9%), clipped to the back
+    INK={'vanilla':'#5A3410','rosette':'#5A1426','charcoal':'#141414','aloe':'#16301C'}[k]
+    sp=Image.open('/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/bw/spray-test.png').convert('L')
+    m=Image.fromarray(255-np.asarray(sp)).rotate(-72,expand=True,resample=Image.BICUBIC)
+    sc=150*K/max(m.size); m=m.resize((int(m.size[0]*sc),int(m.size[1]*sc)),Image.LANCZOS)
+    Mk=Image.new('L',(w,h),0); Mk.paste(m,(int((FX0+84+B)*K-m.size[0]/2),int((40+B)*K-m.size[1]/2)))
+    wm=np.asarray(Mk).astype(np.float32)/255*((yy<FLY)&(yy>=0)&(xx>=FX0)&(xx<=FX1))*0.09
+    a=a*(1-wm[...,None])+hx(INK)*wm[...,None]
     rng=np.random.default_rng(11)
     mott=np.asarray(Image.fromarray(rng.normal(128,40,(h//36,w//36)).clip(0,255).astype(np.uint8)).resize((w,h),Image.BICUBIC)).astype(np.float32)-128
     a*=(1+0.008*mott/40)[...,None]

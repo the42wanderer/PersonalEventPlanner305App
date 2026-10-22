@@ -20,7 +20,7 @@ top wall and is printed upside down, so it reads correctly once folded.
 | `proof/` | For checking only. Magenta = cut; cyan dashes = folds; the foil is simulated; pink = text that needs checking. |
 | `fronts.png`, `mockup-boxes.png`, `all-four-proofs.jpg` | Previews. |
 
-**Foil:** the word "Vanilla" on the front, and again on the right wall, in one gold foil. Run a physical foil proof on the
+**Foil:** the word "Vanilla" on the front and on the right wall, and a small vanilla pod above the back headline, all in one gold foil. The back also carries the engraved vanilla spray as a faint (about 9%) watermark in each soap's ink. Run a physical foil proof on the
 real board before the full run, especially gold on the honey Vanilla box.
 
 **Die:** the PDF this came from has no separate die line, so the cut and folds in the proofs are taken from the

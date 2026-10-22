@@ -61,9 +61,17 @@ def front(s):
         g.append(caps('NET WT. 100 g',124,77.6,4.4,c,'end',0))
     sx=(FX1-FX0)/136; sy=(FY1-FY0)/81
     return [f'<g transform="translate({FX0} {FY0}) scale({sx:.5f} {sy:.5f})">'+''.join(g)+'</g>']
+import math
+sys.path.insert(0,'/home/user/PersonalEventPlanner305App/vanilla-shop/brand/directions/bloom')
+import orchid
+def podmark(W):
+    p=orchid.pod(W/2-9,5.6,W/2+9,4.4,1.5)                   # a small cured pod, in the same gold foil as "Vanilla"
+    f=foilfill()
+    return f'<path d="{p["body"]}" fill="{f}"/><path d="{p["curl"]}" fill="none" stroke="{f}" stroke-width="0.4" stroke-linecap="round"/>'
 def back(s,k):
-    if not show(): return []
-    c=s['ink']; d=s['deep']; W=FX1-FX0; o=[]
+    W=FX1-FX0
+    if not show(): return [f'<g transform="translate({FX0+W} {FLY}) rotate(180)">'+podmark(W)+'</g>']
+    c=s['ink']; d=s['deep']; o=[podmark(W)]
     o.append(txt('Nourish, rejuvenate and uplift.',W/2,13.5,7.0,c,'IS','middle'))
     o.append(rule(10,18.5,W-10,18.5,c,0.2,0.5))
     cw=37.5; xs=(9,9+cw+5.3,9+2*(cw+5.3)); y0=23.5
