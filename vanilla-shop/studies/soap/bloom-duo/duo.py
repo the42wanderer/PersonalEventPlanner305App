@@ -10,10 +10,10 @@ CW={'vanilla':('#B5620F','#F8D79A','#D9822A','#F7EFDC'),
     'ebony':  ('#2E2622','#D9C7AE','#B07A3A','#EDE6DA'),
     'aloe':   ('#2F5A2D','#CFE0A8','#C9A33A','#F2F1E2')}
 # (cx, cy, R, rotation) for the big and the small flower, in front mm
-LAY={'vanilla':((104,30,74,-14),(70,66,16,22)),
-     'rosette':((108,34,72,10),(72,67,15,-26)),
-     'ebony':  ((102,28,76,-30),(72,67,16,6)),
-     'aloe':   ((110,32,72,2),(70,66,16,-14))}
+LAY={'vanilla':((104,30,74,-14),(64,14,15,22)),
+     'rosette':((108,34,72,10),(66,13,14,-26)),
+     'ebony':  ((102,28,76,-30),(64,14,15,6)),
+     'aloe':   ((110,32,72,2),(66,14,15,-14))}
 def layer(k,i,cx,cy,R,rot,blur):
     e,c,t,_=CW[k]; S=int(R*2.4)                      # draw on its own square, then rotate into place
     n=O+f'L-{k}-{i}'; bloom.bloom(n,S,S,S/2,S/2,R,e,c,t,None,blur=blur,grain=0)
