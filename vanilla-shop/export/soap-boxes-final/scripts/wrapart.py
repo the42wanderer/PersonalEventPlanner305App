@@ -30,11 +30,15 @@ def art(k):
     yy,xx=np.mgrid[0:h,0:w].astype(np.float32)/K-B          # sheet mm
     a[yy<FLY]=hx(g)                                          # the flowers stay on the wrap, not the separate back flap
     # veil: plain paper behind the front's type, and quieter walls so their small text reads
-    fx,fy=xx-FX0,yy-FY0
+    # the front's own veil, read at the nearest point of the front, then eased into each wall's level over ~12 mm
+    fx=np.clip(xx,FX0,FX1)-FX0; fy=np.clip(yy,FY0,FY1)-FY0
     left=np.clip((88-fx)/50,0,1); left=left*left*(3-2*left); low=np.clip((fy-60)/10,0,1); low=low*low*(3-2*low)
-    onfront=(xx>=FX0)&(xx<=FX1)&(yy>=FY0)&(yy<=FY1)
+    vf=np.maximum(left*0.82,low*0.9)
     topw=(yy<FY0)&(xx>=FX0)&(xx<=FX1); rightw=(xx>FX1)
-    v=np.where(onfront,np.maximum(left*0.82,low*0.9),np.where(rightw,0.6,np.where(topw,0.72,0.78)))   # the right wall keeps the flower; text walls stay calm
+    vw=np.where(rightw,0.6,np.where(topw,0.72,0.78))
+    d=np.hypot(np.maximum(np.maximum(FX0-xx,xx-FX1),0),np.maximum(np.maximum(FY0-yy,yy-FY1),0))
+    t=np.clip(d/12,0,1); t=t*t*(3-2*t)
+    v=vf*(1-t)+vw*t
     a=a*(1-v[...,None])+hx(g)*v[...,None]
     rng=np.random.default_rng(11)
     mott=np.asarray(Image.fromarray(rng.normal(128,40,(h//36,w//36)).clip(0,255).astype(np.uint8)).resize((w,h),Image.BICUBIC)).astype(np.float32)-128
