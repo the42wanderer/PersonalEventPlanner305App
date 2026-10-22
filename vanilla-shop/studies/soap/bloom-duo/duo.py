@@ -7,7 +7,7 @@ O='/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-4
 K=bloom.K; W,H=150,95                       # front 136 x 81 + 7 mm round it
 CW={'vanilla':('#B5620F','#F8D79A','#D9822A','#F7EFDC'),
     'rosette':('#A8324E','#F8D3D6','#E08A6A','#F8EDE6'),
-    'ebony':  ('#8E3A1A','#F3CFA2','#E0913A','#E4E2DE'),
+    'ebony':  ('#060505','#958D85','#1E1B1A','#E4E2DE'),
     'aloe':   ('#2F5A2D','#CFE0A8','#C9A33A','#F2F1E2')}
 # (cx, cy, R, rotation) for the big and the small flower, in front mm
 LAY={'vanilla':((104,30,74,-14),(64,14,15,22)),
@@ -24,7 +24,8 @@ for k in (sys.argv[1:] or CW):
     g=CW[k][3]; base=Image.new('RGBA',(W*K,H*K),tuple(int(v) for v in hx(g))+(255,))
     (b,s)=LAY[k]
     sm,p=layer(k,"s",*s,blur=2.2); base.alpha_composite(sm,p) if False else base.paste(sm,p,sm)
-    bg,p=layer(k,"b",*b,blur=5.2); base.paste(bg,p,bg); base.paste(bg,p,bg.getchannel("A").point(lambda v:int(v*0.5)))   # a second pass deepens the colour
+    bg,p=layer(k,"b",*b,blur=5.2); base.paste(bg,p,bg); base.paste(bg,p,bg.getchannel("A").point(lambda v:int(v*0.5)))
+    if k=="ebony": base.paste(bg,p,bg.getchannel("A").point(lambda v:int(v*0.6)))   # black needs one more pass to sit as strong as the colours   # a second pass deepens the colour
     # a wide halo of the whole picture laid back over it, so the light bleeds like wet paint
     a=np.asarray(base.convert('RGB')).astype(np.float32); h,w=a.shape[:2]
     rng=np.random.default_rng(11)
