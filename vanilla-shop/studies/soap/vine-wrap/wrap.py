@@ -6,7 +6,7 @@ G='/home/user/PersonalEventPlanner305App/vanilla-shop/plates/generated/'
 O='/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/soap/b2/'
 SRC=['v6-vine.png','v7-vine-upright.png','v6-sprig.png','v7-vine-upright-b.png','v8-crop-vine-trail.png']
 RAMP={'vanilla':('#5C3410','#C98A2E','#F6DFAE','#F1DDB5'),'rosette':('#5E1429','#C9607C','#F8D6DE','#F2D3D9'),
-      'ebony':('#0E0C0B','#7A4E1A','#E2AE62','#1F1A18'),'aloe':('#163A1E','#5E9A66','#DDEDCB','#DAE8C7')}
+      'ebony':('#25201D','#6E625A','#D9CDBF','#E8E1D6'),'aloe':('#163A1E','#5E9A66','#DDEDCB','#DAE8C7')}
 def hx(c): return np.array([int(c[i:i+2],16) for i in (1,3,5)],np.float32)
 def tone(im,dk,md,lt):
     a=np.asarray(im).astype(np.float32); L=(0.3*a[...,0]+0.59*a[...,1]+0.11*a[...,2])/255

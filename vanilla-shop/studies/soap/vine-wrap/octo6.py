@@ -136,7 +136,7 @@ def front(opt,k):
         body+=T(x+0.6,H-11,1.8,'100% natural · made exclusively with our own farmed vanilla','G',sub)+T(W-12,H-10.6,4.4,'100 g','IS',sub,'end')
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="100%" height="100%"><defs>{FOIL}<clipPath id="oc"><path d="{octa()}"/></clipPath></defs>'
             f'<g clip-path="url(#oc)">{body}</g></svg>')
-WALLM2={'vanilla':'#F1DDB5','rosette':'#F2D3D9','ebony':'#1F1A18','aloe':'#DAE8C7'}
+WALLM2={'vanilla':'#F1DDB5','rosette':'#F2D3D9','ebony':'#E8E1D6','aloe':'#DAE8C7'}
 WALLM={'vanilla':'#E8B65E','rosette':'#E58BA0','ebony':'#2A2522','aloe':'#86B98A'}
 def wallcol(opt,k):
     if opt=='Q': return WALLM2[k]
@@ -148,7 +148,7 @@ def box(opt,k,s=3.0,ry=-24,rx=-14):
     shade=[0.0,0.06,0.16,0.22,0.3,0.3,0.22,0.06]
     for i in range(8):
         (px,py),(qx,qy)=pts[i],pts[(i+1)%8]; L=math.hypot(qx-px,qy-py); a=math.degrees(math.atan2(qy-py,qx-px))
-        mx,my=(px+qx)/2*s,(py+qy)/2*s; col=wallcol(opt,k); dk=BAND[k][3] if opt=='Q' and k!='ebony' else (INKM[k] if opt in 'MNPQ' else (SOAPS[k]['dk'] if opt not in 'BDG' else '#FFF4DE'))
+        mx,my=(px+qx)/2*s,(py+qy)/2*s; col=wallcol(opt,k); dk=BAND[k][3] if opt=='Q' else (INKM[k] if opt in 'MNPQ' else (SOAPS[k]['dk'] if opt not in 'BDG' else '#FFF4DE'))
         txt=(f'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:{1.9*s}px AE;letter-spacing:{0.5*s}px;color:{dk};opacity:.8">THE VANILLA SHOP · {SOAPS[k]["kind"]}</div>' if i==0 else '')
         faces+=(f'<div style="position:absolute;left:{-L*s/2}px;top:{-D*s/2}px;width:{L*s}px;height:{D*s}px;background:{col};'
                 f'transform:translate3d({mx}px,{my}px,0) rotateZ({a}deg) rotateX(-90deg)">{txt}<div style="position:absolute;inset:0;background:rgba(0,0,0,{shade[i]})"></div></div>')
