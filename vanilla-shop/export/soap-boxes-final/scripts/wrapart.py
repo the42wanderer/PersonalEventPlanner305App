@@ -45,7 +45,9 @@ def art(k):
     m=Image.fromarray(255-np.asarray(sp)).rotate(-72,expand=True,resample=Image.BICUBIC)
     sc=150*K/max(m.size); m=m.resize((int(m.size[0]*sc),int(m.size[1]*sc)),Image.LANCZOS)
     Mk=Image.new('L',(w,h),0); Mk.paste(m,(int((FX0+84+B)*K-m.size[0]/2),int((40+B)*K-m.size[1]/2)))
-    wm=np.asarray(Mk).astype(np.float32)/255*((yy<FLY)&(yy>=0)&(xx>=FX0)&(xx<=FX1))*0.09
+    de=np.minimum(np.minimum(xx-FX0,FX1-xx),np.minimum(yy,FLY-yy)); ef=np.clip(de/14,0,1); ef=ef*ef*(3-2*ef)   # fade in from every edge
+    rf=np.clip(1-np.hypot((xx-FX0-70)/80,(yy-40)/55),0,1)**0.7                                                  # and thin out from the middle
+    wm=np.asarray(Mk).astype(np.float32)/255*ef*rf*0.11
     a=a*(1-wm[...,None])+hx(INK)*wm[...,None]
     rng=np.random.default_rng(11)
     mott=np.asarray(Image.fromarray(rng.normal(128,40,(h//36,w//36)).clip(0,255).astype(np.uint8)).resize((w,h),Image.BICUBIC)).astype(np.float32)-128
