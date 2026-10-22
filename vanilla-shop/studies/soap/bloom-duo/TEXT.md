@@ -18,3 +18,16 @@ The back of the charcoal box shows the same copy and the same incomplete ingredi
 
 To confirm: net weight (100 g on the dieline vs 114 g on the website); each soap's full INCI list; barcodes,
 MRP, dates and TFM for Charcoal and Aloe.
+
+## Approved direction (front copy as now set)
+
+- Name: "Vanilla" in gold foil, then the variant in the soap's colour (Bathing Bar / & Rosette / & Charcoal+ / & Aloe Vera).
+  The + on Charcoal+ is set as a superscript. What it stands for is still to be decided (see below).
+- Descriptor (italic, larger): Vanilla & rose / Charcoal & vanilla / Vanilla & aloe vera bathing bar.
+- 100% NATURAL · PRODUCT OF SRI LANKA
+- "Made with vanilla grown on our own farms." (reworded from "Made exclusively with our own farmed vanilla";
+  confirm the sourcing claim is accurate for every bar.)
+- NET WT. 100 g (confirm against 114 g on the website).
+
+Before print: decide what the + means (a back-panel line can explain it); run one physical foil proof on the actual board,
+especially gold over the honey Vanilla box; proof at actual size.

@@ -155,12 +155,10 @@ def front_bloom(k,art=None):
     b=[f'<image href="file:///tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/soap/b3/{art}" x="-7" y="-7" width="150" height="95" preserveAspectRatio="none"/>',
        logo(x+9,16,18,ink),
        f'<text x="{x-0.8}" y="44" font-family="ISR" font-size="21" fill="url(#foil2)">Vanilla<tspan fill="{ink}">{l1[7:]}</tspan></text>',
-       f'<text x="{x-0.8}" y="61" font-family="IS" font-size="21" fill="{ink}">{l2}</text>',
-       (f'<text x="{x}" y="67.2" font-family="IS" font-size="4.6" fill="{ink}">{FD[k]}</text>' if k!='vanilla' else ''),
-       f'<text x="{x}" y="71.4" font-family="AE" font-size="2.4" fill="{ink}" letter-spacing="0.25">100% NATURAL</text>',
-       f'<text x="{x}" y="74.5" font-family="AE" font-size="2.4" fill="{ink}" letter-spacing="0.25">MADE EXCLUSIVELY WITH OUR OWN</text>',
-       f'<text x="{x}" y="77.6" font-family="AE" font-size="2.4" fill="{ink}" letter-spacing="0.25">FARMED VANILLA</text>',
-       f'<text x="124" y="71.4" font-family="AE" font-size="2.4" fill="{ink}" letter-spacing="0.25" text-anchor="end">PRODUCT OF SRI LANKA</text>',
+       f'<text x="{x-0.8}" y="61" font-family="IS" font-size="21" fill="{ink}">{l2.rstrip("+")}'+('<tspan font-family="ISR" font-size="11" dx="0.8" dy="-8.5">+</tspan>' if l2.endswith('+') else '')+'</text>',
+       (f'<text x="{x}" y="67.8" font-family="IS" font-size="5.2" fill="{ink}">{FD[k]}</text>' if k!='vanilla' else ''),
+       f'<text x="{x}" y="72.9" font-family="AE" font-size="2.3" fill="{ink}" letter-spacing="0.3">100% NATURAL · PRODUCT OF SRI LANKA</text>',
+       f'<text x="{x}" y="77.6" font-family="IS" font-size="4.1" fill="{ink}">Made with vanilla grown on our own farms.</text>',
        f'<text x="124" y="77.6" font-family="AE" font-size="4.4" fill="{ink}" text-anchor="end">NET WT. 100 g</text>']
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="100%" height="100%"><defs>{FOIL2}<clipPath id="oc"><path d="{octa()}"/></clipPath></defs>'
             f'<g clip-path="url(#oc)">{"".join(b)}</g></svg>')
