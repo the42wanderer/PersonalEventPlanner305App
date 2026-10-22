@@ -36,7 +36,7 @@ def art(k):
     topw=(yy<FY0)&(xx>=FX0)&(xx<=FX1); rightw=(xx>FX1)
     vw=np.where(yy<FLY,0.92,np.where(rightw,0.6,np.where(topw,0.72,0.78)))   # a faint ghost carries on over the back flap
     d=np.hypot(np.maximum(np.maximum(FX0-xx,xx-FX1),0),np.maximum(np.maximum(FY0-yy,yy-FY1),0))
-    t=np.clip(d/12,0,1); t=t*t*(3-2*t)
+    t=(d>0).astype(np.float32)          # each wall keeps its own level from the fold
     v=vf*(1-t)+vw*t
     a=a*(1-v[...,None])+hx(g)*v[...,None]
     rng=np.random.default_rng(11)
