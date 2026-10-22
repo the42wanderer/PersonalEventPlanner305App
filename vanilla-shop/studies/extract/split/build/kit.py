@@ -4,7 +4,7 @@ from PIL import ImageFont
 R='/home/user/PersonalEventPlanner305App/vanilla-shop'; CF='/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/candlefonts'
 T='/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/ext/w/'
 W,H,CX=226,70,113
-FONTS={'GMono':R+'/fonts/geist-mono.ttf','G':R+'/fonts/geist-regular.ttf','GM':R+'/fonts/geist-medium.ttf','GB':R+'/fonts/geist-bold.ttf','IS':R+'/fonts/instrument-serif-italic.ttf','RW':CF+'/roc-wide-regular.otf','RR':CF+'/roc-regular.otf','RB':CF+'/roc-bold.otf','RWM':CF+'/roc-wide-medium.otf'}
+FONTS={'GMono':R+'/fonts/geist-mono.ttf','G':R+'/fonts/geist-regular.ttf','GM':R+'/fonts/geist-medium.ttf','GB':R+'/fonts/geist-bold.ttf','IS':R+'/fonts/instrument-serif-italic.ttf','RW':R+'/fonts/archivo-expanded-regular.ttf','RR':CF+'/roc-regular.otf','RB':CF+'/roc-bold.otf','RWM':R+'/fonts/archivo-expanded-medium.ttf'}
 css=''.join(f"@font-face{{font-family:{k};src:url(file://{v})}}" for k,v in FONTS.items())
 _m={}
 def width(t,f,sz,tr=0):

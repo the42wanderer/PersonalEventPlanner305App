@@ -28,8 +28,8 @@ Start here when we pick this up again.
    - Then re-set the layouts to those sizes. Do not let the printer scale them: if the proportions differ, the
      layout distorts.
 3. **Barcodes** for the 200 and 100 ml sizes. They use the 500 ml code as a stand-in for now.
-4. **Font licence.** The small capitals use Roc Grotesk Wide. The user's copy is the Fontspring **demo**, which is
-   not licensed for commercial print. Buy the licence before production, or swap in another wide grotesque.
+4. **Font licence: resolved (22 Oct).** The small capitals now use Archivo Expanded (OFL, in `vanilla-shop/fonts`)
+   instead of the Roc Grotesk demo. Roc is no longer needed to rebuild the labels.
 
 ## Next steps
 
