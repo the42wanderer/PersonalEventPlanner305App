@@ -20,7 +20,14 @@ def black_flower(cx,cy,R,rot,blur,fall=1.6):
     a=np.asarray(Image.open(n+'.png')).astype(np.float32); y,x=np.mgrid[0:a.shape[0],0:a.shape[1]].astype(np.float32)/K
     r=np.hypot(x-S/2,y-S/2)/R; f=np.clip(1-r**fall,0,1)                       # solid at the heart, gone by the tips
     al=np.clip(a[...,3]/255*1.3,0,1)*f
-    im=Image.fromarray(np.dstack([np.full(al.shape+(3,),9,np.float32),al*255]).astype(np.uint8),'RGBA').rotate(rot,resample=Image.BICUBIC)
+    # the lip (the cup) in a lighter, smoky charcoal so its frilled shape reads inside the black; the throat glows amber
+    def mk(sfx,s): m=Image.open(n+sfx).convert('L').filter(ImageFilter.GaussianBlur(s*K)); return np.asarray(m).astype(np.float32)/255
+    Lb=mk('-l.png',blur*0.35); Li=mk('-l.png',blur*1.6)**1.8; Tb=mk('-t.png',blur*0.9)
+    rgb=np.full(al.shape+(3,),9,np.float32)
+    rgb=rgb*(1-Li[...,None]*0.95)+np.array([176,150,124],np.float32)*Li[...,None]*0.95     # rim stays dark, the cup lightens inwards
+    rgb=rgb*(1-Tb[...,None]*0.9)+np.array([226,146,58],np.float32)*Tb[...,None]*0.9
+    al=np.maximum(al,Lb*0.92)
+    im=Image.fromarray(np.dstack([rgb,al*255]).clip(0,255).astype(np.uint8),'RGBA').rotate(rot,resample=Image.BICUBIC)
     return place(im,cx,cy)
 def amber_flower(cx,cy,R,rot):
     S=int(R*2.4); n=O+'L-eb2s'; bloom.bloom(n,S,S,S/2,S/2,R,'#B5651E','#F7DDB0','#E0913A',None,blur=2.3,grain=0)
