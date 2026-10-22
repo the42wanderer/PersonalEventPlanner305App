@@ -1,0 +1,10 @@
+import { createRequire } from 'module';
+const require = createRequire('/opt/node-tools/node_modules/');
+const { chromium } = require('playwright');
+const [out,...files]=process.argv.slice(2); const fs=require('fs');
+const b=await chromium.launch(); const p=await b.newPage();
+let html='<html><head><style>@page{size:226mm 70mm;margin:0}html,body{margin:0}img{display:block;width:226mm;height:70mm;page-break-after:always}</style></head><body>';
+for(const f of files) html+=`<img src="file://${f}">`;
+html+='</body></html>'; fs.writeFileSync('/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/ext/d/proof.html',html);
+await p.goto('file:///tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/ext/d/proof.html'); await p.waitForTimeout(800);
+await p.pdf({path:out,width:'226mm',height:'70mm',printBackground:true}); await b.close();

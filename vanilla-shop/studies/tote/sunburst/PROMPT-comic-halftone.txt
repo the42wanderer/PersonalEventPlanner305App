@@ -1,0 +1,119 @@
+Create the artwork for a one-colour screen-printed tote bag: a vintage postage stamp showing a vanilla garden in Sri Lanka, drawn and printed like a page from a 1930s–1940s newspaper adventure comic strip. Portrait 4:5, the flat artwork only, seen straight on, filling the canvas.
+
+THE LOOK IN ONE SENTENCE
+Brush-and-pen ink drawing by a skilled comic-strip artist of the 1930s, reproduced in one black ink with a coarse mechanical halftone dot screen for the grey tones, exactly as old newspaper comics and pulp magazines were printed. It is warm, hand-made and lively: neither photorealistic nor geometric and vector-like.
+
+INK AND PRINTING
+- Exactly one ink: solid black (#1A1714) on warm off-white unbleached cotton (#EFE6D2). Nothing else, no colour.
+- Every mark is solid ink. There are no smooth greys, no gradients, no airbrush, no blur and no glow.
+- Grey tones are made only with a coarse halftone dot screen: round black dots on a regular grid, angled at 45 degrees, clearly visible as separate dots.
+  - The dots sit about 0.65% of the image width apart, so roughly 150 dots across the full width.
+  - Use four set tints, like the old Ben-Day shading sheets:
+    - 10%: tiny dots;
+    - 25%: small dots;
+    - 45%: medium dots, nearly touching;
+    - 70%: dark, where the black joins up and leaves small paper holes.
+  - Within a tint the dots are all the same size. The only place where the dots grow smoothly is the sky.
+  - The smallest dot is still clearly a dot, never a speck: about 0.25% of the image width across.
+- Real print character, as if photographed from an old comic page:
+  - the dots slightly swollen and soft-edged where the ink spread;
+  - brush lines very slightly rough at the edges;
+  - the odd tiny gap in a large black;
+  - no fake scratches or grunge overlay.
+- About 40–45% of the image is black overall. The design reads clearly as black and cream at thumbnail size.
+
+LINE WORK: HOW THE ARTIST INKS IT
+- Everything is drawn with a flexible brush and a pen nib, so the lines swell and taper: thicker on the shadow side of a form and where shapes overlap, thinning to a point at the ends. This living, varied line is the key to the look. Never use mechanical lines of one even weight, and never use ruled geometric outlines, except on the stamp frame itself.
+- The artist "spots blacks": the deep shadows are filled with solid brush black (under the house eaves, inside the shrubs, under the leaves, the far side of the tree trunk, the hair, the folds of cloth facing away from the light). Large confident black shapes give the picture its punch.
+- Mid-tones are the halftone tints laid inside the inked outlines. Light areas are bare paper.
+- A little pen hatching is allowed in a few places (the bark, the thatch, the hills), but tone mainly comes from spotted blacks and dot tints, not from fine cross-hatching.
+- Shapes are observed from life, then simplified the way a good cartoonist simplifies: natural, slightly irregular curves, no perfect circles, no symmetry, no repeated identical shapes, no Art Deco stylisation, no clip-art vector look.
+
+THE PEOPLE: NATURAL, SPECIFIC, UNPOSED
+Draw them the way the best 1930s adventure-strip artists drew people: economical and believable, with real weight and gesture, caught in the middle of their work. They are not posing, not looking at the viewer and not idealised. They are ordinary working villagers, drawn with respect.
+- Faces get a few confident brush and pen marks: the profile line, the eye as a small dark shape under the brow, a line for the mouth, a touch of shadow under the cheekbone and the jaw.
+- Skin is the 25% dot tint, with a few spotted blacks for the shadow side. There is no detailed modelling, no skin texture and no muscle definition.
+- Hands are simplified but correct, busy holding something, four fingers and a thumb.
+- Clothes are paper white, with brush lines for the main folds and a 10% dot tint in their shadowed side.
+
+THE STAMP FRAME (x = % across from the left, y = % down from the top)
+The frame is engraved and printed, so it is cleaner and more regular than the drawing inside it, though still slightly soft-edged like old print.
+- Outside the stamp is plain off-white.
+- The stamp's edge is an even row of round perforation bites, 18 along the top and bottom and 23 down each side, with clean corners.
+- Inside the bites, a thin paper margin, then a frame of solid black about 6% of the stamp's width. A simple repeating border is cut out of it in paper: small diamonds alternating with dots, between two thin paper rules. Each corner has a black square tile holding a small eight-petalled paper flower.
+- Across the top (x 12% to 88%, y 6% to 13%) is a wide banner with a gently arched lower edge. It is plain paper, outlined in black, and completely empty.
+- Bottom left (x 7% to 23%, y 79% to 93%) is a square tablet with notched corners. It is plain paper with a black double rule, and completely empty.
+- Along the bottom (x 25% to 80%, y 82% to 91%) is a long caption box. It is plain paper with a black double rule, and completely empty.
+- The picture fills the window inside the frame, from y 13% to y 79%.
+
+THE PICTURE
+Early morning in a small vanilla garden behind a village house in the hills of central Sri Lanka. A woman hand-pollinates the vanilla flowers, one by one, with a thin stick. Her husband crouches at her feet laying the pods they picked yesterday into a basket. It is a quiet working moment, seen as if the artist was standing a few steps away.
+
+Sky and sun:
+- The sun is a soft-edged paper disc at x 30%, y 22%, about 8% of the stamp's width across.
+- The sky is a halftone gradient: the dots are biggest at the top of the picture (about 45%) and shrink to nothing near the sun and the horizon, so the light glows out of the paper.
+- A few long, thin, brush-drawn clouds cross the sky in paper.
+
+Hills and palms:
+- Two ranges of soft, irregular hills sit across the middle distance (y 38% to 47%): the far range in a 10% tint with a thin brush outline, the near range in a 25% tint with spotted black in its folds.
+- Four coconut palms stand on the left (x 8% to 40%), each different in height and lean. Their trunks are slightly curved and drawn with a tapering brush line. Their fronds are drawn freely with a brush: drooping, uneven, some broken, each frond a quick tapering stroke with a ragged edge. They are solid black against the sky. They are not fans of identical leaves.
+
+The house (left middle ground, x 6% to 44%, y 41% to 68%):
+- A low village house of mud and plaster, seen at a slight angle, a little crooked with age.
+- Its deep, shaggy thatched roof of dried palm fronds is drawn with loose overlapping pen strokes. The eaves hang low and uneven at about y 56%, with a band of solid black shadow beneath them.
+- The walls are paper with a 10% tint and a few cracks. There is a dark doorway in solid black and one small window.
+- A clay pot sits by the door.
+
+Ground and shrubs:
+- Behind the people is a band of leafy bushes, drawn as clusters of brush-inked leaves with solid black spotted into their depths, from y 60% to 79%. The light clothing reads strongly against them.
+- The swept earth floor is the 10% tint, with a few scattered fallen leaves.
+
+The man (lower left, crouching):
+- An ordinary, wiry village farmer of about fifty, slightly built, with a lined face, close-cropped greying hair, a thin moustache and a white cotton cloth tied loosely round his head.
+- He crouches on his heels at the lower left, in side view facing right. His head is at about x 30%, y 60%, and his body fills x 18% to 40%, y 56% to 79%, with his feet hidden behind the caption box.
+- He is bare-chested, with a faded checked sarong hitched up to his knees. A small towel is slung over one shoulder.
+- He looks down at his hands. He is laying a handful of slim vanilla pods into a wide, shallow woven basket on the ground in front of him (centred at x 38%, y 75%). One hand places the pods; the other steadies the basket's rim.
+- His back is slightly bent, and his elbows rest near his knees. The pose is relaxed and practised. He is not heroic, not muscular and not looking up.
+- The basket is drawn with a quick crisscross of pen lines and a black shadow inside its rim. It holds a neat pile of slim dark pods.
+
+The woman (centre, standing):
+- A village woman of about thirty-five, slim, with her black hair pulled back into a low knot at the nape of her neck and a few loose strands.
+- She stands on the ground in profile, facing right. Her head is at x 53%, y 40%, and her figure runs from y 36% down to the caption box, which hides her feet.
+- She wears a white short-sleeved cotton jacket and a long white cloth wrapped round her waist, falling to her ankles. It hangs in soft, slightly uneven folds, inked with tapering brush lines.
+- She reaches up with both arms to a flower just above her eye level, with her weight on her front foot.
+- Her hands are at x 63%, y 31%. Her left hand gently holds the flower steady between finger and thumb. Her right hand holds a thin wooden pollinating stick, a single fine line, to the centre of the flower.
+- She looks at the flower intently, with a slight frown of concentration and lips closed.
+
+The vanilla vine (the right third, the hero of the picture):
+- A support tree stands from x 70% to 82%, from the top of the picture to the bottom. Its bark is drawn with rough vertical pen strokes over a 25% tint, with solid black down its shadowed right side.
+- A thick, smooth, fleshy vanilla vine winds round the trunk in loose spirals. It is drawn with a fat tapering brush line, with a paper highlight along its lit edge and short aerial roots at its joints.
+- About ten large, thick, fleshy oval leaves with pointed tips grow alternately along the vine. Each is inked with a swelling brush outline and a paper midrib, its lit half in a 25% tint and its shadow half in solid black, and each is a different size and angle. Three of them arch out over the top centre of the picture (x 45% to 70%, y 14% to 30%), above the woman's hands.
+- There are four vanilla flowers, at (x 64%, y 30%) at the woman's hands, (x 76%, y 42%), (x 84%, y 53%) and (x 79%, y 66%).
+  - Each is a pale orchid in paper white, a little smaller than one leaf, inked with fine pen lines.
+  - Five narrow, pointed, slightly twisted tepals spread like a loose star, round a lip rolled into a small tube or trumpet that juts forward, with a wavy frilled rim and a dark shadow inside it.
+  - Beside two flowers are small clusters of round green buds in a 25% tint.
+  - These are vanilla orchids: not daffodils, lilies, jasmine or frangipani, and there is no wide cup at the centre.
+- Four bunches of green vanilla pods hang from the vine, at (x 88%, y 25%), (x 79%, y 52%), (x 74%, y 77%) and (x 88%, y 69%).
+  - Each bunch has eight to ten pods hanging loosely from one joint, side by side with small gaps between them, slightly different lengths and angles.
+  - Each pod is pencil-thin, about 25 times longer than it is wide, round, smooth and gently curved, on its own short stalk.
+  - Each pod is inked in a 70% tint or solid black, with one thin paper highlight down its length.
+  - No stripes, no bulges, no drops; nothing like bananas, cucumbers, beans or okra.
+- The lowest pod bunch and one leaf hang down over the bottom-right corner of the frame, overlapping the corner tile, as if the vine is growing out of the stamp. This is the only place the drawing crosses the frame.
+
+Light: early-morning sun from the upper left. Light planes are paper, and shadow sides are dot tints and spotted blacks. The woman's white clothes catch the light; the man is partly in the shade of the vine.
+
+COMPOSITION AND FEEL
+- The eye goes from the woman's raised hands and the flower, down the vine's pods, to the man's hands laying pods in the basket below. It is a quiet loop of work from flower to harvest.
+- Strong design of big blacks against open paper; the sky stays light and open.
+- The figures overlap naturally, with no stiff symmetry, and the people are not centred like a poster.
+- It should feel like a real panel from a beautifully drawn 1930s comic, printed on a stamp: human, warm, a little rough at the edges, and full of life.
+
+DO NOT INCLUDE
+- Photorealism, realistic skin texture, detailed muscle anatomy, glamour or idealised model-like faces, people looking at the viewer, heroic poses.
+- Geometric, Art Deco or vector stylisation of the people or plants; identical repeated shapes; even-weight mechanical outlines; flat cut-paper shapes.
+- Smooth greys, gradients, colour, glow or blur. Tone comes only from solid black, pen lines and halftone dots.
+- Fine engraving, etching or banknote cross-hatching.
+- A ladder or stool. Any person other than the two described. Extra fingers or hands.
+- Any text, letters, numbers, speech bubbles or symbols. The banner, tablet and caption box stay blank, because the lettering is added later.
+- A watermark, signature, logo or postmark.
+- A tote bag, mock-up, hands or table. Show the flat artwork only.

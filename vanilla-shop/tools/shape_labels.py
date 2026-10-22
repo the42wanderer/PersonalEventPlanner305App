@@ -15,8 +15,9 @@ from fontTools.pens.transformPen import TransformPen
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LABELS = {
+    # Batch block field labels, as on the current pack.
     'sinhala': ['කා.අ.', 'නි.දි.', 'කා.ඉ.දි.', 'උ.සි.මි.රු.'],
-    'tamil': ['தொகுதி இல', 'பொ.செ திகதி', 'மு.திகதி', 'விலை ரூபா'],
+    'tamil': ['தொகுதி இல', 'பொ.செ திகதி', 'மு.திகதி', 'விலை ரூபா', 'விலைரூபா'],
 }
 FONTS = {'sinhala': 'noto-sans-sinhala.ttf', 'tamil': 'noto-sans-tamil.ttf'}
 
