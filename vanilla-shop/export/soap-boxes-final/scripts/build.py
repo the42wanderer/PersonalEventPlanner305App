@@ -20,7 +20,7 @@ SOAP={
  'vanilla': dict(l2='Bathing Bar',desc='',ink='#5A3410',deep='#8A5A10',kind='BATHING BAR',
                  ean='4796034220069',mrp='1,200',tfm='70',mfd='01/09/2025',exp='30/08/2027',extra=None,
                  en='Rejuvenate your skin and spirit with The Vanilla Shop bathing bar.'),
- 'rosette': dict(l2='Rosette',desc='Vanilla & rose bathing bar',ink='#5A1426',deep='#9A3550',kind='VANILLA & ROSE BATHING BAR',
+ 'rosette': dict(l2='Rosé',desc='Vanilla & rose bathing bar',ink='#5A1426',deep='#9A3550',kind='VANILLA & ROSE BATHING BAR',
                  ean='4796034220076',mrp='1,300',tfm='63',mfd='02/04/2025',exp='01/04/2027',extra=('rose extract',True),
                  en='Rejuvenate your skin and spirit with The Vanilla Shop vanilla and rose bathing bar.'),
  'charcoal':dict(l2='Charcoal+',desc='Charcoal & vanilla bathing bar',ink='#141414',deep='#55504B',kind='CHARCOAL & VANILLA BATHING BAR',
@@ -135,7 +135,7 @@ def build(k):
         for (a,b_,x2,y2) in ((0,FY0,SW,FY0),(0,FY1,SW,FY1),(FX0,FLY,FX0,SH),(FX1,FLY,FX1,SH),(FX0,FLY,FX1,FLY)):
             o.append(f'<path d="M{a} {b_}L{x2} {y2}" stroke="#00A0E0" stroke-width="0.2" stroke-dasharray="1.2 0.8"/>')
     return o
-NAMES={'vanilla':'Vanilla Bathing Bar','rosette':'Vanilla & Rosette','charcoal':'Vanilla & Charcoal+','aloe':'Vanilla & Aloe Vera'}
+NAMES={'vanilla':'Vanilla Bathing Bar','rosette':'Vanilla & Rosé','charcoal':'Vanilla & Charcoal+','aloe':'Vanilla & Aloe Vera'}
 def page(k,o,name):
     PW,PH=SW+2*B+2*M,SH+2*B+2*M+6
     inner=(f'<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:{M}mm;top:{M}mm" width="{SW+2*B}mm" height="{SH+2*B}mm" '
