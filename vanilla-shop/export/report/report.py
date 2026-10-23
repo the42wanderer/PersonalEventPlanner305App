@@ -82,11 +82,11 @@ P.append(page(6,f'''<div class="pad">{head("05 · Vanilla extracts &amp; syrup",
 <div class="a" style="background:#EDE7DC">{img(O+"extract-range.jpg","width:100%")}<div class="tag">After</div></div></div>
 <div class="notes">{"".join(f'<div><b>{a}</b>{b}</div>' for a,b in [("Split label","Painted vanilla on one side, clean information on the other; the label reads at a glance."),("No. 01 · 02 · 03","Alcoholic extract, non-alcoholic extract and syrup become a collectable, numbered set, each with its own colour."),("Same information","Every fact from the old labels is kept, re-set to be readable; the history line was corrected."),("Print-ready","500, 200 and 100 ml labels and neck seals, with bleed and cut lines.")])}</div>'''))
 # 7 tea
-P.append(page(7,f'''<div class="pad">{head("06 · Natural vanilla tea","From a kraft pouch with a sticker to a Ceylon tea box.")}</div>
-<div class="ba"><div class="b" style="display:flex;gap:2mm;align-items:center;justify-content:center">{img(OLD+"vanilla_ceylon_tea_1.jpg","width:62%")}</div>
-<div class="a">{img(R+"/studies/v5/mockup-pair.jpg","width:100%")}<div class="tag">After</div></div></div>
+P.append(page(7,f'''<div class="pad">{head("06 · Natural vanilla tea","The kraft pouch stays. Everything on it changes.")}</div>
+<div class="ba"><div class="b" style="display:flex;gap:3mm;align-items:center;justify-content:center;padding:0 4mm">{img(OLD+"vanilla_ceylon_tea_1.jpg","width:58%")}{img(O+"tea-box-old.jpg","width:34%")}</div>
+<div class="a" style="display:grid;grid-template-columns:0.85fr 1.15fr;gap:3mm;padding:0 3mm;background:#F4F1EB;align-items:center">{img(O+"tea-pouches-new.jpg","width:100%")}{img(O+"tea-boxes-new.jpg","width:100%")}<div class="tag">After</div></div></div>
 <div class="tagb">Before</div>
-<div class="notes">{"".join(f'<div><b>{a}</b>{b}</div>' for a,b in [("A real box","A 25-bag and a 12-bag carton replace the pouch, so the tea can sit on a shelf and be given as a gift."),("Painted vanilla","Flower, vine and cured pods, painted to match the extracts."),("Ceylon credentials","The Ceylon Tea lion and “Authentic Ceylon” up front; a simple brewing guide on the side."),("Editable files","Dielines and fronts in several colourways for the team to adapt.")])}</div>'''))
+<div class="notes">{"".join(f'<div><b>{a}</b>{b}</div>' for a,b in [("Same kraft pouch","The 100 g stand-up pouch is kept; a new arched paper label replaces the sticker, for Vanilla Tea and Vanilla &amp; Cinnamon Tea."),("Boxes for gifting","A 25-bag and a 12-bag carton replace the green sachet box, in the same painted style as the pouch labels."),("Painted vanilla","Flower, vine and cured pods (and cinnamon quills), painted to match the extracts."),("Ceylon credentials","The Ceylon Tea lion and “Authentic Ceylon” on every pack; a brewing guide on the boxes.")])}</div>'''))
 # 8 soaps
 P.append(page(8,f'''<div class="pad">{head("07 · Bath bars","Same box, a completely different feeling.")}</div>
 <div class="ba" style="grid-template-columns:1fr 1.35fr"><div class="b" style="display:grid;grid-template-columns:1fr 1fr;align-content:center">{"".join(img(OLD+f+"_1.jpg","width:100%") for f in ["vanilla","rosette","charcoal","aloe_vera"])}</div>
@@ -110,7 +110,7 @@ P.append(page(11,f'''<div style="position:absolute;inset:0;display:grid;grid-tem
 P.append(page(12,f'''<div class="pad">{head("10 · Where the brand is now","One shop, five lines, unmistakably related.")}</div>
 <div style="position:absolute;left:14mm;right:14mm;top:50mm;bottom:16mm;display:grid;grid-template-columns:1.2fr 1fr 0.55fr;grid-template-rows:1fr 1fr;gap:4mm">
 <div style="background:#EDE7DC;display:flex;align-items:center;overflow:hidden">{img(O+"extract-range.jpg","width:100%")}</div>
-<div style="background:#E7DFD2;display:flex;align-items:center;overflow:hidden">{img(R+"/studies/v5/mockup-pair.jpg","width:112%;margin-left:-6%")}</div>
+<div style="background:#F4F1EB;display:grid;grid-template-columns:0.85fr 1.15fr;gap:2mm;padding:0 2mm;align-items:center;overflow:hidden">{img(O+"tea-pouches-new.jpg","width:100%")}{img(O+"tea-boxes-new.jpg","width:100%")}</div>
 <div style="grid-row:span 2;background:#D9D2C4;overflow:hidden;display:flex;justify-content:center">{img(R+"/export/tote/1ink-halftone/tote-stamp-halftone_mockup.jpg","height:100%")}</div>
 <div style="background:#E6E0D5;display:flex;align-items:center;overflow:hidden">{img(O+"soap-3d.jpg","width:100%")}</div>
 <div style="background:#EAE3D7;display:flex;justify-content:space-around;align-items:center;overflow:hidden">{"".join(cube(k,17,18,17) for k in ["velvet","aura","harmony","zest"])}</div></div>'''))
