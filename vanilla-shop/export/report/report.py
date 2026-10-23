@@ -31,7 +31,7 @@ P.append(page(1,f'''<div style="position:absolute;inset:0;display:grid;grid-temp
 <div style="font:58pt/0.95 ISR;color:{INK};margin-top:4mm">From a shelf of<br><i style="font-family:IS">strangers</i><br>to one family.</div>
 <p class="lede" style="width:100mm;margin-top:8mm">What we changed across the range, why, and where The Vanilla Shop stands now: extracts, tea, bath bars, candles and the tote.</p></div>
 <div style="position:relative;background:#E7DFD2;overflow:hidden">{img(O+"soap-3d.jpg","position:absolute;width:150%;left:-25%;top:6%")}
-{img(R+"/studies/v5/mockup-pair.jpg","position:absolute;width:118%;left:-9%;bottom:-6%")}</div></div>'''))
+{img(O+"tea-3d-crop.jpg","position:absolute;width:108%;left:-4%;top:43%")}</div></div>'''))
 # 2 where we started
 P.append(page(2,f'''<div class="pad">{head("01 · Where we started","Thirteen products, six visual languages.",
 "The range as it appears on thevanillashop.lk today. Every product was designed on its own: white-and-gold bottle labels, yellow floral soap boxes, kraft pouches with paper stickers, cloth bags, a green tea box and a black floral hamper. Each one is fine by itself. Together, they don’t look like one shop.")}</div>
@@ -84,7 +84,7 @@ P.append(page(6,f'''<div class="pad">{head("05 · Vanilla extracts &amp; syrup",
 # 7 tea
 P.append(page(7,f'''<div class="pad">{head("06 · Natural vanilla tea","The kraft pouch stays. Everything on it changes.")}</div>
 <div class="ba"><div class="b" style="display:flex;gap:3mm;align-items:center;justify-content:center;padding:0 4mm">{img(OLD+"vanilla_ceylon_tea_1.jpg","width:58%")}{img(O+"tea-box-old.jpg","width:34%")}</div>
-<div class="a" style="display:grid;grid-template-columns:0.85fr 1.15fr;gap:3mm;padding:0 3mm;background:#F4F1EB;align-items:center">{img(O+"tea-pouches-new.jpg","width:100%")}{img(O+"tea-boxes-new.jpg","width:100%")}<div class="tag">After</div></div></div>
+<div class="a" style="display:grid;grid-template-columns:0.85fr 1.15fr;gap:3mm;padding:0 3mm;background:#F4F1EB;align-items:center">{img(O+"tea-pouches-new.jpg","width:100%")}{img(O+"tea-3d-crop.jpg","width:100%")}<div class="tag">After</div></div></div>
 <div class="tagb">Before</div>
 <div class="notes">{"".join(f'<div><b>{a}</b>{b}</div>' for a,b in [("Same kraft pouch","The 100 g stand-up pouch is kept; a new arched paper label replaces the sticker, for Vanilla Tea and Vanilla &amp; Cinnamon Tea."),("Boxes for gifting","A 25-bag and a 12-bag carton replace the green sachet box, in the same painted style as the pouch labels."),("Painted vanilla","Flower, vine and cured pods (and cinnamon quills), painted to match the extracts."),("Ceylon credentials","The Ceylon Tea lion and “Authentic Ceylon” on every pack; a brewing guide on the boxes.")])}</div>'''))
 # 8 soaps
@@ -112,7 +112,7 @@ P.append(page(11,f'''<div style="position:absolute;inset:0;display:grid;grid-tem
 P.append(page(12,f'''<div class="pad">{head("10 · Where the brand is now","One shop, five lines, unmistakably related.")}</div>
 <div style="position:absolute;left:14mm;right:14mm;top:50mm;bottom:16mm;display:grid;grid-template-columns:1.2fr 1fr 0.55fr;grid-template-rows:1fr 1fr;gap:4mm">
 <div style="background:#EDE7DC;display:flex;align-items:center;overflow:hidden">{img(O+"extract-range.jpg","width:100%")}</div>
-<div style="background:#F4F1EB;display:grid;grid-template-columns:0.85fr 1.15fr;gap:2mm;padding:0 2mm;align-items:center;overflow:hidden">{img(O+"tea-pouches-new.jpg","width:100%")}{img(O+"tea-boxes-new.jpg","width:100%")}</div>
+<div style="background:#F4F1EB;display:grid;grid-template-columns:0.85fr 1.15fr;gap:2mm;padding:0 2mm;align-items:center;overflow:hidden">{img(O+"tea-pouches-new.jpg","width:100%")}{img(O+"tea-3d-crop.jpg","width:100%")}</div>
 <div style="grid-row:span 2;background:#D9D2C4;overflow:hidden;display:flex;justify-content:center">{img(R+"/export/tote/1ink-halftone/tote-stamp-halftone_mockup.jpg","height:100%")}</div>
 <div style="background:#E6E0D5;display:flex;align-items:center;overflow:hidden">{img(O+"soap-3d.jpg","width:100%")}</div>
 <div style="background:#EAE3D7;display:flex;justify-content:space-around;align-items:center;overflow:hidden">{"".join(cube(k,17,18,17) for k in ["velvet","aura","harmony","zest"])}</div></div>'''))
