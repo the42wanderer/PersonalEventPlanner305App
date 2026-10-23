@@ -5,7 +5,7 @@ sys.path.insert(0,'/home/user/PersonalEventPlanner305App/vanilla-shop/studies/ex
 import numpy as np, draw
 from draw import Canvas, leaf, pod, bud, stem
 from comp import flower, mix, sheen
-O='/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/teaart/'
+O='/home/user/PersonalEventPlanner305App/vanilla-shop/studies/tea/watercolour/'
 PAL={'teal':dict(ground='#2C6466',tep_core='#F4FBF2',tep_edge='#8FC3B6',lip_core='#FBFDF4',lip_edge='#CDE6D8',throat_core='#F1C55E',throat_edge='#D49A3A',
                  leaf_core='#7DB59E',leaf_edge='#1F4D4C',pod_core='#3E2416',pod_edge='#1D1310',bud_core='#E2F1E4',bud_edge='#86BBA8',stem='#6FA593'),
      'amber':dict(ground='#B0612A',tep_core='#FFF3E0',tep_edge='#F0A86A',lip_core='#FFF8EC',lip_edge='#F9D3A6',throat_core='#F6C85A',throat_edge='#E0913A',
