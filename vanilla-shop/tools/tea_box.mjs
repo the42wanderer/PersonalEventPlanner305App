@@ -135,7 +135,26 @@ function build(boxKey) {
   // ---- front
   {
     const F = face('front'), t = [];
-    if (boxKey === 'cube') {
+    if (ART) {
+      // One layout for both boxes: information top left, the logo and the lion together top right as one signature,
+      // the name on the foot rule bottom left, the drawing rising from the bottom right corner.
+      const rx = F.w - 8, cube = boxKey === 'cube', ln = cube ? 11 : 12, lnh = ln * LION.vh / LION.vw, lw = cube ? 9.5 : 10, ty = 6.5;
+      t.push(F.lion(rx - ln, ty, ln), F.rule(rx - ln - 3.5, ty, rx - ln - 3.5, ty + lnh, 0.4), F.logo(rx - ln - 7 - lw / 2, ty + lw * 0.52, lw));
+      if (cube) {
+        t.push(F.caps('AUTHENTIC CEYLON', 8, 10.4), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, 8, 14.2), F.rule(8, 16.8, 46, 16.8));
+        t.push(F.body('Ceylon black tea\nwith natural vanilla', 8, 22.4, 40, { size: 2.4, lead: 3.3 }).svg);
+        const sz = 19;
+        L.Name.push(F.text('title', 'Vanilla', 7, F.h - 9 - 0.78 * sz, sz, { fill: GOLD }), F.text('title', 'Tea', 7, F.h - 9, sz));
+      } else {
+        t.push(F.caps('THE VANILLA SHOP', 9, 12), F.caps('NO. 01', 96, 12, { anchor: 'end' }), F.rule(9, 15, 96, 15));
+        t.push(F.label('BLEND', 9, 23), F.caps('CEYLON BLACK TEA', 9, 27), F.caps('NATURAL VANILLA', 9, 30.4));
+        t.push(F.label('ORIGIN', 48, 23), F.caps('AUTHENTIC CEYLON', 48, 27));
+        t.push(F.label('CONTENTS', 9, 36.4), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, 9, 40.4));
+        const sz = 26;
+        L.Name.push(F.text('title', 'Vanilla', 8, F.h - 9, sz, { fill: GOLD }), F.text('title', 'Tea', 8 + width(FONT.title, 'Vanilla ', sz), F.h - 9, sz));
+      }
+      t.push(F.rule(cube ? 8 : 9, F.h - 5, cube ? 46 : 113, F.h - 5));
+    } else if (boxKey === 'cube') {
       // Top bar; the name high, two lines; the product line; the logo bottom left on the same edge.
       const r = F.w - 8, sz = 20, asc = 0.72 * sz, top = 16.5, b1 = top + asc, b2 = b1 + 0.78 * sz;
       t.push(F.caps('AUTHENTIC CEYLON', 8, 10.4), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, r, 10.4, { anchor: 'end' }), F.rule(8, 12.8, r, 12.8));
