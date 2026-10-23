@@ -2,7 +2,7 @@
 # (the Song Chao faded print), and a deep tea-green band along the foot of the front holding the watercolour flower,
 # Ceylon tea flushes and cured pods (the extract labels' technique). Front-panel mm, 3 mm bleed.
 import sys
-sys.path.insert(0,'/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/teaart')  # teaflower.py lives beside this file in the repo
+sys.path.insert(0,'/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/teaart')
 sys.path.insert(0,'/home/user/PersonalEventPlanner305App/vanilla-shop/studies/extract/split')
 import numpy as np
 from PIL import Image
@@ -12,7 +12,7 @@ from comp import flower, mix
 from teaflower import PAL, flush, pods
 O='/home/user/PersonalEventPlanner305App/vanilla-shop/studies/tea/watercolour/cream/'
 SP='/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/bw/spray-test.png'
-K=draw.K; B=3; PAPER=np.array([0xF6,0xEE,0xDC],np.float32); LINE=np.array([0xA9,0xBE,0x9E],np.float32); FADE=0.30
+K=draw.K; B=3; PAPER=np.array([0xF6,0xEE,0xDC],np.float32); LINE=np.array([0xA9,0xBE,0x9E],np.float32); FADE=0.30; SPX,SPY=0.66,0.78
 p=PAL['green']
 def pattern(Wmm,Hmm,k=K,h=72,seed=1):
     """the engraved spray, tiled in a loose half-drop, flipped every other one, as a pale sage line on cream"""
@@ -20,10 +20,10 @@ def pattern(Wmm,Hmm,k=K,h=72,seed=1):
     src=Image.open(SP).convert('L'); sw=int(h*2400/3400*k); sh=int(h*k)
     A=src.resize((sw,sh),Image.LANCZOS); Bf=A.transpose(Image.FLIP_LEFT_RIGHT)
     M=Image.new('L',(w,hh),255); rng=np.random.default_rng(seed)
-    for r in range(-1,int(Hmm/(h*0.78))+2):
-        for c in range(-1,int(Wmm/(h*0.66))+2):
+    for r in range(-1,int(Hmm/(h*SPY))+2):
+        for c in range(-1,int(Wmm/(h*SPX))+2):
             t=(A if (r*3+c)%2 else Bf).rotate(rng.uniform(-18,18),expand=True,fillcolor=255)
-            x=int((c*h*0.66+(r%2)*h*0.33+rng.uniform(-6,6))*k); y=int((r*h*0.78+rng.uniform(-6,6))*k)
+            x=int((c*h*SPX+(r%2)*h*SPX/2+rng.uniform(-6,6))*k); y=int((r*h*SPY+rng.uniform(-6,6))*k)
             M.paste(t,(x,y),Image.fromarray(((255-np.asarray(t))>30).astype(np.uint8)*255))
     a=1-np.asarray(M).astype(np.float32)/255; a=np.clip((a-0.15)/0.7,0,1)*FADE
     img=img*(1-a[...,None])+LINE*a[...,None]
@@ -51,7 +51,8 @@ def cube_art(cv):     # band 94 x 36 mm
     flush(cv,p,(14,42),-72,1.05,blur=0.75)
     flush(cv,p,(90,42),-110,1.0,blur=0.7)
     flower(cv,(58,20),35,1.55,p,blurs=(0.42,0.36,0.65))
-front('long-cream.png',182,91,48,long_art)
-front('cube-cream.png',94,91,52,cube_art)
-Image.fromarray(pattern(260,260,k=12,seed=2).clip(0,255).astype(np.uint8)).save(O+'pattern.jpg',quality=92)
-print('ok')
+if __name__=='__main__':
+  front('long-cream.png',182,91,48,long_art)
+  front('cube-cream.png',94,91,52,cube_art)
+  Image.fromarray(pattern(260,260,k=12,seed=2).clip(0,255).astype(np.uint8)).save(O+'pattern.jpg',quality=92)
+  print('ok')

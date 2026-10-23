@@ -157,12 +157,12 @@ function build(boxKey) {
       if (cube) {
         const sz = shade ? 18 : 16.5, b1 = shade ? 45 : 34;
         L.Name.push(F.text('title', 'Vanilla', 7, b1, sz, { fill: GOLD }), F.text('title', 'Tea', 7, b1 + 0.8 * sz, sz));
-        if (shade) t.push(F.body('Ceylon black tea\nwith natural vanilla', 8, b1 + 0.8 * sz + 9, 40, { size: 2.4, lead: 3.3 }).svg, F.rule(8, F.h - 5, 46, F.h - 5));
+        if (shade) t.push(F.body('Ceylon black tea\nwith natural vanilla', 8, b1 + 0.8 * sz + 9, 40, { size: 2.4, lead: 3.3 }).svg);
         else t.push(F.body('Ceylon black tea\nwith natural vanilla', rx, 41, 30, { size: 2.3, lead: 3.2, anchor: 'end' }).svg);
       } else {
         const sz = shade ? 27 : 25, b = shade ? 53 : 40;
         L.Name.push(F.text('title', 'Vanilla', 8, b, sz, { fill: GOLD }), F.text('title', 'Tea', 8 + width(FONT.title, 'Vanilla ', sz), b, sz));
-        if (shade) t.push(F.body('Ceylon black tea with natural vanilla', 9, b + 10, 80, { size: 2.6 }).svg, F.rule(9, F.h - 5, 113, F.h - 5));
+        if (shade) t.push(F.body('Ceylon black tea with natural vanilla', 9, b + 10, 80, { size: 2.6 }).svg);
         else t.push(F.body('Ceylon black tea\nwith natural vanilla', rx, 34.4, 40, { size: 2.5, lead: 3.4, anchor: 'end' }).svg);
       }
     } else if (ART && process.env.TEA_SIG === 'left') {
@@ -343,8 +343,8 @@ function build(boxKey) {
     if (B.lidTurn) ringPath = `M0 0`;   // the turned ring is inside a transformed group; no free guide path
   }
 
-  if (THEME && THEMES[THEME].light) defs += '<linearGradient id="foil" x1="0" y1="0" x2="1" y2="0.4"><stop offset="0" stop-color="#5A3A0E"/><stop offset="0.3" stop-color="#A57B2E"/>' +
-    '<stop offset="0.5" stop-color="#7A561A"/><stop offset="0.75" stop-color="#B98E3E"/><stop offset="1" stop-color="#5A3A0E"/></linearGradient>';
+  if (THEME && THEMES[THEME].light) defs += '<linearGradient id="foil" x1="0" y1="0" x2="1" y2="0.4"><stop offset="0" stop-color="#4A2C06"/><stop offset="0.3" stop-color="#8C5F1C"/>' +
+    '<stop offset="0.5" stop-color="#5E3E0C"/><stop offset="0.75" stop-color="#9C7028"/><stop offset="1" stop-color="#4A2C06"/></linearGradient>';
   else if (THEME) defs += '<linearGradient id="foil" x1="0" y1="0" x2="1" y2="0.4"><stop offset="0" stop-color="#9A7230"/><stop offset="0.3" stop-color="#E9CB80"/>' +
     '<stop offset="0.5" stop-color="#B08336"/><stop offset="0.75" stop-color="#F2D995"/><stop offset="1" stop-color="#9A7230"/></linearGradient>';
   const tile = grainTile({ dpi: 600, clump: 0.5 });

@@ -7,7 +7,9 @@ sys.path.insert(0,'/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-
 import numpy as np, cv2
 from PIL import Image, ImageDraw
 import draw
+import cream
 from cream import pattern, PAPER
+cream.FADE=0.24; cream.SPX,cream.SPY=1.05,1.1      # sparser and paler: noticed only on a closer look
 O='/home/user/PersonalEventPlanner305App/vanilla-shop/studies/tea/watercolour/shadow/'
 SP='/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/bw/spray-test.png'
 K=draw.K; B=3; SHADE=np.array([0x2A,0x4A,0x34],np.float32)
@@ -29,7 +31,8 @@ def front(name,W,H,spray,flushes,quiet,glow):
     for (x0,y0,x1,y1) in quiet:                                   # quiet the print behind the type
         dx=np.maximum(np.maximum(x0-xx,xx-x1),0); dy=np.maximum(np.maximum(y0-yy,yy-y1),0)
         q=np.minimum(q,np.clip(np.hypot(dx,dy)/10,0,1))
-    q=q*np.clip(0.35+0.65*((xx/W)*0.6+(yy/H)*0.4),0,1)             # fuller towards the right and the foot
+    edge=np.minimum(np.minimum(xx+B,W-B-xx),np.minimum(yy+B,H-B-yy))
+    q=q*np.clip(1.15-edge/22,0.12,1)                              # the print lives near the edges; the middle stays quiet
     img=paper+(pat-paper)*q[...,None]
     # warm light pooling where the sun comes in
     g=np.clip(1-np.hypot(xx-glow[0],yy-glow[1])/glow[2],0,1)**1.5; img=img*(1+0.035*g[...,None])
@@ -42,16 +45,18 @@ def front(name,W,H,spray,flushes,quiet,glow):
     F=Image.new('L',(w,h),0); d=ImageDraw.Draw(F)
     for f in flushes: tea_sil(d,*f,K)
     far=np.asarray(F).astype(np.float32)/255
-    # blur grows away from the top right (where the plant is closest to the box)
-    t=np.clip(np.hypot(xx-W,yy+10)/ (W*0.9),0,1)
-    n1=cv2.GaussianBlur(near,(0,0),0.5*K); n2=cv2.GaussianBlur(near,(0,0),2.2*K)
-    a=(n1*(1-t)+n2*t)*0.26+cv2.GaussianBlur(far,(0,0),3.0*K)*0.17
-    img=img*(1-a[...,None])+SHADE*a[...,None]
+    # a cast shadow: sharp where the plant is near the paper (top right), softer further away; shapes from one light
+    # do not darken where they overlap (max, not sum), and the paper is multiplied, not painted over
+    t=np.clip(np.hypot(xx-W,yy+10)/(W*0.9),0,1)
+    n1=cv2.GaussianBlur(near,(0,0),0.3*K); n2=cv2.GaussianBlur(near,(0,0),1.8*K)
+    a=np.maximum((n1*(1-t)+n2*t)*0.92,cv2.GaussianBlur(far,(0,0),2.6*K)*0.62)*0.42
+    MUL=np.array([0.60,0.70,0.64],np.float32)
+    img=img*(1-a[...,None]+a[...,None]*MUL)
     img+=np.random.default_rng(3).normal(0,3.5,(h,w,1))
     Image.fromarray(img.clip(0,255).astype(np.uint8)).save(O+name)
 # long, panel 176 x 85: signature top left, name across the middle left, the shadow falling from the top right
 front('long-cream.png',182,91,spray=(138,30,120,-38,True),flushes=[((170,-8),118,2.4),((120,-10),70,1.9),((176,70),-150,2.0)],
-      quiet=[(6,4,120,24),(4,36,124,70),(130,6,172,20)],glow=(150,10,90))
-front('cube-cream.png',94,91,spray=(66,30,100,-34,True),flushes=[((90,-8),112,1.7),((92,64),-150,1.6)],
-      quiet=[(5,4,52,22),(4,36,62,72),(52,6,84,18)],glow=(80,6,60))
+      quiet=[(6,4,124,26),(4,30,128,72),(128,4,174,22)],glow=(150,10,90))
+front('cube-cream.png',94,91,spray=(74,24,82,-28,True),flushes=[((90,-8),112,1.7),((92,64),-150,1.6)],
+      quiet=[(5,4,56,24),(4,30,64,80),(50,4,86,20)],glow=(80,6,60))
 print('ok')
