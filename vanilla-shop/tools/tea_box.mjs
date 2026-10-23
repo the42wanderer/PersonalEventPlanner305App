@@ -30,7 +30,7 @@ const width = (f, s, sz, track = 0) => {
 const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper: '#2A1B13', ink: '#F3E6C8' },
   // the extract labels' technique: a soft watercolour vanilla with Ceylon tea's two leaves and a bud, glowing out of
   // one colour (art from TEA_ART, made by studies/tea/watercolour/teaart.py; TEA_ART=studies/tea/watercolour); the realistic paintings are left off
-  teal: { paper: '#2C6466', ink: '#F5EEDC', art: true }, amber: { paper: '#B0612A', ink: '#FFF4E4', art: true } };
+  teal: { paper: '#2C6466', ink: '#F5EEDC', art: true }, tgreen: { paper: '#1F4732', ink: '#F5EEDC', art: true }, tgreen: { paper: '#1F4732', ink: '#F5EEDC', art: true }, amber: { paper: '#B0612A', ink: '#FFF4E4', art: true } };
 const THEME = THEMES[process.env.TEA_THEME] ? process.env.TEA_THEME : null;
 const MM = 72 / 25.4, INK = THEME ? THEMES[THEME].ink : '#143A1D', PAPER = THEME ? THEMES[THEME].paper : '#F8E7C0';
 const GOLD = 'url(#foil)';
@@ -135,7 +135,26 @@ function build(boxKey) {
   // ---- front
   {
     const F = face('front'), t = [];
-    if (ART) {
+    if (ART && process.env.TEA_SIG === 'left') {
+      // The signature (logo and lion) top left in place of the shop's name; the information under it; the name on the
+      // foot rule bottom left; the whole right half left to the painting.
+      const cube = boxKey === 'cube', x = cube ? 8 : 9, lw = cube ? 10 : 11, ln = cube ? 11.5 : 12.5, lnh = ln * LION.vh / LION.vw, ty = 6.5;
+      t.push(F.logo(x + lw / 2, ty + lw * 0.52, lw), F.rule(x + lw + 3.5, ty, x + lw + 3.5, ty + lnh, 0.4), F.lion(x + lw + 7, ty, ln));
+      if (cube) {
+        t.push(F.rule(8, 21, 46, 21), F.caps('AUTHENTIC CEYLON', 8, 26.2), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, 8, 30));
+        t.push(F.body('Ceylon black tea\nwith natural vanilla', 8, 35.6, 40, { size: 2.4, lead: 3.3 }).svg);
+        const sz = 19;
+        L.Name.push(F.text('title', 'Vanilla', 7, F.h - 9 - 0.78 * sz, sz, { fill: GOLD }), F.text('title', 'Tea', 7, F.h - 9, sz));
+      } else {
+        t.push(F.caps('NO. 01', 96, 12, { anchor: 'end' }), F.rule(9, 21, 96, 21));
+        t.push(F.label('BLEND', 9, 27.5), F.caps('CEYLON BLACK TEA', 9, 31.5), F.caps('NATURAL VANILLA', 9, 34.9));
+        t.push(F.label('ORIGIN', 48, 27.5), F.caps('AUTHENTIC CEYLON', 48, 31.5));
+        t.push(F.label('CONTENTS', 9, 40.9), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, 9, 44.9));
+        const sz = 26;
+        L.Name.push(F.text('title', 'Vanilla', 8, F.h - 9, sz, { fill: GOLD }), F.text('title', 'Tea', 8 + width(FONT.title, 'Vanilla ', sz), F.h - 9, sz));
+      }
+      t.push(F.rule(cube ? 8 : 9, F.h - 5, cube ? 46 : 113, F.h - 5));
+    } else if (ART) {
       // One layout for both boxes: information top left, the logo and the lion together top right as one signature,
       // the name on the foot rule bottom left, the drawing rising from the bottom right corner.
       const rx = F.w - 8, cube = boxKey === 'cube', ln = cube ? 11 : 12, lnh = ln * LION.vh / LION.vw, lw = cube ? 9.5 : 10, ty = 6.5;
