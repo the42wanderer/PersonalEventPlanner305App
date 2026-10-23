@@ -33,9 +33,11 @@ const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper:
   teal: { paper: '#2C6466', ink: '#F5EEDC', art: true }, tgreen: { paper: '#1F4732', ink: '#F5EEDC', art: true },
   // after the Japanese-tea board: cream paper, our engraving printed faintly all over (studies/tea/watercolour/cream.py),
   // the painted band along the front's foot; green ink, "Vanilla" in a deeper gold for a light ground
+  // TEA_CREAM=shadow: no band; the name in the quiet middle; art from studies/tea/watercolour/shadow.py
   cream: { paper: '#F6EEDC', ink: '#1F4732', art: true, pattern: true, light: true }, tgreen: { paper: '#1F4732', ink: '#F5EEDC', art: true },
   // after the Japanese-tea board: cream paper, our engraving printed faintly all over (studies/tea/watercolour/cream.py),
   // the painted band along the front's foot; green ink, "Vanilla" in a deeper gold for a light ground
+  // TEA_CREAM=shadow: no band; the name in the quiet middle; art from studies/tea/watercolour/shadow.py
   cream: { paper: '#F6EEDC', ink: '#1F4732', art: true, pattern: true, light: true }, amber: { paper: '#B0612A', ink: '#FFF4E4', art: true } };
 const THEME = THEMES[process.env.TEA_THEME] ? process.env.TEA_THEME : null;
 const MM = 72 / 25.4, INK = THEME ? THEMES[THEME].ink : '#143A1D', PAPER = THEME ? THEMES[THEME].paper : '#F8E7C0';
@@ -151,14 +153,17 @@ function build(boxKey) {
       const cube = boxKey === 'cube', x = cube ? 8 : 9, rx = F.w - 8, lw = cube ? 10 : 11, ln = cube ? 11.5 : 12.5, lnh = ln * LION.vh / LION.vw, ty = 6.5;
       t.push(F.logo(x + lw / 2, ty + lw * 0.52, lw), F.rule(x + lw + 3.5, ty, x + lw + 3.5, ty + lnh, 0.4), F.lion(x + lw + 7, ty, ln));
       t.push(F.caps('AUTHENTIC CEYLON', rx, 10.6, { anchor: 'end' }), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, rx, 14.4, { anchor: 'end' }));
+      const shade = process.env.TEA_CREAM === 'shadow';   // no band: the name sits in the quiet middle, the line under it
       if (cube) {
-        const sz = 16.5;
-        L.Name.push(F.text('title', 'Vanilla', 7, 34, sz, { fill: GOLD }), F.text('title', 'Tea', 7, 34 + 0.8 * sz, sz));
-        t.push(F.body('Ceylon black tea\nwith natural vanilla', rx, 41, 30, { size: 2.3, lead: 3.2, anchor: 'end' }).svg);
+        const sz = shade ? 18 : 16.5, b1 = shade ? 45 : 34;
+        L.Name.push(F.text('title', 'Vanilla', 7, b1, sz, { fill: GOLD }), F.text('title', 'Tea', 7, b1 + 0.8 * sz, sz));
+        if (shade) t.push(F.body('Ceylon black tea\nwith natural vanilla', 8, b1 + 0.8 * sz + 9, 40, { size: 2.4, lead: 3.3 }).svg, F.rule(8, F.h - 5, 46, F.h - 5));
+        else t.push(F.body('Ceylon black tea\nwith natural vanilla', rx, 41, 30, { size: 2.3, lead: 3.2, anchor: 'end' }).svg);
       } else {
-        const sz = 25;
-        L.Name.push(F.text('title', 'Vanilla', 8, 40, sz, { fill: GOLD }), F.text('title', 'Tea', 8 + width(FONT.title, 'Vanilla ', sz), 40, sz));
-        t.push(F.body('Ceylon black tea\nwith natural vanilla', rx, 34.4, 40, { size: 2.5, lead: 3.4, anchor: 'end' }).svg);
+        const sz = shade ? 27 : 25, b = shade ? 53 : 40;
+        L.Name.push(F.text('title', 'Vanilla', 8, b, sz, { fill: GOLD }), F.text('title', 'Tea', 8 + width(FONT.title, 'Vanilla ', sz), b, sz));
+        if (shade) t.push(F.body('Ceylon black tea with natural vanilla', 9, b + 10, 80, { size: 2.6 }).svg, F.rule(9, F.h - 5, 113, F.h - 5));
+        else t.push(F.body('Ceylon black tea\nwith natural vanilla', rx, 34.4, 40, { size: 2.5, lead: 3.4, anchor: 'end' }).svg);
       }
     } else if (ART && process.env.TEA_SIG === 'left') {
       // The signature (logo and lion) top left in place of the shop's name; the information under it; the name on the
