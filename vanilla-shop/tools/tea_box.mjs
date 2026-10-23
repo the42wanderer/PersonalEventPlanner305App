@@ -25,7 +25,12 @@ const width = (f, s, sz, track = 0) => {
   const g = f.ot.stringToGlyphs(s), k = sz / f.ot.unitsPerEm;
   return g.reduce((w, gl) => w + gl.advanceWidth * k, 0) + track * Math.max(0, g.length - 1);
 };
-const MM = 72 / 25.4, INK = '#143A1D', PAPER = '#F8E7C0';
+// TEA_THEME=green|espresso: a deep ground in cream ink, "Vanilla" in gold (the house foil), as on the candles and
+// soaps; written to export/tea-<theme>/ so the golden-ground files stay as they are.
+const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper: '#2A1B13', ink: '#F3E6C8' } };
+const THEME = THEMES[process.env.TEA_THEME] ? process.env.TEA_THEME : null;
+const MM = 72 / 25.4, INK = THEME ? THEMES[THEME].ink : '#143A1D', PAPER = THEME ? THEMES[THEME].paper : '#F8E7C0';
+const GOLD = 'url(#foil)';
 const R = (x0, y0, x1, y1) => ({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
 const G = (f) => path.join(root, 'plates', 'generated', f);
 const data = (f) => `data:image/${f.endsWith('png') ? 'png' : 'jpeg'};base64,` + fs.readFileSync(f).toString('base64');
@@ -108,7 +113,7 @@ function build(boxKey) {
   for (const k of ['front', 'sideA', 'back', 'sideB']) {
     const F = face(k), r = P[k].region, p = P[k].panel;
     defs += `<clipPath id="clip-${k}"><rect x="${n(Math.min(r.x, p.x) - (k === 'front' ? 3 * MM : 0))}" y="${n(p.y - 3 * MM)}" width="${n(Math.max(r.w, p.w) + (k === 'front' ? 3 * MM : 0))}" height="${n(p.h + 6 * MM)}"/></clipPath>`;
-    L.Ground.push(`<g clip-path="url(#clip-${k})">${F.img(G(`v6-ground-golden${boxKey === 'long' ? '-long' : ''}-${k}.jpg`), -3, -3, F.w + 6, F.h + 6)}</g>`);
+    if (!THEME) L.Ground.push(`<g clip-path="url(#clip-${k})">${F.img(G(`v6-ground-golden${boxKey === 'long' ? '-long' : ''}-${k}.jpg`), -3, -3, F.w + 6, F.h + 6)}</g>`);
   }
 
   // ---- painting: one placement for the vine across front and right side
@@ -129,7 +134,7 @@ function build(boxKey) {
       // Top bar; the name high, two lines; the product line; the logo bottom left on the same edge.
       const r = F.w - 8, sz = 20, asc = 0.72 * sz, top = 16.5, b1 = top + asc, b2 = b1 + 0.78 * sz;
       t.push(F.caps('AUTHENTIC CEYLON', 8, 10.4), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, r, 10.4, { anchor: 'end' }), F.rule(8, 12.8, r, 12.8));
-      L.Name.push(F.text('title', 'Vanilla', 7, b1, sz), F.text('title', 'Tea', 7, b2, sz));
+      L.Name.push(F.text('title', 'Vanilla', 7, b1, sz, THEME ? { fill: GOLD } : {}), F.text('title', 'Tea', 7, b2, sz));
       t.push(F.body('Ceylon black tea\nwith natural vanilla', 8, b2 + 8.8, 40, { size: 2.5, lead: 3.4 }).svg);
       // The lion top right, its top level with the name's capitals and its right edge on the bar's end.
       t.push(F.lion(r - 14, top, 14));
@@ -142,7 +147,8 @@ function build(boxKey) {
       t.push(F.label('BLEND', 9, 23), F.caps('CEYLON BLACK TEA', 9, 27), F.caps('NATURAL VANILLA', 9, 30.4));
       t.push(F.label('ORIGIN', 48, 23), F.caps('AUTHENTIC CEYLON', 48, 27));
       t.push(F.label('CONTENTS', 9, 36.4), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, 9, 40.4));
-      L.Name.push(F.text('title', 'Vanilla Tea', 8, F.h - 9, sz));
+      if (THEME) L.Name.push(F.text('title', 'Vanilla', 8, F.h - 9, sz, { fill: GOLD }), F.text('title', 'Tea', 8 + width(FONT.title, 'Vanilla ', sz), F.h - 9, sz));
+      else L.Name.push(F.text('title', 'Vanilla Tea', 8, F.h - 9, sz));
       // Bottom right, under the painting: the logo and the Ceylon Tea lion standing on the name's baseline,
       // split by a fine rule, the lion's right edge on the panel margin; the foot rule runs the full width.
       const base = F.h - 9, rx = F.w - 8, ln = 15, lnh = ln * LION.vh / LION.vw, lw = 14, lh = lw * 963 / 933;
@@ -260,6 +266,8 @@ function build(boxKey) {
     if (B.lidTurn) ringPath = `M0 0`;   // the turned ring is inside a transformed group; no free guide path
   }
 
+  if (THEME) defs += '<linearGradient id="foil" x1="0" y1="0" x2="1" y2="0.4"><stop offset="0" stop-color="#9A7230"/><stop offset="0.3" stop-color="#E9CB80"/>' +
+    '<stop offset="0.5" stop-color="#B08336"/><stop offset="0.75" stop-color="#F2D995"/><stop offset="1" stop-color="#9A7230"/></linearGradient>';
   const tile = grainTile({ dpi: 600, clump: 0.5 });
   defs += `<pattern id="grain" patternUnits="userSpaceOnUse" width="${n(tile.mm * MM)}" height="${n(tile.mm * MM)}"><image xlink:href="${tile.href}" width="${n(tile.mm * MM)}" height="${n(tile.mm * MM)}"/></pattern>`;
   defs += `<clipPath id="clip-all">${Object.values(P).map(({ region: r }) => `<rect x="${r.x}" y="${r.y}" width="${n(r.w)}" height="${n(r.h)}"/>`).join('')}</clipPath>`;
@@ -318,7 +326,7 @@ function barcode(F, code, right, top) {
 
 const keys = process.argv[2] ? [process.argv[2]] : Object.keys(BOXES);
 for (const k of keys) {
-  const svg = build(k), dir = path.join(root, 'export', 'tea', k);
+  const svg = build(k), dir = path.join(root, 'export', THEME ? `tea-${THEME}` : 'tea', k);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, `vanilla-tea-${k}_EDITABLE.svg`), svg);
   if (process.env.PREVIEW_DIR) {
