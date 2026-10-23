@@ -16,8 +16,8 @@ def page(n,body,bg=PAPER,dark=False):
             f'<div class="foot" style="color:{c}"><span>The Vanilla Shop · Rebrand 2026</span><span>{n:02d}</span></div></section>')
 def head(kicker,title,sub=''):
     return (f'<div class="kick">{kicker}</div><h1>{title}</h1>'+(f'<p class="lede">{sub}</p>' if sub else ''))
-def cube(k,w=34,h=36,d=34,ry=-34,rx=-16):
-    f=lambda n:f'file://{O}cd-{k}-{n}.jpg'
+def cube(k,w=34,h=36,d=34,ry=-34,rx=-16,pre='cd'):
+    f=lambda n:f'file://{O}{pre}-{k}-{n}.jpg'
     return (f'<div class="scene" style="width:{w*1.9}mm;height:{h*1.75}mm"><div class="cube" style="transform:translate(-50%,-50%) rotateX({rx}deg) rotateY({ry}deg)">'
             f'<div class="face" style="width:{w}mm;height:{h}mm;background-image:url({f("front")});transform:translate(-50%,-50%) translateZ({d/2}mm)"></div>'
             f'<div class="face" style="width:{d}mm;height:{h}mm;background-image:url({f("side")});transform:translate(-50%,-50%) rotateY(90deg) translateZ({w/2}mm)"><i style="background:rgba(0,0,0,.22)"></i></div>'
@@ -100,8 +100,10 @@ P.append(page(9,f'''<div class="pad">{head("Bath bars · the details","Built to 
 <div style="display:grid;grid-template-rows:1fr auto;gap:5mm"><div style="background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden">{img(O+"soap-back-clean.jpg","width:100%")}</div>
 <p class="small">The back carries the brand’s engraved vanilla as a faint watermark and a small gold-foil pod; the flower wraps over the walls. Text is in English, Sinhala and Tamil, set properly, with the typos of the old box corrected.</p></div></div>'''))
 # 10 candles
-P.append(page(10,f'''<div class="pad">{head("08 · Scented candles","A new gift line: four moods, four colours.","Velvet, Aura, Harmony and Zest. Each box is one deep colour with its own painted florals and a bold name, made to look like a present before it is wrapped.")}</div>
-<div style="position:absolute;left:12mm;right:12mm;top:78mm;bottom:18mm;display:flex;justify-content:space-around;align-items:center">{"".join(cube(k) for k in ["velvet","aura","harmony","zest"])}</div>''',bg='#EAE3D7'))
+P.append(page(10,f'''<div class="pad">{head("08 · Scented candles","Same box, a new identity for each mood.")}</div>
+<div style="position:absolute;left:20mm;right:20mm;top:44mm;height:52mm;background:#fff;display:flex;justify-content:space-around;align-items:center">{"".join(cube(k,22,23,22,pre="old") for k in ["velvet","aura","harmony","zest"])}<div class="tag">Before</div></div>
+<div style="position:absolute;left:20mm;right:20mm;top:100mm;height:60mm;background:#E2DACD;display:flex;justify-content:space-around;align-items:center">{"".join(cube(k,25,26,25) for k in ["velvet","aura","harmony","zest"])}<div class="tag">After</div></div>
+<div class="notes" style="top:166mm">{"".join(f'<div><b>{a}</b>{b}</div>' for a,b in [("Same die","The 90 × 90 × 95 mm carton is unchanged; only the artwork is new."),("A name you can see","The old boxes showed a small script name on a colour sticker over a dark logo pattern. Now the name is the hero, across the corner of the box."),("Each mood its own world","Velvet, Aura, Harmony and Zest each get a deep colour and their own painted florals, so the set reads as a gift range."),("Full information","Notes and mood, safety icons, contents and maker details, set clearly on the sides.")])}</div>''',bg='#EAE3D7'))
 # 11 tote
 P.append(page(11,f'''<div style="position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr">
 <div class="pad">{head("09 · The tote","The brand you carry out of the shop.","A one-ink screen print: an engraved Ceylon harvest scene inside a stamp, drawn as a comic-era halftone. One colour keeps it affordable to print and easy to reorder.")}</div>
