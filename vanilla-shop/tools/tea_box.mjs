@@ -27,10 +27,14 @@ const width = (f, s, sz, track = 0) => {
 };
 // TEA_THEME=green|espresso: a deep ground in cream ink, "Vanilla" in gold (the house foil), as on the candles and
 // soaps; written to export/tea-<theme>/ so the golden-ground files stay as they are.
-const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper: '#2A1B13', ink: '#F3E6C8' } };
+const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper: '#2A1B13', ink: '#F3E6C8' },
+  // the extract labels' technique: a soft watercolour vanilla with Ceylon tea's two leaves and a bud, glowing out of
+  // one colour (art from TEA_ART, made by studies/tea/watercolour/teaart.py; TEA_ART=studies/tea/watercolour); the realistic paintings are left off
+  teal: { paper: '#2C6466', ink: '#F5EEDC', art: true }, amber: { paper: '#B0612A', ink: '#FFF4E4', art: true } };
 const THEME = THEMES[process.env.TEA_THEME] ? process.env.TEA_THEME : null;
 const MM = 72 / 25.4, INK = THEME ? THEMES[THEME].ink : '#143A1D', PAPER = THEME ? THEMES[THEME].paper : '#F8E7C0';
 const GOLD = 'url(#foil)';
+const ART = THEME && THEMES[THEME].art ? (f) => path.join(process.env.TEA_ART, f) : null;
 const R = (x0, y0, x1, y1) => ({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
 const G = (f) => path.join(root, 'plates', 'generated', f);
 const data = (f) => `data:image/${f.endsWith('png') ? 'png' : 'jpeg'};base64,` + fs.readFileSync(f).toString('base64');
@@ -116,8 +120,9 @@ function build(boxKey) {
     if (!THEME) L.Ground.push(`<g clip-path="url(#clip-${k})">${F.img(G(`v6-ground-golden${boxKey === 'long' ? '-long' : ''}-${k}.jpg`), -3, -3, F.w + 6, F.h + 6)}</g>`);
   }
 
+  if (ART) { const F = face('front'); L.Ground.push(`<g clip-path="url(#clip-front)">${F.img(ART(`${boxKey}-${THEME}.png`), -3, -3, F.w + 6, F.h + 6)}</g>`); }
   // ---- painting: one placement for the vine across front and right side
-  {
+  if (!ART) {
     const F = face('front'), V = B.vine, vine = F.img(G('v6-vine-faded.png'), V.x, V.y, 3808 * V.s, 1651 * V.s);
     const fa = P.front.panel, sa = P.sideA.panel;
     defs += `<clipPath id="clip-walls"><rect x="${n(fa.x - 3 * MM)}" y="${n(fa.y - 0.5 * MM)}" width="${n(sa.x + sa.w - fa.x + 3 * MM)}" height="${n(fa.h + 3.5 * MM)}"/></clipPath>`;
@@ -162,7 +167,7 @@ function build(boxKey) {
   // ---- right side: how to brew as a numbered stepper; pack line at the foot
   {
     const F = face('sideA'), t = [], sx = boxKey === 'cube' ? 40 : 8, r = boxKey === 'cube' ? F.w - 8 : F.w - 30, sy = 18;
-    if (boxKey === 'long') L.Painting.push(F.img(G('v6-climb.png'), F.w - 2 - 612 * 0.035, F.h + 1.5 - 2000 * 0.035, 667 * 0.035, 2000 * 0.035));
+    if (boxKey === 'long' && !ART) L.Painting.push(F.img(G('v6-climb.png'), F.w - 2 - 612 * 0.035, F.h + 1.5 - 2000 * 0.035, 667 * 0.035, 2000 * 0.035));
     t.push(head(F, 'How to brew', sx, r));
     // Line icons in the same style as the contents panel, joined by a fine line.
     const steps = [['cup', '150 ML', 'One tea bag in hot water'], ['timer', '5 MINUTES', 'Then lift the bag out'], ['ice', 'OVER ICE', 'Let it cool, pour over ice']];
@@ -181,8 +186,12 @@ function build(boxKey) {
   const backPlate = (F, ox, w) => {
     const t = [], s = 56 / 1485, x0 = ox + w - 5 - 1000 * s, y0 = 19;
     const at = (px, py) => [x0 + px * s, y0 + py * s];
-    L.Painting.push(F.img(G('v6-diagram-soft.png'), x0, y0, 1000 * s, 1485 * s));
+    if (!ART) L.Painting.push(F.img(G('v6-diagram-soft.png'), x0, y0, 1000 * s, 1485 * s));
     t.push(head(F, 'Vanilla was never plain.', ox + 8, ox + w - 8));
+    if (ART) {   // no plate to label: the line alone, larger
+      t.push(F.body('The delicate sweetness of natural vanilla unfolds through warm, comforting notes and a smooth, mellow aroma.', ox + 8, 21, w - 22, { size: 3.2, lead: 4.4 }).svg);
+      return t.join('');
+    }
     t.push(F.body('The delicate sweetness of natural vanilla unfolds through warm, comforting notes and a smooth, mellow aroma.', ox + 8, 19.6, 37, { size: 2.2, lead: 3.0 }).svg);
     [['VANILLA ORCHID', 'Hand-pollinated; open for one day', at(545, 330)],
       ['AERIAL ROOTS', 'The vine climbs by them', at(165, 560)],
@@ -192,7 +201,7 @@ function build(boxKey) {
       const y = 46 + i * 6.8, lw = Math.max(width(FONT.wide, k, 1.75, 0.25), width(FONT.body, note, 2.0));
       t.push(F.text('wide', k, ox + 8, y, 1.75, { track: 0.25 }), F.text('body', note, ox + 8, y + 2.7, 2.0, { opacity: 0.85 }));
       const sx = ox + 8 + lw + 1.6, sy = y - 0.6;
-      t.push(`<path d="M${F.X(sx)} ${F.Y(sy)}H${F.X(Math.min(px - 3, sx + 4))}L${F.X(px)} ${F.Y(py)}" fill="none" stroke="${INK}" stroke-width="${F.S(0.14)}"/><circle cx="${F.X(px)}" cy="${F.Y(py)}" r="${F.S(0.55)}" fill="${INK}"/>`);
+      if (!ART) t.push(`<path d="M${F.X(sx)} ${F.Y(sy)}H${F.X(Math.min(px - 3, sx + 4))}L${F.X(px)} ${F.Y(py)}" fill="none" stroke="${INK}" stroke-width="${F.S(0.14)}"/><circle cx="${F.X(px)}" cy="${F.Y(py)}" r="${F.S(0.55)}" fill="${INK}"/>`);
     });
     return t.join('');
   };
@@ -257,7 +266,7 @@ function build(boxKey) {
     const sprig = F.img(G('v6-sprig.png'), F.w + 1.5 - sw, 1.5 - 168 * ss, sw, sh);
     defs += `<clipPath id="clip-lid"><rect x="${p.x}" y="${p.y}" width="${n(p.w)}" height="${n(p.h)}"/></clipPath>`;
     const turn = B.lidTurn ? ` transform="rotate(180 ${pcx} ${pcy})"` : '';
-    L.Painting.push(`<g id="Lid_sprigs" clip-path="url(#clip-lid)"><g${turn}>${sprig}<g transform="rotate(180 ${pcx} ${pcy})">${sprig}</g></g></g>`);
+    if (!ART) L.Painting.push(`<g id="Lid_sprigs" clip-path="url(#clip-lid)"><g${turn}>${sprig}<g transform="rotate(180 ${pcx} ${pcy})">${sprig}</g></g></g>`);
     const fy = F.h - 8.6;
     L.Type.push(`<g id="Lid"${turn}><circle cx="${F.X(cx)}" cy="${F.Y(cy)}" r="${F.S(25.6)}" fill="none" stroke="${INK}" stroke-opacity=".5" stroke-width="${F.S(0.18)}"/>` +
       `<circle cx="${F.X(cx)}" cy="${F.Y(cy)}" r="${F.S(18.6)}" fill="none" stroke="${INK}" stroke-opacity=".5" stroke-width="${F.S(0.18)}"/>` +
