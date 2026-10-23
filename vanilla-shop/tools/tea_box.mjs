@@ -30,7 +30,13 @@ const width = (f, s, sz, track = 0) => {
 const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper: '#2A1B13', ink: '#F3E6C8' },
   // the extract labels' technique: a soft watercolour vanilla with Ceylon tea's two leaves and a bud, glowing out of
   // one colour (art from TEA_ART, made by studies/tea/watercolour/teaart.py; TEA_ART=studies/tea/watercolour); the realistic paintings are left off
-  teal: { paper: '#2C6466', ink: '#F5EEDC', art: true }, tgreen: { paper: '#1F4732', ink: '#F5EEDC', art: true }, tgreen: { paper: '#1F4732', ink: '#F5EEDC', art: true }, amber: { paper: '#B0612A', ink: '#FFF4E4', art: true } };
+  teal: { paper: '#2C6466', ink: '#F5EEDC', art: true }, tgreen: { paper: '#1F4732', ink: '#F5EEDC', art: true },
+  // after the Japanese-tea board: cream paper, our engraving printed faintly all over (studies/tea/watercolour/cream.py),
+  // the painted band along the front's foot; green ink, "Vanilla" in a deeper gold for a light ground
+  cream: { paper: '#F6EEDC', ink: '#1F4732', art: true, pattern: true, light: true }, tgreen: { paper: '#1F4732', ink: '#F5EEDC', art: true },
+  // after the Japanese-tea board: cream paper, our engraving printed faintly all over (studies/tea/watercolour/cream.py),
+  // the painted band along the front's foot; green ink, "Vanilla" in a deeper gold for a light ground
+  cream: { paper: '#F6EEDC', ink: '#1F4732', art: true, pattern: true, light: true }, amber: { paper: '#B0612A', ink: '#FFF4E4', art: true } };
 const THEME = THEMES[process.env.TEA_THEME] ? process.env.TEA_THEME : null;
 const MM = 72 / 25.4, INK = THEME ? THEMES[THEME].ink : '#143A1D', PAPER = THEME ? THEMES[THEME].paper : '#F8E7C0';
 const GOLD = 'url(#foil)';
@@ -120,6 +126,11 @@ function build(boxKey) {
     if (!THEME) L.Ground.push(`<g clip-path="url(#clip-${k})">${F.img(G(`v6-ground-golden${boxKey === 'long' ? '-long' : ''}-${k}.jpg`), -3, -3, F.w + 6, F.h + 6)}</g>`);
   }
 
+  if (ART && THEMES[THEME].pattern) for (const k of ['sideA', 'back', 'sideB', 'top', 'bottom']) {
+    const F = face(k), r = P[k].region;
+    defs += `<clipPath id="clip-pat-${k}"><rect x="${r.x}" y="${r.y}" width="${n(r.w)}" height="${n(r.h)}"/></clipPath>`;
+    L.Ground.push(`<g clip-path="url(#clip-pat-${k})">${F.img(ART('pattern.jpg'), -40, -40, 260, 260)}</g>`);
+  }
   if (ART) { const F = face('front'); L.Ground.push(`<g clip-path="url(#clip-front)">${F.img(ART(`${boxKey}-${THEME}.png`), -3, -3, F.w + 6, F.h + 6)}</g>`); }
   // ---- painting: one placement for the vine across front and right side
   if (!ART) {
@@ -135,7 +146,21 @@ function build(boxKey) {
   // ---- front
   {
     const F = face('front'), t = [];
-    if (ART && process.env.TEA_SIG === 'left') {
+    if (ART && THEMES[THEME].pattern) {
+      // The name large on the cream; the signature top left; the pack line top right; the band below is the picture.
+      const cube = boxKey === 'cube', x = cube ? 8 : 9, rx = F.w - 8, lw = cube ? 10 : 11, ln = cube ? 11.5 : 12.5, lnh = ln * LION.vh / LION.vw, ty = 6.5;
+      t.push(F.logo(x + lw / 2, ty + lw * 0.52, lw), F.rule(x + lw + 3.5, ty, x + lw + 3.5, ty + lnh, 0.4), F.lion(x + lw + 7, ty, ln));
+      t.push(F.caps('AUTHENTIC CEYLON', rx, 10.6, { anchor: 'end' }), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, rx, 14.4, { anchor: 'end' }));
+      if (cube) {
+        const sz = 16.5;
+        L.Name.push(F.text('title', 'Vanilla', 7, 34, sz, { fill: GOLD }), F.text('title', 'Tea', 7, 34 + 0.8 * sz, sz));
+        t.push(F.body('Ceylon black tea\nwith natural vanilla', rx, 41, 30, { size: 2.3, lead: 3.2, anchor: 'end' }).svg);
+      } else {
+        const sz = 25;
+        L.Name.push(F.text('title', 'Vanilla', 8, 40, sz, { fill: GOLD }), F.text('title', 'Tea', 8 + width(FONT.title, 'Vanilla ', sz), 40, sz));
+        t.push(F.body('Ceylon black tea\nwith natural vanilla', rx, 34.4, 40, { size: 2.5, lead: 3.4, anchor: 'end' }).svg);
+      }
+    } else if (ART && process.env.TEA_SIG === 'left') {
       // The signature (logo and lion) top left in place of the shop's name; the information under it; the name on the
       // foot rule bottom left; the whole right half left to the painting.
       const cube = boxKey === 'cube', x = cube ? 8 : 9, lw = cube ? 10 : 11, ln = cube ? 11.5 : 12.5, lnh = ln * LION.vh / LION.vw, ty = 6.5;
@@ -313,7 +338,9 @@ function build(boxKey) {
     if (B.lidTurn) ringPath = `M0 0`;   // the turned ring is inside a transformed group; no free guide path
   }
 
-  if (THEME) defs += '<linearGradient id="foil" x1="0" y1="0" x2="1" y2="0.4"><stop offset="0" stop-color="#9A7230"/><stop offset="0.3" stop-color="#E9CB80"/>' +
+  if (THEME && THEMES[THEME].light) defs += '<linearGradient id="foil" x1="0" y1="0" x2="1" y2="0.4"><stop offset="0" stop-color="#5A3A0E"/><stop offset="0.3" stop-color="#A57B2E"/>' +
+    '<stop offset="0.5" stop-color="#7A561A"/><stop offset="0.75" stop-color="#B98E3E"/><stop offset="1" stop-color="#5A3A0E"/></linearGradient>';
+  else if (THEME) defs += '<linearGradient id="foil" x1="0" y1="0" x2="1" y2="0.4"><stop offset="0" stop-color="#9A7230"/><stop offset="0.3" stop-color="#E9CB80"/>' +
     '<stop offset="0.5" stop-color="#B08336"/><stop offset="0.75" stop-color="#F2D995"/><stop offset="1" stop-color="#9A7230"/></linearGradient>';
   const tile = grainTile({ dpi: 600, clump: 0.5 });
   defs += `<pattern id="grain" patternUnits="userSpaceOnUse" width="${n(tile.mm * MM)}" height="${n(tile.mm * MM)}"><image xlink:href="${tile.href}" width="${n(tile.mm * MM)}" height="${n(tile.mm * MM)}"/></pattern>`;
