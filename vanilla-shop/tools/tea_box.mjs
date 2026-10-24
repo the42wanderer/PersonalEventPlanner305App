@@ -37,14 +37,16 @@ const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper:
   cream: { paper: '#F6EEDC', ink: '#1F4732', art: true, pattern: true, light: true },
   // the extract labels' Split on a box: cream left of the front, a teal block from SPLIT_AT wrapping onto the right
   // side with the watercolour flower across the fold (art from studies/tea/watercolour/split.py)
-  split: { paper: '#F6EEDC', ink: '#1E4F50', art: true, light: true, split: { cube: 58, long: 92 } }, tgreen: { paper: '#1F4732', ink: '#F5EEDC', art: true },
+  split: { paper: '#F6EEDC', ink: '#1E4F50', art: true, light: true, split: { cube: 58, long: 92 } },
+  splitcin: { paper: '#F6EEDC', ink: '#6B3420', art: true, light: true, split: { cube: 58, long: 92 }, suffix: '-cin', cin: true }, tgreen: { paper: '#1F4732', ink: '#F5EEDC', art: true },
   // after the Japanese-tea board: cream paper, our engraving printed faintly all over (studies/tea/watercolour/cream.py),
   // the painted band along the front's foot; green ink, "Vanilla" in a deeper gold for a light ground
   // TEA_CREAM=shadow: no band; the name in the quiet middle; art from studies/tea/watercolour/shadow.py
   cream: { paper: '#F6EEDC', ink: '#1F4732', art: true, pattern: true, light: true },
   // the extract labels' Split on a box: cream left of the front, a teal block from SPLIT_AT wrapping onto the right
   // side with the watercolour flower across the fold (art from studies/tea/watercolour/split.py)
-  split: { paper: '#F6EEDC', ink: '#1E4F50', art: true, light: true, split: { cube: 58, long: 92 } }, amber: { paper: '#B0612A', ink: '#FFF4E4', art: true } };
+  split: { paper: '#F6EEDC', ink: '#1E4F50', art: true, light: true, split: { cube: 58, long: 92 } },
+  splitcin: { paper: '#F6EEDC', ink: '#6B3420', art: true, light: true, split: { cube: 58, long: 92 }, suffix: '-cin', cin: true }, amber: { paper: '#B0612A', ink: '#FFF4E4', art: true } };
 const THEME = THEMES[process.env.TEA_THEME] ? process.env.TEA_THEME : null;
 const MM = 72 / 25.4, INK = THEME ? THEMES[THEME].ink : '#143A1D', PAPER = THEME ? THEMES[THEME].paper : '#F8E7C0';
 const GOLD = 'url(#foil)';
@@ -137,14 +139,14 @@ function build(boxKey) {
   if (ART && THEMES[THEME].split) {
     const F = face('sideA'), r = P.sideA.panel;
     defs += `<clipPath id="clip-split-side"><rect x="${n(r.x)}" y="${n(r.y - 3 * MM)}" width="${n(r.w + 3 * MM)}" height="${n(r.h + 6 * MM)}"/></clipPath>`;
-    L.Ground.push(`<g clip-path="url(#clip-split-side)">${F.img(ART(`${boxKey}-split-side.png`), 0, -3, F.w + 3, F.h + 6)}</g>`);
+    L.Ground.push(`<g clip-path="url(#clip-split-side)">${F.img(ART(`${boxKey}${THEMES[THEME].suffix || ''}-split-side.png`), 0, -3, F.w + 3, F.h + 6)}</g>`);
   }
   if (ART && THEMES[THEME].pattern) for (const k of ['sideA', 'back', 'sideB', 'top', 'bottom']) {
     const F = face(k), r = P[k].region;
     defs += `<clipPath id="clip-pat-${k}"><rect x="${r.x}" y="${r.y}" width="${n(r.w)}" height="${n(r.h)}"/></clipPath>`;
     L.Ground.push(`<g clip-path="url(#clip-pat-${k})">${F.img(ART('pattern.jpg'), -40, -40, 260, 260)}</g>`);
   }
-  if (ART) { const F = face('front'); L.Ground.push(`<g clip-path="url(#clip-front)">${F.img(ART(THEMES[THEME].split ? `${boxKey}-split-front.png` : `${boxKey}-${THEME}.png`), -3, -3, F.w + 6, F.h + 6)}</g>`); }
+  if (ART) { const F = face('front'); L.Ground.push(`<g clip-path="url(#clip-front)">${F.img(ART(THEMES[THEME].split ? `${boxKey}${THEMES[THEME].suffix || ''}-split-front.png` : `${boxKey}-${THEME}.png`), -3, -3, F.w + 6, F.h + 6)}</g>`); }
   // ---- painting: one placement for the vine across front and right side
   if (!ART) {
     const F = face('front'), V = B.vine, vine = F.img(G('v6-vine-faded.png'), V.x, V.y, 3808 * V.s, 1651 * V.s);
@@ -163,10 +165,18 @@ function build(boxKey) {
       // Cream left of the split: signature, pack line, the name stacked large, the plain-words line.
       const cube = boxKey === 'cube', x = cube ? 8 : 9, lw = cube ? 10 : 11, ln = cube ? 11.5 : 12.5, lnh = ln * LION.vh / LION.vw, ty = 6.5;
       t.push(F.logo(x + lw / 2, ty + lw * 0.52, lw), F.rule(x + lw + 3.5, ty, x + lw + 3.5, ty + lnh, 0.4), F.lion(x + lw + 7, ty, ln));
-      t.push(F.caps('AUTHENTIC CEYLON', x, 27), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, x, 30.8));
-      const sz = cube ? 16.5 : 25, b1 = cube ? 48 : 52;
-      L.Name.push(F.text('title', 'Vanilla', x - 1, b1, sz, { fill: GOLD }), F.text('title', 'Tea', x - 1, b1 + 0.8 * sz, sz));
-      t.push(F.body('Ceylon black tea\nwith natural vanilla', x, b1 + 0.8 * sz + 8.5, 44, { size: cube ? 2.3 : 2.5, lead: cube ? 3.2 : 3.4 }).svg);
+      // the pack line one cap-height under the signature; the name optically on the margin (italic overhang); the
+      // plain-words line a fixed 7 mm under the last baseline, so the foot margin matches the top on both cartons
+      t.push(F.caps('AUTHENTIC CEYLON', x, 22.5), F.caps(`${pack.bags} TEA BAGS · ${pack.net} G`, x, 26.3));
+      if (THEMES[THEME].cin) {
+        const sz = cube ? 13 : 17, b1 = cube ? 40 : 42;
+        L.Name.push(F.text('title', 'Vanilla &', x - 1, b1, sz, { fill: GOLD }), F.text('title', 'Cinnamon', x - 1, b1 + 0.8 * sz, sz), F.text('title', 'Tea', x - 1, b1 + 1.6 * sz, sz));
+        t.push(F.body('Vanilla and cinnamon blended\nwith pure Ceylon tea', x, b1 + 1.6 * sz + 7, 60, { size: cube ? 2.2 : 2.4, lead: 3.2 }).svg);
+      } else {
+        const sz = cube ? 16.5 : 23, b1 = cube ? 46 : 50;
+        L.Name.push(F.text('title', 'Vanilla', x - 1.2, b1, sz, { fill: GOLD }), F.text('title', 'Tea', x - 1.2, b1 + 0.8 * sz, sz));
+        t.push(F.body('Ceylon black tea\nwith natural vanilla', x, b1 + 0.8 * sz + 7, 44, { size: cube ? 2.3 : 2.5, lead: cube ? 3.2 : 3.4 }).svg);
+      }
     } else if (ART && THEMES[THEME].pattern) {
       // The name large on the cream; the signature top left; the pack line top right; the band below is the picture.
       const cube = boxKey === 'cube', x = cube ? 8 : 9, rx = F.w - 8, lw = cube ? 10 : 11, ln = cube ? 11.5 : 12.5, lnh = ln * LION.vh / LION.vw, ty = 6.5;
@@ -345,7 +355,7 @@ function build(boxKey) {
   // ---- lid: two sprigs reaching in from opposite corners (from the vine set) frame the emblem ring (from the
   // candles). A long-box lid hangs off the back, so its whole group is turned to read from the front.
   {
-    const F = face('top'), cx = F.w / 2, cy = F.h / 2 - 2, r = 22, ring = 'SAVOR THE CALM · AUTHENTIC CEYLON VANILLA TEA · ';
+    const F = face('top'), cx = F.w / 2, cy = F.h / 2 - 2, r = 22, ring = THEME && THEMES[THEME].cin ? 'SAVOR THE CALM · VANILLA & CINNAMON CEYLON TEA · ' : 'SAVOR THE CALM · AUTHENTIC CEYLON VANILLA TEA · ';
     const len = 2 * Math.PI * r, track = (len - width(FONT.wide, ring, 2.5)) / ring.length;
     ringPath = `M${F.X(cx - r)} ${F.Y(cy)}A${F.S(r)} ${F.S(r)} 0 1 1 ${F.X(cx + r)} ${F.Y(cy)}A${F.S(r)} ${F.S(r)} 0 1 1 ${F.X(cx - r)} ${F.Y(cy)}`;
     defs += `<path id="ring" d="${ringPath}"/>`;
