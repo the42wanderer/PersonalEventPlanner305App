@@ -49,7 +49,10 @@ const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper:
   splitcin: { paper: '#F6EEDC', ink: '#6B3420', art: true, light: true, split: { cube: 58, long: 92 }, suffix: '-cin', cin: true }, amber: { paper: '#B0612A', ink: '#FFF4E4', art: true },
   // the painting soaked into aged cream paper like spilt tea (studies/tea/watercolour/carton/blotbox.py)
   blot: { paper: '#F4EBD6', ink: '#4F5E2C', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
-  blotcin: { paper: '#F4EBD6', ink: '#6B3420', art: true, light: true, blot: true, split: { cube: 58, long: 92 }, suffix: '-cin', cin: true } };
+  blotcin: { paper: '#F4EBD6', ink: '#6B3420', art: true, light: true, blot: true, split: { cube: 58, long: 92 }, suffix: '-cin', cin: true },
+  // the pouch colours brought into the cream as one artwork (studies/tea/watercolour/carton/glow.py)
+  glow: { paper: '#F6EEDC', ink: '#1E4F50', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
+  glowcin: { paper: '#F6EEDC', ink: '#6B3420', art: true, light: true, blot: true, split: { cube: 58, long: 92 }, suffix: '-cin', cin: true } };
 const THEME = THEMES[process.env.TEA_THEME] ? process.env.TEA_THEME : null;
 const MM = 72 / 25.4, INK = THEME ? THEMES[THEME].ink : '#143A1D', PAPER = THEME ? THEMES[THEME].paper : '#F8E7C0';
 const GOLD = 'url(#foil)';
