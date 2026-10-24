@@ -291,7 +291,8 @@ function build(boxKey) {
       t.push(F.icon(ic, sx, y, is / 10));
       t.push(F.text('wideR', h, tx, y + 2.6, 2.2, { track: 0.3 }), F.body(d, tx, y + 5.9, 30, { size: 2.1, lead: 2.9 }).svg);
     });
-    t.push(F.rule(sx, F.h - 11.4, r, F.h - 11.4), F.caps(`${pack.bags} TEA BAGS · 2 G EACH · ${pack.net} G`, sx, F.h - 7.5, { size: 1.9 }));
+    const lift = boxKey === 'long' && ['wgreen', 'wsage'].includes(THEME) ? 8 : 0;   // clear of the pod tip at the fold
+    t.push(F.rule(sx, F.h - 11.4 - lift, r, F.h - 11.4 - lift), F.caps(`${pack.bags} TEA BAGS · 2 G EACH · ${pack.net} G`, sx, F.h - 7.5 - lift, { size: 1.9 }));
     L.Type.push(`<g id="Side_How_to_brew">${ART && THEMES[THEME].split && !THEMES[THEME].blot ? t.join('').replaceAll(INK, '#F6EEDC') : t.join('')}</g>`);   // on the teal, the side's type turns cream
   }
 
