@@ -53,6 +53,8 @@ const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper:
   // the pouch colours brought into the cream as one artwork (studies/tea/watercolour/carton/glow.py)
   // layered watercolour glazes, brand tea palette (studies/tea/watercolour/carton/blot2box.py)
   washteal: { paper: '#F6EEDC', ink: '#1E4F50', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
+  wgreen: { paper: '#F6EEDC', ink: '#1F4A2C', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
+  wsage: { paper: '#F6EEDC', ink: '#3E5A3C', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
   wash: { paper: '#F6EEDE', ink: '#1F4A2C', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
   glow: { paper: '#F6EEDC', ink: '#1E4F50', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
   glowcin: { paper: '#F6EEDC', ink: '#6B3420', art: true, light: true, blot: true, split: { cube: 58, long: 92 }, suffix: '-cin', cin: true } };
