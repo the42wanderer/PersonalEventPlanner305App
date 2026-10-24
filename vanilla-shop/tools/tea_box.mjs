@@ -51,6 +51,8 @@ const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper:
   blot: { paper: '#F4EBD6', ink: '#4F5E2C', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
   blotcin: { paper: '#F4EBD6', ink: '#6B3420', art: true, light: true, blot: true, split: { cube: 58, long: 92 }, suffix: '-cin', cin: true },
   // the pouch colours brought into the cream as one artwork (studies/tea/watercolour/carton/glow.py)
+  // layered watercolour glazes, brand tea palette (studies/tea/watercolour/carton/blot2box.py)
+  wash: { paper: '#F6EEDE', ink: '#1F4A2C', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
   glow: { paper: '#F6EEDC', ink: '#1E4F50', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
   glowcin: { paper: '#F6EEDC', ink: '#6B3420', art: true, light: true, blot: true, split: { cube: 58, long: 92 }, suffix: '-cin', cin: true } };
 const THEME = THEMES[process.env.TEA_THEME] ? process.env.TEA_THEME : null;
