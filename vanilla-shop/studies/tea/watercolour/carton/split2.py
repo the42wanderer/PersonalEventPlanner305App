@@ -22,7 +22,7 @@ CIN=dict(ground='#7C3D22',tep_core='#FFF6E8',tep_edge='#E9B48C',lip_core='#FFFAF
 class WC(Canvas):
     """every wash dries with pigment at its edge; less halo, so nothing glows"""
     def add(s,polys,core,edge,blur,depth=1.0,alpha=1.0,glow=1.0,centre=None,R=None,halo=0.12,wash=None):
-        if getattr(s,'crisp',False): blur=min(blur,0.08); halo=0.0
+        if getattr(s,'crisp',False): blur=min(blur,getattr(s,'cap',0.08)); halo=0.0
         if wash is None: wash=() if getattr(s,'nowash',False) else (mix(edge,'#000000',0.18),0.32,0.32)
         super().add(polys,core,edge,blur,depth,alpha,glow,centre,R,halo,wash)
 def flush(cv,p,base,ang,s,blur=0.7,alpha=1.0):
