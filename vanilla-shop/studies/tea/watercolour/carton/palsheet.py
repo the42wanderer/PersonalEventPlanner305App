@@ -12,8 +12,11 @@ K=draw.K; B=3; PAPER=np.array([0xF6,0xEE,0xDC],np.float32)
 F='/home/user/PersonalEventPlanner305App/vanilla-shop/fonts/'
 f1=ImageFont.truetype(F+'instrument-serif-italic.ttf',int(16.5*K)); f2=ImageFont.truetype(F+'archivo-expanded-regular.ttf',int(2.2*K)); f3=ImageFont.truetype(F+'archivo-expanded-regular.ttf',int(3.2*K))
 def pal(ground,g1,g2,ink,leaf=('#8FB08A','#3E5E44'),tep='#E4EFE8'):
-    return dict(tep_core='#FFFDF8',lip_core='#FFFEF9',throat_core='#F3C75E',throat_edge='#D69B3A',pod_core='#4A2A16',pod_edge='#26150B',tbud_core='#F3F6E6',
-                ground=ground,tep_edge=tep,lip_edge='#F6F4EC',leaf_core=leaf[0],leaf_edge=leaf[1],tea_core=leaf[0],tea_edge=leaf[1],tbud_edge='#B5CBA6',tstem='#82A47C'),(g1,g2,ground),ink
+    # a natural tea-leaf green, tinted towards the palette so the leaves sit in the same light
+    lc=mix('#7C9663',ground,0.22); le=mix('#3E5530',ground,0.22); tip=mix('#9AA466',ground,0.2)
+    return dict(tep_core='#FFFDF8',lip_core='#FFFEF9',throat_core='#F3C75E',throat_edge='#D69B3A',pod_core='#4A2A16',pod_edge='#26150B',tbud_core=mix('#E4EBD2',ground,0.1),
+                ground=ground,tep_edge=tep,lip_edge='#F6F4EC',leaf_core=lc,leaf_edge=le,tea_core=lc,tea_edge=le,tea_tip=tip,veins=True,
+                tbud_edge=mix('#9DB083',ground,0.2),tstem=mix('#7E965E',ground,0.2)),(g1,g2,ground),ink
 OPTS=[('1  CEYLON GREEN',*pal('#2F5E3E','#D9E6D6','#9DBF9F','#1F4A2C')),          # brand tea deep green
       ('2  MIDNIGHT INDIGO',*pal('#2B3566','#DCDFEA','#9AA3C6','#1F2752',tep='#E2E5F2')),   # the Aura candle's blue
       ('3  CEYLON TEA RED',*pal('#8E3B2C','#F1DAD0','#D59A88','#6A2A1E',tep='#F6E2DA')),  # brewed black tea, extract red
@@ -33,7 +36,7 @@ for name,p,(g1,g2,g3),ink in OPTS:
     d.text((10*K,12*K),'AUTHENTIC CEYLON',font=f2,fill=ink)
     d.text((10*K,20*K),'Vanilla',font=f1,fill=(130,86,26)); d.text((10*K,33*K),'Tea',font=f1,fill=ink)
     d.text((10*K,84*K),name,font=f3,fill=(40,40,40))
-    im.thumbnail((560,560)); tiles.append(im)
+    im.crop((int(30*K),int(40*K),int(94*K),int(91*K))).save(f'leafcrop-{len(tiles)}.jpg',quality=92); im.thumbnail((560,560)); tiles.append(im)
 w,h=tiles[0].size; c=Image.new('RGB',(w*3+40,h*2+20),'#9a958c')
 for i,t in enumerate(tiles): c.paste(t,((i%3)*(w+20),(i//3)*(h+20)))
 c.save('/home/user/PersonalEventPlanner305App/vanilla-shop/studies/tea/watercolour/carton/colour-options.jpg',quality=90); print('ok')

@@ -25,13 +25,41 @@ class WC(Canvas):
         if getattr(s,'crisp',False): blur=min(blur,getattr(s,'cap',0.08)); halo=0.0
         if wash is None: wash=() if getattr(s,'nowash',False) else (mix(edge,'#000000',0.18),0.32,0.32)
         super().add(polys,core,edge,blur,depth,alpha,glow,centre,R,halo,wash)
+def serrate(poly,w,seed,amt=1.0):
+    """a tea leaf's edge: fine forward-leaning teeth and a slightly wavy margin, not a perfect lens"""
+    P=np.asarray(poly,float); n=len(P); rng=np.random.default_rng(seed)
+    d=np.roll(P,-1,0)-np.roll(P,1,0); d/=np.linalg.norm(d,axis=1,keepdims=True)+1e-9; nrm=np.stack([d[:,1],-d[:,0]],1)
+    t=np.arange(n)/n; teeth=(np.mod(t*n/3.0,1.0)**2)*0.05*w
+    wave=np.convolve(rng.normal(0,1,n+8),np.ones(9)/9,'valid')[:n]*0.06*w
+    taper=np.minimum(1,np.minimum(t,1-t)*8)
+    return P+nrm*((teeth+wave)*taper*amt)[:,None]
 def flush(cv,p,base,ang,s,blur=0.7,alpha=1.0):
     a=math.radians(ang); P=lambda d,o=0:(base[0]+math.cos(a)*d*s-math.sin(a)*o*s, base[1]+math.sin(a)*d*s+math.cos(a)*o*s)
     tip=P(26); m1=P(9,0.8); m2=P(17,-0.6)
     cv.add([stem([base,m1,m2,tip],0.6*s)],mix(p['tstem'],'#FFFFFF',0.2),p['tstem'],blur*0.8,alpha=alpha)
     lv=[(m1,ang-62,19*s,5.6*s,-0.3),(m2,ang+52,15*s,4.6*s,0.28)]
-    cv.add([leaf(*q) for q in lv],p['tea_core'],p['tea_edge'],blur,alpha=alpha,glow=1.1)
-    sheen(cv,[leaf(*q,spine=True) for q in lv],0.38*s,mix(p['tea_core'],'#FFFFFF',0.4),p['tea_core'],blur,p.get('sheen',0.5)*alpha)
+    if p.get('veins'):
+        # painted like a real leaf: a flat wash with a darker drying edge, the tip a little warmer, a midrib and side veins
+        for i,q in enumerate(lv):
+            core=mix(p['tea_core'],p.get('tea_tip',p['tea_core']),0.35*i)
+            poly=serrate(leaf(*q),q[3],i)
+            # like the petals: pigment pools toward the midrib and thins out to the margin, no dark drying line
+            pap=p.get('paper','#F6EEDC')
+            cv.add([poly],core,mix(core,pap,0.55),blur*1.3,alpha=0.72*alpha,glow=1.2,wash=())
+            # a second, smaller glaze pooled on one side of the midrib: the pigment never sits evenly
+            q2=(q[0],q[1]+(4 if i else -4),q[2]*0.72,q[3]*0.55,q[4])
+            cv.add([serrate(leaf(*q2),q2[3],i+7,0.5)],mix(core,p['tea_edge'],0.3),mix(core,pap,0.4),blur*1.8,alpha=0.22*alpha,wash=())
+            sp=leaf(*q,spine=True); vc=mix(p['tea_edge'],p['tea_core'],0.45)
+            cv.add([draw.ribbon(sp[1:-2],lambda t,w=0.16*s:w*(1-0.6*t)+0.02)],vc,vc,0.08,alpha=0.4*alpha,wash=())
+            d=np.gradient(sp,axis=0); d/=np.linalg.norm(d,axis=1,keepdims=True)+1e-9; nrm=np.stack([-d[:,1],d[:,0]],1)
+            for k in (0.3,0.48,0.66):
+                j=int(k*(len(sp)-1)); L=q[3]*0.8*(1-k*0.6)
+                for sg in (1,-1):
+                    a0=sp[j]; a1=sp[j]+d[j]*L*0.9+nrm[j]*sg*L
+                    cv.add([draw.ribbon(draw.cr([a0,(a0+a1)/2+d[j]*0.4,a1],8),lambda t,w=0.07*s:w*(1-t)+0.015)],vc,vc,0.08,alpha=0.22*alpha,wash=())
+    else:
+        cv.add([leaf(*q) for q in lv],p['tea_core'],p['tea_edge'],blur,alpha=alpha,glow=1.1)
+        sheen(cv,[leaf(*q,spine=True) for q in lv],0.38*s,mix(p['tea_core'],'#FFFFFF',0.4),p['tea_core'],blur,p.get('sheen',0.5)*alpha)
     cv.add([bud(tip,ang-6,9*s,2.0*s,0.12)],p['tbud_core'],p['tbud_edge'],blur*0.8,alpha=alpha,glow=1.3)
 def pod_pair(cv,p,base,ang,L,w):
     """the range's pods: always two cured pods, crossing, the front one longer"""
