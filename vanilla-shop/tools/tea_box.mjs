@@ -55,6 +55,10 @@ const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper:
   washteal: { paper: '#F6EEDC', ink: '#1E4F50', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
   wgreen: { paper: '#F6EEDC', ink: '#1F4A2C', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
   wsage: { paper: '#F6EEDC', ink: '#3E5A3C', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
+  // three art directions judged on one carton (studies/tea/concepts/concepts.py)
+  cA: { paper: '#3A1C14', ink: '#F3E6C8', art: true, blot: true, split: { cube: 58, long: 92 } },
+  cB: { paper: '#1F3A2B', ink: '#F3E6C8', art: true, blot: true, split: { cube: 58, long: 92 } },
+  cC: { paper: '#F6EEDC', ink: '#1E4F50', art: true, light: true, split: { cube: 58, long: 92 } },
   wash: { paper: '#F6EEDE', ink: '#1F4A2C', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
   glow: { paper: '#F6EEDC', ink: '#1E4F50', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
   glowcin: { paper: '#F6EEDC', ink: '#6B3420', art: true, light: true, blot: true, split: { cube: 58, long: 92 }, suffix: '-cin', cin: true } };
