@@ -46,7 +46,10 @@ const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper:
   // the extract labels' Split on a box: cream left of the front, a teal block from SPLIT_AT wrapping onto the right
   // side with the watercolour flower across the fold (art from studies/tea/watercolour/split.py)
   split: { paper: '#F6EEDC', ink: '#1E4F50', art: true, light: true, split: { cube: 58, long: 92 } },
-  splitcin: { paper: '#F6EEDC', ink: '#6B3420', art: true, light: true, split: { cube: 58, long: 92 }, suffix: '-cin', cin: true }, amber: { paper: '#B0612A', ink: '#FFF4E4', art: true } };
+  splitcin: { paper: '#F6EEDC', ink: '#6B3420', art: true, light: true, split: { cube: 58, long: 92 }, suffix: '-cin', cin: true }, amber: { paper: '#B0612A', ink: '#FFF4E4', art: true },
+  // the painting soaked into aged cream paper like spilt tea (studies/tea/watercolour/carton/blotbox.py)
+  blot: { paper: '#F4EBD6', ink: '#4F5E2C', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
+  blotcin: { paper: '#F4EBD6', ink: '#6B3420', art: true, light: true, blot: true, split: { cube: 58, long: 92 }, suffix: '-cin', cin: true } };
 const THEME = THEMES[process.env.TEA_THEME] ? process.env.TEA_THEME : null;
 const MM = 72 / 25.4, INK = THEME ? THEMES[THEME].ink : '#143A1D', PAPER = THEME ? THEMES[THEME].paper : '#F8E7C0';
 const GOLD = 'url(#foil)';
@@ -136,17 +139,22 @@ function build(boxKey) {
     if (!THEME) L.Ground.push(`<g clip-path="url(#clip-${k})">${F.img(G(`v6-ground-golden${boxKey === 'long' ? '-long' : ''}-${k}.jpg`), -3, -3, F.w + 6, F.h + 6)}</g>`);
   }
 
+  if (ART && THEMES[THEME].blot) for (const k of ['back', 'sideB', 'top', 'bottom']) {
+    const F = face(k), r = P[k].region;
+    defs += `<clipPath id="clip-pap-${k}"><rect x="${r.x}" y="${r.y}" width="${n(r.w)}" height="${n(r.h)}"/></clipPath>`;
+    L.Ground.push(`<g clip-path="url(#clip-pap-${k})">${F.img(ART(k === 'top' ? 'paper-lid.jpg' : 'paper.jpg'), (F.w - 260) / 2, (F.h - 260) / 2 - 2, 260, 260)}</g>`);
+  }
   if (ART && THEMES[THEME].split) {
     const F = face('sideA'), r = P.sideA.panel;
     defs += `<clipPath id="clip-split-side"><rect x="${n(r.x)}" y="${n(r.y - 3 * MM)}" width="${n(r.w + 3 * MM)}" height="${n(r.h + 6 * MM)}"/></clipPath>`;
-    L.Ground.push(`<g clip-path="url(#clip-split-side)">${F.img(ART(`${boxKey}${THEMES[THEME].suffix || ''}-split-side.png`), 0, -3, F.w + 3, F.h + 6)}</g>`);
+    L.Ground.push(`<g clip-path="url(#clip-split-side)">${F.img(ART(`${boxKey}${THEMES[THEME].suffix || ''}${THEMES[THEME].blot ? '' : '-split'}-side.png`), 0, -3, F.w + 3, F.h + 6)}</g>`);
   }
   if (ART && THEMES[THEME].pattern) for (const k of ['sideA', 'back', 'sideB', 'top', 'bottom']) {
     const F = face(k), r = P[k].region;
     defs += `<clipPath id="clip-pat-${k}"><rect x="${r.x}" y="${r.y}" width="${n(r.w)}" height="${n(r.h)}"/></clipPath>`;
     L.Ground.push(`<g clip-path="url(#clip-pat-${k})">${F.img(ART('pattern.jpg'), -40, -40, 260, 260)}</g>`);
   }
-  if (ART) { const F = face('front'); L.Ground.push(`<g clip-path="url(#clip-front)">${F.img(ART(THEMES[THEME].split ? `${boxKey}${THEMES[THEME].suffix || ''}-split-front.png` : `${boxKey}-${THEME}.png`), -3, -3, F.w + 6, F.h + 6)}</g>`); }
+  if (ART) { const F = face('front'); L.Ground.push(`<g clip-path="url(#clip-front)">${F.img(ART(THEMES[THEME].split ? `${boxKey}${THEMES[THEME].suffix || ''}${THEMES[THEME].blot ? '' : '-split'}-front.png` : `${boxKey}-${THEME}.png`), -3, -3, F.w + 6, F.h + 6)}</g>`); }
   // ---- painting: one placement for the vine across front and right side
   if (!ART) {
     const F = face('front'), V = B.vine, vine = F.img(G('v6-vine-faded.png'), V.x, V.y, 3808 * V.s, 1651 * V.s);
@@ -276,7 +284,7 @@ function build(boxKey) {
       t.push(F.text('wideR', h, tx, y + 2.6, 2.2, { track: 0.3 }), F.body(d, tx, y + 5.9, 30, { size: 2.1, lead: 2.9 }).svg);
     });
     t.push(F.rule(sx, F.h - 11.4, r, F.h - 11.4), F.caps(`${pack.bags} TEA BAGS · 2 G EACH · ${pack.net} G`, sx, F.h - 7.5, { size: 1.9 }));
-    L.Type.push(`<g id="Side_How_to_brew">${ART && THEMES[THEME].split ? t.join('').replaceAll(INK, '#F6EEDC') : t.join('')}</g>`);   // on the teal, the side's type turns cream
+    L.Type.push(`<g id="Side_How_to_brew">${ART && THEMES[THEME].split && !THEMES[THEME].blot ? t.join('').replaceAll(INK, '#F6EEDC') : t.join('')}</g>`);   // on the teal, the side's type turns cream
   }
 
   // ---- back: the line, then the labelled plate of vanilla

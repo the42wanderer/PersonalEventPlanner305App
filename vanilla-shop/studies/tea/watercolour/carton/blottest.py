@@ -11,10 +11,10 @@ from split2 import WC, flush, pod_pair, echo
 from blot import soak_in
 K=draw.K; B=3; PAPER=np.array([0xF4,0xEB,0xD6],np.float32)
 base=dict(tep_core='#FFFDF6',lip_core='#FFFEF8',throat_core='#F3C75E',throat_edge='#D69B3A',pod_core='#4A2A16',pod_edge='#26150B',tbud_core='#F2F6E2')
-P={'tea-gold':(dict(base,ground='#D9B784',tep_edge='#EFDDBE',lip_edge='#F6EBD6',leaf_core='#A9B67E',leaf_edge='#5F6E3A',tea_core='#9DB870',tea_edge='#577433',tbud_edge='#BCCB92',tstem='#93A866'),'#9A6A2C','#4F5E2C'),
+P={'tea-gold':(dict(base,ground='#DCB197',tep_edge='#F1DCCB',lip_edge='#F7EBE0',leaf_core='#A3AC80',leaf_edge='#6A7048',tea_core='#99A877',tea_edge='#5E6E42',tbud_edge='#BCC49A',tstem='#929E70',sheen=0.15),'#A86E58','#4F5E2C'),
    'celadon':(dict(base,ground='#A9C6B4',tep_edge='#D3E4D6',lip_edge='#E6EFE4',leaf_core='#8DB39A',leaf_edge='#4E7A60',tea_core='#9CC48E',tea_edge='#4E7F4A',tbud_edge='#A9C99A',tstem='#7FA97A'),'#5E8A74','#2F5A44')}
 tiles=[]
-for k,(p,tide,ink) in P.items():
+for k,(p,tide,ink) in list(P.items())[:1]:
     cv=WC(94,91)
     cv.add([leaf((96,40),200,46,10,0.3)],mix(p['leaf_core'],p['ground'],0.5),p['leaf_edge'],2.4,alpha=0.7)
     echo(cv,p,(86,30),20,1.0)
