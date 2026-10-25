@@ -23,6 +23,25 @@ def silhouette(h,w,paint):
     """paint the botanical, keep only its shape: one flat tone, like a shadow"""
     c0=np.zeros((h,w,3),np.float32); c1=np.full((h,w,3),255.0,np.float32); paint(c0); paint(c1)
     return np.clip(1-(c1-c0).mean(2)/255,0,1)
+def teapot(h,w,cx,base,s=1.0,tilt=28):
+    """a big teapot, one flat tone, tipped forward as if about to pour: round body, domed lid and knob, a long swan
+    spout dipping left, a loop handle; the lid seam and a belly band cut out as fine lines, like the soap's watermark"""
+    import draw
+    ss=3; im=Image.new('L',(w*ss,h*ss),0); d=ImageDraw.Draw(im); P=lambda x,y:((cx+x*s)*K*ss,(base+y*s)*K*ss)
+    t=np.linspace(0,2*np.pi,200); body=[P(23*np.cos(a),-17-16.5*np.sin(a)) for a in t]
+    body=[(x,min(y,P(0,-1.2)[1])) for x,y in body]; d.polygon(body,fill=255)                  # flat-bottomed belly
+    d.polygon([P(-14,-3.2),P(14,-3.2),P(11,0),P(-11,0)],fill=255)                             # the foot
+    d.polygon([P(15*np.cos(a),-31.5-6.5*np.sin(a)) for a in np.linspace(0,np.pi,60)],fill=255)   # the lid
+    d.ellipse([P(-2.6,-41.2),P(2.6,-36.4)],fill=255); d.polygon([P(-1.3,-37.4),P(1.3,-37.4),P(1.8,-36),P(-1.8,-36)],fill=255)
+    rib=draw.ribbon(draw.cr([(-19,-12),(-28,-17),(-33,-27),(-38,-35)],16),lambda u:3.6*(1-u)+0.9)   # the spout
+    d.polygon([P(x,y) for x,y in rib],fill=255)
+    rib=draw.ribbon(draw.cr([(20,-27),(30,-31),(35,-22),(31,-12),(20,-8)],16),lambda u:1.9)       # the handle
+    d.polygon([P(x,y) for x,y in rib],fill=255)
+    lw=max(1,int(0.28*s*K*ss))
+    d.line([P(15*np.cos(a),-31.5+0.6*np.sin(a)) for a in np.linspace(np.pi,2*np.pi,40)],fill=0,width=lw)   # lid seam
+    for off in (-14.5,-13.3): d.line([P(x,off+1.8*np.sqrt(max(0,1-(x/23)**2))) for x in np.linspace(-22.2,22.2,60)],fill=0,width=max(1,lw//2))
+    im=im.rotate(tilt,resample=Image.BICUBIC,center=P(-11,0))                                 # tipped on its front foot
+    return np.asarray(im.resize((w,h),Image.BOX)).astype(np.float32)/255
 def art(box,k='teal'):
     d=BOX[box]; FW,FH,SW,LH,SPLIT=d['FW'],d['FH'],d['SW'],d['LH'],d['SPLIT']; p=CW[k]; L=p['leaves']
     W,H=B+FW+SW+FW+B,FH+2*B; w,h=int(W*K),int(H*K); P=Paint(W,H,seed=3); f=B+FW; g=f+SW   # g: the fold onto the back
@@ -30,15 +49,14 @@ def art(box,k='teal'):
     # the shadows on the brew side and back, in the word's tone
     def shade_paint(c):
         if box=='long':
-            shoot(P,c,(f+64,B+FH+6),-112,74,0.3,22,L,'#000000',21,1)
             shoot(P,c,(g+FW+4,B-4),148,70,0.3,24,L,'#000000',22,-1)
             vleaf(P,c,(g+40,B+FH+6),-70,62,7,0.25,'#000000')
             paint_flower(P,c,(g+FW-46,B+30),210,2.2); paint_vbud(P,c,(g+FW-74,B+20),-120,7); paint_vbud(P,c,(g+FW-30,B+52),40,6)
         else:
-            shoot(P,c,(f+62,B+FH+6),-110,62,0.3,19,L,'#000000',21,1)
             shoot(P,c,(g+FW+4,B-4),146,52,0.3,19,L,'#000000',22,-1)
             paint_flower(P,c,(g+FW-26,B+32),210,1.6); paint_vbud(P,c,(g+FW-46,B+22),-120,5.5)
     sh=silhouette(h,w,shade_paint); xx=np.arange(w,dtype=np.float32)[None,:]/K; sh*=(xx>f)
+    sh=np.maximum(sh,teapot(h,w,g-11,B+46,0.82)*(xx>f))                         # beside the steps, pouring towards them, the handle round the fold
     img=img*(1-sh[...,None])+hx(p['word'])*sh[...,None]
     # Vanilla Tea, margin to margin across the brew side and the back, on the 10 mm foot
     fnt=fit('Vanilla Tea',(g+FW-10)-(f+10)); m1=mask(h,w,'Vanilla',fnt,f+10,B+FH-10); mall=mask(h,w,'Vanilla Tea',fnt,f+10,B+FH-10)
