@@ -2,7 +2,7 @@
 # thermal ramp maps it): a dawn glow on the horizon, layered hill-country ridges paler with distance, mist in the
 # valleys, an estate slope in contour rows of tea bushes, shade trees on a crest; the vanilla flower and a tea shoot in
 # the foreground. The inner label carries the name in the range's type (Instrument Serif, Archivo Expanded caps).
-import sys, json, numpy as np, cv2
+import os, sys, json, numpy as np, cv2
 from PIL import Image, ImageDraw
 S='/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/'
 sys.argv=sys.argv[:1]; sys.path.insert(0,S+'teasoap')
@@ -100,7 +100,7 @@ def estate(h,w):
     return np.clip(L,0,1)
 def foreground(h,w):
     img,P=canvas(FW,FH); bg=img.copy()
-    shoot(P,img,(B-4,B+FH+4),-66,58,0.45,22,('#6E8E66','#88A57A','#A3BC92','#C2D4AE'),'#E6EFD6',9,1)
+    if not os.environ.get('NOSHOOT'): shoot(P,img,(B-4,B+FH+4),-66,58,0.45,22,('#6E8E66','#88A57A','#A3BC92','#C2D4AE'),'#E6EFD6',9,1)
     paint_flower(P,img,(B+11,B+9),30,2.35); paint_vbud(P,img,(B+34,B+6),-40,6)
     a=np.clip(np.abs(img-bg).max(2)/30,0,1); Lf=(img@np.array([0.3,0.59,0.11],np.float32))/255
     return Lf,a
