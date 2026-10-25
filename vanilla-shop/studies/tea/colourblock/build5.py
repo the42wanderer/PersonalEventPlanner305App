@@ -56,11 +56,15 @@ def art(box,k='teal'):
             shoot(P,c,(g+FW+4,B-4),146,52,0.3,19,L,'#000000',22,-1)
             paint_flower(P,c,(g+FW-26,B+32),210,1.6); paint_vbud(P,c,(g+FW-46,B+22),-120,5.5)
     sh=silhouette(h,w,shade_paint); xx=np.arange(w,dtype=np.float32)[None,:]/K; sh*=(xx>f)
-    sh=np.maximum(sh,teapot(h,w,g-11,B+46,0.82)*(xx>f))                         # beside the steps, pouring towards them, the handle round the fold
     img=img*(1-sh[...,None])+hx(p['word'])*sh[...,None]
     # Vanilla Tea, margin to margin across the brew side and the back, on the 10 mm foot
     fnt=fit('Vanilla Tea',(g+FW-10)-(f+10)); m1=mask(h,w,'Vanilla',fnt,f+10,B+FH-10); mall=mask(h,w,'Vanilla Tea',fnt,f+10,B+FH-10)
     img=img*(1-m1[...,None])+hx(p['word'])*m1[...,None]; m2=np.clip(mall-m1,0,1); img=img*(1-m2[...,None])+hx(TEA_TONE)*m2[...,None]
+    # the teapot: a deeper shadow than the teal (the lettering stays lighter), set on the grid: its top on the 10 mm
+    # margin, its handle at the fold; a fine pour falls from the spout tip to the pack rule, the steps' right-hand line
+    sc=0.86; t0=teapot(h,w,60,60,sc); ys,xs_=np.nonzero(t0>0.5); x1,y1=xs_.max()/K-60,ys.max()/K-60
+    tp=teapot(h,w,(g+1.5)-x1,(B+FH+5)-y1,sc)*(xx>f)                                     # grounded in the bottom corner, cut by the foot
+    img=img*(1-tp[...,None])+hx('#163F3D')*tp[...,None]
     # the front, as before
     if box=='long':
         vleaf(P,img,(B+SPLIT+4,B+92),-62,70,8.5,0.25,'#2A5240'); vleaf(P,img,(f+2,B+96),-118,64,7.5,-0.2,'#33604A')
