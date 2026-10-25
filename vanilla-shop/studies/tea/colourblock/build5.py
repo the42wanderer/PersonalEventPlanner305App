@@ -42,6 +42,29 @@ def teapot(h,w,cx,base,s=1.0,tilt=28):
     for off in (-14.5,-13.3): d.line([P(x,off+1.8*np.sqrt(max(0,1-(x/23)**2))) for x in np.linspace(-22.2,22.2,60)],fill=0,width=max(1,lw//2))
     im=im.rotate(tilt,resample=Image.BICUBIC,center=P(-11,0))                                 # tipped on its front foot
     return np.asarray(im.resize((w,h),Image.BOX)).astype(np.float32)/255
+SHELF=36.0; TIP_X=44.0                                     # side-local mm: the shelf rule, and where the pour falls
+def pour_scene(h,w,f,g,tilt=35):
+    """the pot comes in from the top-right corner (cut by the top edge, its handle at the fold), tipped to pour; a
+    stream falls from the spout into a cup standing on the shelf rule. One deep tone, one diagonal, one story"""
+    import draw
+    ref=teapot(h,w,60,60,1.0,tilt); ys,xs=np.nonzero(ref>0.5)
+    j=np.argmin(xs); dx_tip=(xs.max()-xs[j])/K; dy_tip=(ys[j]-ys.min())/K               # tip, measured from the pot's right and top
+    sc=((g+2)-(f+TIP_X))/dx_tip
+    m=teapot(h,w,60,60,sc,tilt); ys,xs=np.nonzero(m>0.5); x1,y0=xs.max()/K-60,ys.min()/K-60
+    cx,base=(g+2)-x1,(B-5)-y0; pot=teapot(h,w,cx,base,sc,tilt)
+    ys,xs=np.nonzero(pot>0.5); j=np.argmin(xs); tx,ty=xs[j]/K,ys[j]/K
+    ss=3; im=Image.new('L',(w*ss,h*ss),0); d=ImageDraw.Draw(im); Q=lambda x,y:(x*K*ss,y*K*ss)
+    sy=B+SHELF; mouth=sy-1.6-8.6
+    d.polygon([Q(tx-11,sy-1.6),Q(tx+11,sy-1.6),Q(tx+9.5,sy),Q(tx-9.5,sy)],fill=255)       # the saucer
+    d.polygon([Q(tx+7*np.cos(a),mouth+8.2*np.sin(a)) for a in np.linspace(0,np.pi,60)],fill=255)   # the bowl
+    d.polygon([Q(tx-3.4,mouth+7.6),Q(tx+3.4,mouth+7.6),Q(tx+4,sy-1.6),Q(tx-4,sy-1.6)],fill=255)    # the foot
+    rib=draw.ribbon([(tx+6.2+3.0*np.cos(a),mouth+3.4+2.6*np.sin(a)) for a in np.linspace(-1.9,1.6,30)],lambda u:0.55)
+    d.polygon([Q(x,y) for x,y in rib],fill=255)                                          # the handle
+    d.line([Q(tx-6.2,mouth+1.1),Q(tx+6.2,mouth+1.1)],fill=0,width=max(1,int(0.25*K*ss)))   # the rim, cut out
+    sp=draw.cr([(tx,ty),(tx-0.4,(ty+mouth)/2),(tx-0.2,mouth+1)],10)                         # the stream, thinning as it falls
+    rib=draw.ribbon(sp,lambda u:0.55*(1-u)+0.28); d.polygon([Q(x,y) for x,y in rib],fill=255)
+    sc_=np.asarray(im.resize((w,h),Image.BOX)).astype(np.float32)/255
+    return np.maximum(pot,sc_)
 def art(box,k='teal'):
     d=BOX[box]; FW,FH,SW,LH,SPLIT=d['FW'],d['FH'],d['SW'],d['LH'],d['SPLIT']; p=CW[k]; L=p['leaves']
     W,H=B+FW+SW+FW+B,FH+2*B; w,h=int(W*K),int(H*K); P=Paint(W,H,seed=3); f=B+FW; g=f+SW   # g: the fold onto the back
@@ -62,8 +85,7 @@ def art(box,k='teal'):
     img=img*(1-m1[...,None])+hx(p['word'])*m1[...,None]; m2=np.clip(mall-m1,0,1); img=img*(1-m2[...,None])+hx(TEA_TONE)*m2[...,None]
     # the teapot: a deeper shadow than the teal (the lettering stays lighter), set on the grid: its top on the 10 mm
     # margin, its handle at the fold; a fine pour falls from the spout tip to the pack rule, the steps' right-hand line
-    sc=0.86; t0=teapot(h,w,60,60,sc); ys,xs_=np.nonzero(t0>0.5); x1,y1=xs_.max()/K-60,ys.max()/K-60
-    tp=teapot(h,w,(g+1.5)-x1,(B+FH+5)-y1,sc)*(xx>f)                                     # grounded in the bottom corner, cut by the foot
+    tp=pour_scene(h,w,f,g)*(xx>f)                                                    # the brew side's scene: pot, stream, cup on the shelf
     img=img*(1-tp[...,None])+hx('#163F3D')*tp[...,None]
     # the front, as before
     if box=='long':
@@ -114,17 +136,14 @@ ICON={'cup':'<path d="M1.6 4.2H7.2V6.6C7.2 8.2 6 9.2 4.4 9.2S1.6 8.2 1.6 6.6Z"/>
       'ice':'<path d="M2 1.6H8L7.2 9.2H2.8Z"/><rect x="3.3" y="4.6" width="1.6" height="1.6" transform="rotate(-12 4.1 5.4)"/><rect x="5.1" y="5.9" width="1.6" height="1.6" transform="rotate(10 5.9 6.7)"/><path d="M3 3.4H7"/>'}
 def icon(k,x,y,size,c): s=size/10; return f'<g fill="none" stroke="{c}" stroke-width="{0.32/s:.3f}" stroke-linecap="round" stroke-linejoin="round" transform="translate({x} {y}) scale({s})">{ICON[k]}</g>'
 def side(box,k='teal'):
-    """how to brew, at reading size: line icons from the range's set, each step in two short lines, kept left of the teapot"""
+    """the scene above, standing on the shelf rule; the heading and three steps beneath it, one line each"""
     d=BOX[box]; SW,FH=d['SW'],d['FH']; c=CW[k]['lt']; x=10; o=[]
-    o.append(txt('How to brew',x,17,8.6,c,'IS')); o.append(rule(x,21.5,SW-10,21.5,c,0.22,0.6))
-    steps=[('cup','150 ML',['One tea bag in','freshly boiled water.']),('timer','5 MINUTES',['Steep, then lift','the bag out.']),('ice','OVER ICE',['Let it cool and','pour over ice.'])]
-    for i,(ic,hd,ls) in enumerate(steps):
-        y=27.5+i*12.6
-        o.append(icon(ic,x-0.6,y-0.8,9.5,c))
-        o.append(caps(hd,x+13,y+1.6,2.5,c,tr=0.16))
-        for j,l in enumerate(ls): o.append(txt(l,x+13,y+5.6+j*3.6,2.9,c,'G'))
-    o.append(rule(x,66.5,SW-10,66.5,c,0.22,0.6))
-    o.append(caps(f'{d["bags"]} TEA BAGS · 2 G EACH · NET WT. {d["net"]} g',x,71,1.9,c,tr=0.18))
+    o.append(rule(x,SHELF,SW-10,SHELF,c,0.22,0.6))
+    o.append(txt('How to brew',x,SHELF+9.6,7.6,c,'IS'))
+    steps=[('cup','150 ML','One tea bag in freshly boiled water.'),('timer','5 MINUTES','Steep, then lift the bag out.'),('ice','OVER ICE','Let it cool, pour over ice.')]
+    for i,(ic,hd,l) in enumerate(steps):
+        y=SHELF+15+i*8.4
+        o.append(icon(ic,x-0.4,y-0.6,6.6,c)); o.append(caps(hd,x+10.5,y+1.5,2.1,c,tr=0.16)); o.append(txt(l,x+10.5,y+5.2,2.6,c,'G'))
     return face(f'{box}5-S',SW,FH,f'{box}5-side.jpg',o)
 def rename(r,box,n):
     src=open(r[0]+'.html').read().replace(f'{box}4-front.jpg',f'{box}5-front.jpg').replace(f'{box}4-side.jpg',f'{box}5-side.jpg')
