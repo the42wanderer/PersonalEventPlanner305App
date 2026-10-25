@@ -105,7 +105,23 @@ def back(box,k='teal'):
     o.append(rule(10 if box=='long' else 8,49.5,FW-(10 if box=='long' else 8),49.5,c,0.2,0.6))
     return face(f'{box}5-B',FW,FH,f'{box}5-back.jpg',o)
 def front(box): r=b4.front(box); return rename(r,box,'F')
-def side(box): r=b4.side(box); return rename(r,box,'S')
+ICON={'cup':'<path d="M1.6 4.2H7.2V6.6C7.2 8.2 6 9.2 4.4 9.2S1.6 8.2 1.6 6.6Z"/><path d="M7.2 5H8C8.9 5 9.2 5.6 9.2 6.2S8.9 7.4 8 7.4H7.1"/><path d="M3.4 1.2c-.6.7.6 1.2 0 2M5.4 1.2c-.6.7.6 1.2 0 2"/>',
+      'timer':'<circle cx="5" cy="5.6" r="3.5"/><path d="M5 5.6V3.5M5 5.6L6.6 6.6M4 1H6M5 1V2.1"/>',
+      'ice':'<path d="M2 1.6H8L7.2 9.2H2.8Z"/><rect x="3.3" y="4.6" width="1.6" height="1.6" transform="rotate(-12 4.1 5.4)"/><rect x="5.1" y="5.9" width="1.6" height="1.6" transform="rotate(10 5.9 6.7)"/><path d="M3 3.4H7"/>'}
+def icon(k,x,y,size,c): s=size/10; return f'<g fill="none" stroke="{c}" stroke-width="{0.32/s:.3f}" stroke-linecap="round" stroke-linejoin="round" transform="translate({x} {y}) scale({s})">{ICON[k]}</g>'
+def side(box,k='teal'):
+    """how to brew, at reading size: line icons from the range's set, each step in two short lines, kept left of the teapot"""
+    d=BOX[box]; SW,FH=d['SW'],d['FH']; c=CW[k]['lt']; x=10; o=[]
+    o.append(txt('How to brew',x,17,8.6,c,'IS')); o.append(rule(x,21.5,SW-10,21.5,c,0.22,0.6))
+    steps=[('cup','150 ML',['One tea bag in','freshly boiled water.']),('timer','5 MINUTES',['Steep, then lift','the bag out.']),('ice','OVER ICE',['Let it cool and','pour over ice.'])]
+    for i,(ic,hd,ls) in enumerate(steps):
+        y=27.5+i*12.6
+        o.append(icon(ic,x-0.6,y-0.8,9.5,c))
+        o.append(caps(hd,x+13,y+1.6,2.5,c,tr=0.16))
+        for j,l in enumerate(ls): o.append(txt(l,x+13,y+5.6+j*3.6,2.9,c,'G'))
+    o.append(rule(x,66.5,SW-10,66.5,c,0.22,0.6))
+    o.append(caps(f'{d["bags"]} TEA BAGS · 2 G EACH · NET WT. {d["net"]} g',x,71,1.9,c,tr=0.18))
+    return face(f'{box}5-S',SW,FH,f'{box}5-side.jpg',o)
 def rename(r,box,n):
     src=open(r[0]+'.html').read().replace(f'{box}4-front.jpg',f'{box}5-front.jpg').replace(f'{box}4-side.jpg',f'{box}5-side.jpg')
     nm=O+f'{box}5-{n}'; open(nm+'.html','w').write(src); return [nm,r[1],r[2]]
