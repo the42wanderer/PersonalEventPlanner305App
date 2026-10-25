@@ -59,7 +59,39 @@ def washi(img,p):
     pap=hx(p['paper']); core=hx('#FBF8EF')
     a=np.clip((d<=0)*1.0+fringe*0.9,0,1)
     col=np.where((d>-0.5)[...,None],core,pap)                                 # the torn core is whiter than the face
-    return out*(1-a[...,None])+col*a[...,None]
+    return out*(1-a[...,None])+col*a[...,None], a
+def hills(h,w,ridges,x0=0.0):
+    """a Ceylon tea estate, drawn faint: rounded hills back to front, each planted in contour rows of tea bushes
+    (dotted rows following the slope). ridges: (base y, [(centre x, rise, half-width)...], tone) in mm. Returns coverage."""
+    xs=np.arange(w,dtype=np.float32)/K+x0; yy=np.arange(h,dtype=np.float32)[:,None]/K
+    owner=np.full((h,w),-1,np.int16); curves=[]
+    for i,(b,humps,_) in enumerate(ridges):
+        r=np.full(w,b,np.float32)
+        for (c,amp,hw) in humps: r-=amp*np.exp(-((xs-c)/hw)**2)
+        curves.append(r); owner[yy>=r[None,:]]=i
+    cov=np.zeros((h,w),np.float32)
+    for i,(b,humps,tone) in enumerate(ridges):
+        mine=(owner==i).astype(np.float32); cov+=mine*tone
+        ss=3; im=Image.new('L',(w*ss,h*ss),0); dr=ImageDraw.Draw(im); r=curves[i]
+        rad=0.22*K*ss; step=max(1,int(1.35*K))
+        for k in range(0,60):
+            off=0.9+k*2.0*(1+0.03*k)
+            for j in range(int((k*7)%step),w,step):
+                y=(r[j]+off)*K*ss; x=j*ss
+                dr.ellipse((x-rad*1.3,y-rad,x+rad*1.3,y+rad),fill=255)
+        dr.line([(j*ss,r[j]*K*ss) for j in range(0,w,3)],fill=255,width=max(1,int(0.22*K*ss)))
+        dots=np.asarray(im.resize((w,h),Image.BOX)).astype(np.float32)/255
+        cov+=dots*mine*(0.2+tone)
+    return np.clip(cov,0,1)
+def laid_on(img,paint):
+    """paint a layer separately, then lay it on the paper with a soft cast shadow, so white petals read on cream"""
+    import cv2
+    c0=np.zeros_like(img); c1=np.full_like(img,255.0); paint(c0); paint(c1)
+    al=np.clip(1-(c1-c0).mean(2)/255,0,1); col=c0/np.maximum(al[...,None],1e-3)
+    dx,dy=int(0.7*K),int(1.1*K); sh=np.zeros_like(al); sh[dy:,dx:]=al[:-dy,:-dx]
+    sh=cv2.GaussianBlur(sh,(0,0),0.9*K)*0.34
+    img=img*(1-sh[...,None]*(1-hx('#2E4A44')/255))
+    return img*(1-al[...,None])+col*al[...,None]
 def art(k):
     p=CW[k]; W,H=B+FW+SW+B,FH+2*B; w,h=int(W*K),int(H*K)
     P=Paint(W,H,seed=3)
@@ -77,15 +109,25 @@ def art(k):
     shoot(P,img,(B+SPLIT+10,B+97),-78,66,0.35,26,L,'#CFE0C2',5,1)          # one rising at the split,
     shoot(P,img,(f-4,B+97),-118,56,-0.25,24,L[1:],'#CFE0C2',8,-1)          # one at the corner,
     shoot(P,img,(f+SW-3,B+104),-100,44,0.25,21,L,'#CFE0C2',11,1)            # and one on the brew side, low
-    img=washi(img,p)                                                     # the cream: a hand-torn sheet laid over the band
-    paint_pod(P,img,(B+SPLIT-14,B+86),-17,86,2.3,0.12,0); paint_pod(P,img,(B+SPLIT-9,B+91),-24,78,2.0,0.08,0)   # these cross the tear
-    paint_vbud(P,img,(f-20,B+20),-60,7.5); paint_vbud(P,img,(B+SPLIT+12,B+30),200,6.5)
-    paint_flower(P,img,(f-37,B+46),38,2.6)                               # and the flower breaks over it
+    img,cream=washi(img,p)                                               # the cream: a hand-torn sheet laid over the band
+    # the estate, printed faint on the cream: rising from the lower right, running under the tear, kept off the type
+    hh=hills(h,w,[(B+64,[(94,24,22)],0.035),(B+72,[(64,20,20),(116,16,18)],0.05),(B+86,[(92,20,24)],0.065)],x0=-B)
+    xx=np.arange(w,dtype=np.float32)[None,:]/K-B; fadex=np.clip((xx-44)/42,0,1); fadex=fadex*fadex*(3-2*fadex)
+    A=hh*fadex*cream*0.95; img=img*(1-A[...,None])+hx(p['band'])*A[...,None]
+    def front_layer(c):
+        paint_pod(P,c,(B+SPLIT-14,B+86),-17,86,2.3,0.12,0); paint_pod(P,c,(B+SPLIT-9,B+91),-24,78,2.0,0.08,0)   # these cross the tear
+        paint_vbud(P,c,(f-20,B+20),-60,7.5); paint_vbud(P,c,(B+SPLIT+12,B+30),200,6.5)
+        paint_flower(P,c,(f-37,B+46),38,2.6)                             # and the flower breaks over it
+    img=laid_on(img,front_layer)
     img=grain(img,17); out=img.clip(0,255).astype(np.uint8)
     Image.fromarray(out[:,:int((FW+2*B)*K)]).save(O+f'{k}2-front.jpg',quality=94)
     Image.fromarray(out[:,int((FW+B)*K):]).save(O+f'{k}2-side.jpg',quality=94)
     for nm,(fw,fh) in {'lid':(FW,LH),'back':(FW,FH)}.items():
-        a=np.ones((int((fh+2*B)*K),int((fw+2*B)*K),3),np.float32)*hx(p['paper']); a=grain(a,19)
+        a=np.ones((int((fh+2*B)*K),int((fw+2*B)*K),3),np.float32)*hx(p['paper'])
+        if nm=='lid':   # the estate again, low across the lid, quieter
+            hh2,ww2=a.shape[:2]; hl=hills(hh2,ww2,[(B+76,[(26,13,26),(150,15,30)],0.04),(B+83,[(92,11,34),(8,6,18)],0.05),(B+90,[(160,9,28),(56,7,24)],0.06)],x0=-B)
+            A=hl*0.7; a=a*(1-A[...,None])+hx(p['band'])*A[...,None]
+        a=grain(a,19)
         Image.fromarray(a.clip(0,255).astype(np.uint8)).save(O+f'{k}2-{nm}.jpg',quality=94)
 def front(k):
     p=CW[k]; c=p['ink']; x=12; o=[]
