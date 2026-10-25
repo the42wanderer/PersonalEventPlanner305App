@@ -72,13 +72,16 @@ def grain(v,amt,seed):
     h,w=v.shape; g=0.65*nz(h,w,0.55,0.55,seed)+0.35*nz(h,w,1.4,1.4,seed+1)
     return np.clip(v+amt*g*(0.12+3.2*v*(1-v)),0,1)
 def lip_shadow(h,w):
-    """the shadow the flower's lip (tube and mouth, rebuilt exactly as paint_flower draws them) casts on the petal under it"""
+    """a soft occlusion on the petal under the lip's ruffled lower edge, so the two read as separate; cast straight down
+    from the mouth only (never from the tube, whose straight side would show), wide and faint"""
     tube,mouth,_=trumpet((B+11,B+9),30,7.5*2.35,1.1*2.35,3.6*2.35,2.6*2.35,0.13)
-    im=Image.new('L',(w,h),0); dr=ImageDraw.Draw(im)
-    for poly in (tube,mouth): dr.polygon([(x*K,y*K) for x,y in poly],fill=255)
-    m=np.asarray(im).astype(np.float32)/255
-    sh=cv2.GaussianBlur(np.roll(np.roll(m,int(1.5*K),0),int(-0.4*K),1),(0,0),0.45*K)               # cast down, a touch left
-    return np.clip(sh-m,0,1)
+    def mask(polys):
+        im=Image.new('L',(w,h),0); dr=ImageDraw.Draw(im)
+        for poly in polys: dr.polygon([(x*K,y*K) for x,y in poly],fill=255)
+        return np.asarray(im).astype(np.float32)/255
+    lip=cv2.GaussianBlur(mask((tube,mouth)),(0,0),0.5*K); src=mask((mouth,))
+    sh=cv2.GaussianBlur(np.roll(src,int(0.9*K),0),(0,0),1.3*K)
+    return np.clip(sh*(1-lip)*1.6,0,1)
 def render(name,ramp,fr=None,gam=1.0):
     img,_=canvas(FW,FH); h,w=img.shape[:2]
     L=cv2.GaussianBlur(scene(h,w),(0,0),0.12*K); (Lf,af),(Ls,as_)=foreground(h,w)
@@ -94,7 +97,7 @@ def render(name,ramp,fr=None,gam=1.0):
     ins=cv2.distanceTransform(m,cv2.DIST_L2,5)/K
     lo,hi=np.percentile(Lf[af>0.5],(3,99)); sh=np.clip((Lf-lo)/(hi-lo+1e-6),0,1)
     heart=np.exp(-(((xx-30)/17)**2+((yy-19)/15)**2))
-    fv=0.68+0.16*sh+0.22*heart-0.17*np.exp(-ins/0.8)-0.40*lip_shadow(h,w)
+    fv=0.68+0.16*sh+0.22*heart-0.17*np.exp(-ins/0.8)-0.22*lip_shadow(h,w)
     fv=np.clip(fv,0,1)
     v=grain(L,0.075,21)**gam; out=H.ramp(v,ramp)                                                  # gam>1: deeper darks, the light kept
     fg=grain(fv,0.075,23); fo=H.ramp(fg,ramp) if fr is None else H.ramp(np.clip((fg-0.45)/0.55,0,1),fr)   # the flower keeps its own warm light
