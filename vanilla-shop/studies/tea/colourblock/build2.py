@@ -14,7 +14,7 @@ import draw
 K=12; fo.K=K; draw.K=K
 R='/home/user/PersonalEventPlanner305App/vanilla-shop'
 O=b.O
-SPLIT=96                                     # cream panel width on the front, mm (the bottle's split)
+SPLIT=round(175.9/1.618,1)                   # cream panel width on the front, mm: the golden section (108.7 | 67.2)
 CW={'teal':dict(paper='#F3ECDC',band='#1D4F4D',word='#245E5B',ink='#163F3D',deep='#2F6E6A',lt='#F3ECDC',
                 leaves=('#2C5B45','#4F7F5C','#7EA57A','#A9C79A'),pod='#3A2216')}
 def flatleaf(P,img,p0,ang,L,W,bend,col,dark,vein,rng):
@@ -45,11 +45,26 @@ def vleaf(P,img,p0,ang,L,W,bend,col):
     poly=draw.leaf(p0,ang,L,W,bend); sp=draw.leaf(p0,ang,L,W,bend,spine=True)
     P.over(img,poly,col,1.0,0.03); P.shade(img,poly,LIGHT*W*0.25,mix(col,'#000000',0.35),0.6)
     P.over(img,draw.ribbon(sp[2:-3],lambda t:W*0.12*math.sin(math.pi*t)+0.03),mix(col,'#FFFFFF',0.25),0.5,0)
+def washi(img,p):
+    """the edge is torn, not cut: a wandering deckle, white fibres standing out of it, a faint shadow on the teal"""
+    import cv2
+    h,w=img.shape[:2]; rng=np.random.default_rng(21)
+    def wander(sig_mm,amp): v=cv2.GaussianBlur(rng.normal(0,1,(h,1)).astype(np.float32),(1,0),sigmaX=0.1,sigmaY=sig_mm*K)[:,0]; return v/(v.std()+1e-6)*amp
+    xb=(B+SPLIT)+wander(7,1.6)+wander(1.2,0.45)+wander(0.25,0.12)            # mm, per row
+    xx=np.arange(w,dtype=np.float32)[None,:]/K; d=xx-xb[:,None]              # mm past the edge
+    fib=cv2.GaussianBlur(rng.normal(0,1,(h,w)).astype(np.float32),(0,0),sigmaX=0.12*K,sigmaY=0.03*K); fib=fib/fib.std()
+    fringe=np.clip((fib*0.5+0.55)-d/1.1,0,1)*(d>0)*(d<1.4)                   # fibres thinning out across ~1 mm
+    shadow=np.clip(1-(d-0.15)/1.6,0,1)*(d>0)*0.16                             # the sheet lifts a hair off the band
+    out=img*(1-shadow[...,None])
+    pap=hx(p['paper']); core=hx('#FBF8EF')
+    a=np.clip((d<=0)*1.0+fringe*0.9,0,1)
+    col=np.where((d>-0.5)[...,None],core,pap)                                 # the torn core is whiter than the face
+    return out*(1-a[...,None])+col*a[...,None]
 def art(k):
     p=CW[k]; W,H=B+FW+SW+B,FH+2*B; w,h=int(W*K),int(H*K)
     P=Paint(W,H,seed=3)
     img=np.ones((h,w,3),np.float32)*hx(p['paper'])
-    x0=int((B+SPLIT)*K); img[:,x0:]=hx(p['band'])                       # the split: cream | teal, round the corner
+    img[:]=hx(p['band'])                                                 # teal under everything; the cream is laid over it
     # the candles' move on the colour side: the name, huge and cropped, a step off the ground
     im=Image.fromarray(img.clip(0,255).astype(np.uint8)); dr=ImageDraw.Draw(im)
     fnt=ImageFont.truetype(R+'/fonts/instrument-serif.ttf',int(64*K))
@@ -62,9 +77,10 @@ def art(k):
     shoot(P,img,(B+SPLIT+10,B+97),-78,66,0.35,26,L,'#CFE0C2',5,1)          # one rising at the split,
     shoot(P,img,(f-4,B+97),-118,56,-0.25,24,L[1:],'#CFE0C2',8,-1)          # one at the corner,
     shoot(P,img,(f+SW-3,B+104),-100,44,0.25,21,L,'#CFE0C2',11,1)            # and one on the brew side, low
-    paint_pod(P,img,(B+SPLIT-6,B+86),-17,86,2.3,0.12,0); paint_pod(P,img,(B+SPLIT-1,B+91),-24,78,2.0,0.08,0)
-    paint_vbud(P,img,(f-24,B+20),-60,7.5); paint_vbud(P,img,(B+SPLIT+20,B+30),200,6.5)
-    paint_flower(P,img,(f-44,B+46),38,2.75)
+    img=washi(img,p)                                                     # the cream: a hand-torn sheet laid over the band
+    paint_pod(P,img,(B+SPLIT-14,B+86),-17,86,2.3,0.12,0); paint_pod(P,img,(B+SPLIT-9,B+91),-24,78,2.0,0.08,0)   # these cross the tear
+    paint_vbud(P,img,(f-20,B+20),-60,7.5); paint_vbud(P,img,(B+SPLIT+12,B+30),200,6.5)
+    paint_flower(P,img,(f-37,B+46),38,2.6)                               # and the flower breaks over it
     img=grain(img,17); out=img.clip(0,255).astype(np.uint8)
     Image.fromarray(out[:,:int((FW+2*B)*K)]).save(O+f'{k}2-front.jpg',quality=94)
     Image.fromarray(out[:,int((FW+B)*K):]).save(O+f'{k}2-side.jpg',quality=94)
