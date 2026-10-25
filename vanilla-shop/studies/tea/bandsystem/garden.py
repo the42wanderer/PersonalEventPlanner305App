@@ -54,27 +54,30 @@ def foreground(h,w):
     paint_flower(P,img,(B+11,B+9),30,2.35); paint_vbud(P,img,(B+34,B+6),-40,6)
     a=np.clip(np.abs(img-bg).max(2)/30,0,1); Lf=(img@np.array([0.3,0.59,0.11],np.float32))/255
     return Lf,a
-def render(name,ramp):
+def render(name,ramp,DOT='#081A1B'):
     img,_=canvas(FW,FH); h,w=img.shape[:2]
     L=cv2.GaussianBlur(landscape(h,w),(0,0),0.5*K); Lf,a=foreground(h,w)
     Lf=cv2.GaussianBlur(Lf*a,(0,0),1.25*K); a=cv2.GaussianBlur(a,(0,0),1.25*K)                     # the near things softest: depth
     L=L*(1-a)+np.clip(Lf/np.maximum(a,1e-3)*1.05,0,1)*a
-    v=np.clip(L,0,1)**1.05; n=11
-    f=v*n; fl=np.floor(f); fr=f-fl; st=fl+np.clip((fr-0.82)/0.18,0,1)**2                  # stepped bands, each easing into the next
-    vq=0.62*(st/n)+0.38*v                                                                  # banded, but not hard-posterised
-    out=H.ramp(np.clip(vq,0,1),ramp)
-    gy,gx=np.gradient(v); g=np.hypot(gx,gy)*n+1e-4
-    dist=np.minimum(fr,1-fr)/g                                                              # distance to the nearest isotherm, in px
-    line=np.clip(1-dist/1.1,0,1)*np.clip(g*40,0,1)                                         # constant-width lines; none on flat ground
-    lc=H.ramp(np.clip(vq+0.16,0,1),ramp); out=out*(1-0.45*line[...,None])+lc*0.45*line[...,None]
+    v=np.clip(L,0,1)**1.05
+    out=H.ramp(v,ramp)                                                                     # a smooth gradient map, no stepping
+    # halftone: a 45° screen of round dots in a deep ink, growing with the shadow; highlights left clean
+    yy,xx=np.mgrid[0:h,0:w].astype(np.float32)/K; pitch=0.62
+    u=(xx+yy)/np.sqrt(2)/pitch; t=(xx-yy)/np.sqrt(2)/pitch
+    dc=np.hypot(u-np.round(u),t-np.round(t))*pitch                                         # mm to the nearest dot centre
+    dark=np.clip(1-v,0,1); r=pitch*0.5*np.sqrt(np.clip((dark-0.18)/0.82,0,1))*1.05
+    dot=np.clip((r-dc)*K+0.5,0,1)                                                          # anti-aliased dot edge
+    out=out*(1-0.42*dot[...,None]*(1-hx(DOT)/255))
     out+=np.random.default_rng(5).normal(0,2.6,(h,w))[...,None]
     Image.fromarray(out.clip(0,255).astype(np.uint8)).save(O+name+'.jpg',quality=95)
 LEAF=('<linearGradient id="leaf" x1="0" y1="0" x2="1" y2="0.3"><stop offset="0" stop-color="#8A6424"/><stop offset=".25" stop-color="#D9B465"/>'
       '<stop offset=".5" stop-color="#A27A30"/><stop offset=".75" stop-color="#E6C77E"/><stop offset="1" stop-color="#946B28"/></linearGradient>')
 def T(t,x,y,sz,c,f,a='middle',tr=0.0): return f'<text x="{x:.2f}" y="{y:.2f}" font-family="{f}" font-size="{sz}" letter-spacing="{sz*tr:.3f}" fill="{c}" text-anchor="{a}">{t}</text>'
 man=[]
-for rk in ('jade','amber'):
-    ramp=H.RAMPS[rk]; nm=f'gd-{rk}'; render(nm,ramp); ink=ramp[1]; CREAM='#F6F1E4'
+RAMPS={'dawn':['#081A1F','#0F3236','#1B5550','#4E8A78','#D59A6A','#F3CB91','#FFF4E2'],
+       'amber':['#0A1D1C','#173A35','#3D5238','#946A2E','#DB9B47','#F5D294','#FFF6E4']}
+for rk in ('dawn','amber'):
+    ramp=RAMPS[rk]; nm=f'gd-{rk}'; render(nm,ramp); ink=ramp[1]; CREAM='#F6F1E4'
     lw,lh=56,33; lx,ly=cx-lw/2,FH-lh-8
     o=[f'<rect x="{lx}" y="{ly}" width="{lw}" height="{lh}" fill="{CREAM}"/>',
        f'<rect x="{lx+1.4}" y="{ly+1.4}" width="{lw-2.8}" height="{lh-2.8}" fill="none" stroke="{ink}" stroke-width="0.15" opacity=".75"/>',
