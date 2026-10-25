@@ -16,6 +16,7 @@ O=b6.O
 kit.FONTS.update({'ISR':'/home/user/PersonalEventPlanner305App/vanilla-shop/fonts/instrument-serif.ttf'})
 b6.css=''.join(f"@font-face{{font-family:{a};src:url(file://{v})}}" for a,v in kit.FONTS.items())
 d=BOX['cube']; FW,FH=d['FW'],d['FH']; cx=FW/2
+NEAR=None
 def nz(h,w,sx,sy,seed):
     n=np.random.default_rng(seed).normal(0,1,(h,w)).astype(np.float32); n=cv2.GaussianBlur(n,(0,0),sigmaX=sx,sigmaY=sy); return n/(n.std()+1e-6)
 def landscape(h,w):
@@ -74,7 +75,7 @@ def estate(h,w):
         L=np.where(m,L+amp*row*bush-dark,L)
     cA=hump([(56,33.5,30)]); mA=layer(cA,0.24,0.0,5); hedges(mA,cA,1.8,0.30,6)                                # the estate hill, right of the flower
     cB=hump([(6,37,20)]); mB=layer(cB,0.20,0.0,7); hedges(mB,cB,1.7,0.28,8)
-    cN=hump([(30,44,40),(86,45,20)]); mN=layer(cN,0.14,0.0,9); hedges(mN,cN,2.2,0.24,10)                          # the near slope
+    cN=NEAR(xs) if NEAR else hump([(30,44,40),(86,45,20)]); mN=layer(cN,0.14,0.0,9); hedges(mN,cN,2.2,0.24,10)                          # the near slope
     # a red-earth footpath climbing the estate hill
     im=Image.new('L',(w*2,h*2),0); dr=ImageDraw.Draw(im)
     import draw as DR; sp=DR.cr([(66,34.5),(60,36.5),(64,39),(54,41.5),(46,44.5)],14); rib=DR.ribbon(sp,lambda u:0.25+0.55*u)
@@ -126,26 +127,27 @@ def T(t,x,y,sz,c,f,a='middle',tr=0.0): return f'<text x="{x:.2f}" y="{y:.2f}" fo
 man=[]
 RAMPS={'dawn':['#081A1F','#0F3236','#1B5550','#4E8A78','#D59A6A','#F3CB91','#FFF4E2'],
        'amber':['#0A1D1C','#173A35','#3D5238','#946A2E','#DB9B47','#F5D294','#FFF6E4']}
-from kit import logo
-GREEN='#163F3D'; CREAM='#F6F1E4'                                                          # 01's ink; the label's paper
-ramp=RAMPS['dawn']; render('gd-dawn',ramp)
-def label(lw,lh,ly,head):
-    """the cream label with 01's stacked name: Vanilla in gold, Tea in green italic"""
-    lx=cx-lw/2
-    return [f'<defs>{LEAF}</defs><rect x="{lx}" y="{ly}" width="{lw}" height="{lh}" fill="{CREAM}"/>',
-            f'<rect x="{lx+1.4}" y="{ly+1.4}" width="{lw-2.8}" height="{lh-2.8}" fill="none" stroke="{GREEN}" stroke-width="0.15" opacity=".7"/>',
-            *head,
-            T('Vanilla',cx,ly+lh-22.8,14.5,'url(#leaf)','ISR'),
-            T('Tea',cx,ly+lh-10.6,14.5,GREEN,'IS'),
-            T('CEYLON BLACK TEA  ·  NATURAL VANILLA',cx,ly+lh-6.4,1.3,GREEN,'RW',tr=0.26),
-            T('12 TEA BAGS  ·  NET WT. 24 g',cx,ly+lh-3.6,1.2,GREEN,'RW',tr=0.3)]
-# A: the logo heads the label; the lion stays on the art, smaller
-lh=48; ly=FH-lh-6
-oA=label(58,lh,ly,[logo(cx,ly+8.2,11,GREEN)])+[lion(FW-11.5,5.5,6.5,CREAM)]
-man.append(b6.face('gd-label-a',FW,FH,'gd-dawn.jpg',oA))
-# B: the logo large on the art where the lion was; the lion drops to a small mark in the corner
-lh=44; ly=FH-lh-6
-oB=label(58,lh,ly,[T('SINGLE ORIGIN  ·  SRI LANKA',cx,ly+6.6,1.3,GREEN,'RW',tr=0.42)])+[logo(FW-13,12,13,CREAM),
-    lion(4.2,FH-11.2,6.5,CREAM)]
-man.append(b6.face('gd-label-b',FW,FH,'gd-dawn.jpg',oB))
-json.dump(man,open(O+'gd.json','w')); print('ok')
+if __name__=='__main__':
+    from kit import logo
+    GREEN='#163F3D'; CREAM='#F6F1E4'                                                          # 01's ink; the label's paper
+    ramp=RAMPS['dawn']; render('gd-dawn',ramp)
+    def label(lw,lh,ly,head):
+        """the cream label with 01's stacked name: Vanilla in gold, Tea in green italic"""
+        lx=cx-lw/2
+        return [f'<defs>{LEAF}</defs><rect x="{lx}" y="{ly}" width="{lw}" height="{lh}" fill="{CREAM}"/>',
+                f'<rect x="{lx+1.4}" y="{ly+1.4}" width="{lw-2.8}" height="{lh-2.8}" fill="none" stroke="{GREEN}" stroke-width="0.15" opacity=".7"/>',
+                *head,
+                T('Vanilla',cx,ly+lh-22.8,14.5,'url(#leaf)','ISR'),
+                T('Tea',cx,ly+lh-10.6,14.5,GREEN,'IS'),
+                T('CEYLON BLACK TEA  ·  NATURAL VANILLA',cx,ly+lh-6.4,1.3,GREEN,'RW',tr=0.26),
+                T('12 TEA BAGS  ·  NET WT. 24 g',cx,ly+lh-3.6,1.2,GREEN,'RW',tr=0.3)]
+    # A: the logo heads the label; the lion stays on the art, smaller
+    lh=48; ly=FH-lh-6
+    oA=label(58,lh,ly,[logo(cx,ly+8.2,11,GREEN)])+[lion(FW-11.5,5.5,6.5,CREAM)]
+    man.append(b6.face('gd-label-a',FW,FH,'gd-dawn.jpg',oA))
+    # B: the logo large on the art where the lion was; the lion drops to a small mark in the corner
+    lh=44; ly=FH-lh-6
+    oB=label(58,lh,ly,[T('SINGLE ORIGIN  ·  SRI LANKA',cx,ly+6.6,1.3,GREEN,'RW',tr=0.42)])+[logo(FW-13,12,13,CREAM),
+        lion(4.2,FH-11.2,6.5,CREAM)]
+    man.append(b6.face('gd-label-b',FW,FH,'gd-dawn.jpg',oB))
+    json.dump(man,open(O+'gd.json','w')); print('ok')
