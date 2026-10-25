@@ -126,17 +126,26 @@ def T(t,x,y,sz,c,f,a='middle',tr=0.0): return f'<text x="{x:.2f}" y="{y:.2f}" fo
 man=[]
 RAMPS={'dawn':['#081A1F','#0F3236','#1B5550','#4E8A78','#D59A6A','#F3CB91','#FFF4E2'],
        'amber':['#0A1D1C','#173A35','#3D5238','#946A2E','#DB9B47','#F5D294','#FFF6E4']}
-for rk in ('dawn','amber'):
-    ramp=RAMPS[rk]; nm=f'gd-{rk}'; render(nm,ramp); ink=ramp[1]; CREAM='#F6F1E4'
-    lw,lh=56,33; lx,ly=cx-lw/2,FH-lh-8
-    o=[f'<rect x="{lx}" y="{ly}" width="{lw}" height="{lh}" fill="{CREAM}"/>',
-       f'<rect x="{lx+1.4}" y="{ly+1.4}" width="{lw-2.8}" height="{lh-2.8}" fill="none" stroke="{ink}" stroke-width="0.15" opacity=".75"/>',
-       T('THE VANILLA SHOP',cx,ly+6.6,1.4,ink,'RW',tr=0.42),
-       f'<defs>{LEAF}</defs><text x="{cx}" y="{ly+15.2}" font-family="ISR" font-size="6.2" letter-spacing="{6.2*0.14:.3f}" text-anchor="middle"><tspan fill="url(#leaf)">VANILLA</tspan><tspan fill="{ink}"> TEA</tspan></text>',
-       T('Ceylon black tea with natural vanilla',cx,ly+20.6,2.6,ink,'IS'),
-       f'<path d="M{cx-6} {ly+23.4}H{cx+6}" stroke="{ink}" stroke-width="0.15" opacity=".6"/>',
-       T('SINGLE ORIGIN  ·  HILL COUNTRY, SRI LANKA',cx,ly+26.8,1.3,ink,'RW',tr=0.26),
-       T('12 TEA BAGS  ·  NET WT. 24 g',cx,ly+30.0,1.3,ink,'RW',tr=0.3),
-       lion(FW-14.5,6,9.5,CREAM)]
-    man.append(b6.face(nm,FW,FH,nm+'.jpg',o))
+from kit import logo
+GREEN='#163F3D'; CREAM='#F6F1E4'                                                          # 01's ink; the label's paper
+ramp=RAMPS['dawn']; render('gd-dawn',ramp)
+def label(lw,lh,ly,head):
+    """the cream label with 01's stacked name: Vanilla in gold, Tea in green italic"""
+    lx=cx-lw/2
+    return [f'<defs>{LEAF}</defs><rect x="{lx}" y="{ly}" width="{lw}" height="{lh}" fill="{CREAM}"/>',
+            f'<rect x="{lx+1.4}" y="{ly+1.4}" width="{lw-2.8}" height="{lh-2.8}" fill="none" stroke="{GREEN}" stroke-width="0.15" opacity=".7"/>',
+            *head,
+            T('Vanilla',cx,ly+lh-22.8,14.5,'url(#leaf)','ISR'),
+            T('Tea',cx,ly+lh-10.6,14.5,GREEN,'IS'),
+            T('CEYLON BLACK TEA  ·  NATURAL VANILLA',cx,ly+lh-6.4,1.3,GREEN,'RW',tr=0.26),
+            T('12 TEA BAGS  ·  NET WT. 24 g',cx,ly+lh-3.6,1.2,GREEN,'RW',tr=0.3)]
+# A: the logo heads the label; the lion stays on the art, smaller
+lh=48; ly=FH-lh-6
+oA=label(58,lh,ly,[logo(cx,ly+8.2,11,GREEN)])+[lion(FW-11.5,5.5,6.5,CREAM)]
+man.append(b6.face('gd-label-a',FW,FH,'gd-dawn.jpg',oA))
+# B: the logo large on the art where the lion was; the lion drops to a small mark in the corner
+lh=44; ly=FH-lh-6
+oB=label(58,lh,ly,[T('SINGLE ORIGIN  ·  SRI LANKA',cx,ly+6.6,1.3,GREEN,'RW',tr=0.42)])+[logo(FW-13,12,13,CREAM),
+    lion(4.2,FH-11.2,6.5,CREAM)]
+man.append(b6.face('gd-label-b',FW,FH,'gd-dawn.jpg',oB))
 json.dump(man,open(O+'gd.json','w')); print('ok')
