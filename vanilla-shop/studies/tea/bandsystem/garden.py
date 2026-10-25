@@ -43,8 +43,8 @@ def landscape(h,w):
     r2=ridge(xs,46,[(2,10,18,0.0),(36,14,16,0.25),(66,9,14,0.0),(96,12,14,0.1)],41,0.35)
     for tx,th in ((30,9),(37,12),(44,8),(62,10),(74,7)):
         j=int((tx+B)*K); y0=r2[min(w-1,j)]+0.6; X=(tx+B)*K
-        dr.line([(X,(y0+B)*K),(X,(y0-th*0.7+B)*K)],fill=255,width=int(0.3*K)); th=th*0.75
-        for q,(wf,hf,dy) in enumerate(((0.62,0.7,0.0),(0.46,0.8,-1.0),(0.3,0.7,-1.9))):                            # a layered, spreading canopy
+        dr.line([(X,(y0+B)*K),(X,(y0-th*0.55+B)*K)],fill=255,width=int(0.3*K)); th=th*0.6
+        for q,(wf,hf,dy) in enumerate(((1.05,0.55,0.0),(0.8,0.6,-0.8),(0.5,0.55,-1.5))):                            # a layered, spreading canopy
             dr.ellipse([X-th*wf*K,(y0-th+dy-hf+B)*K,X+th*wf*K,(y0-th+dy+hf+B)*K],fill=255)
     t=np.asarray(im).astype(np.float32)/255; L=L*(1-t)+0.16*t
     return np.clip(L,0,1)
@@ -59,8 +59,18 @@ def render(name,ramp):
     L=cv2.GaussianBlur(landscape(h,w),(0,0),0.5*K); Lf,a=foreground(h,w)
     Lf=cv2.GaussianBlur(Lf*a,(0,0),1.25*K); a=cv2.GaussianBlur(a,(0,0),1.25*K)                     # the near things softest: depth
     L=L*(1-a)+np.clip(Lf/np.maximum(a,1e-3)*1.05,0,1)*a
-    out=H.ramp(np.clip(L,0,1)**1.05,ramp); out+=np.random.default_rng(5).normal(0,2.8,(h,w))[...,None]
+    v=np.clip(L,0,1)**1.05; n=11
+    f=v*n; fl=np.floor(f); fr=f-fl; st=fl+np.clip((fr-0.82)/0.18,0,1)**2                  # stepped bands, each easing into the next
+    vq=0.62*(st/n)+0.38*v                                                                  # banded, but not hard-posterised
+    out=H.ramp(np.clip(vq,0,1),ramp)
+    gy,gx=np.gradient(v); g=np.hypot(gx,gy)*n+1e-4
+    dist=np.minimum(fr,1-fr)/g                                                              # distance to the nearest isotherm, in px
+    line=np.clip(1-dist/1.1,0,1)*np.clip(g*40,0,1)                                         # constant-width lines; none on flat ground
+    lc=H.ramp(np.clip(vq+0.16,0,1),ramp); out=out*(1-0.45*line[...,None])+lc*0.45*line[...,None]
+    out+=np.random.default_rng(5).normal(0,2.6,(h,w))[...,None]
     Image.fromarray(out.clip(0,255).astype(np.uint8)).save(O+name+'.jpg',quality=95)
+LEAF=('<linearGradient id="leaf" x1="0" y1="0" x2="1" y2="0.3"><stop offset="0" stop-color="#8A6424"/><stop offset=".25" stop-color="#D9B465"/>'
+      '<stop offset=".5" stop-color="#A27A30"/><stop offset=".75" stop-color="#E6C77E"/><stop offset="1" stop-color="#946B28"/></linearGradient>')
 def T(t,x,y,sz,c,f,a='middle',tr=0.0): return f'<text x="{x:.2f}" y="{y:.2f}" font-family="{f}" font-size="{sz}" letter-spacing="{sz*tr:.3f}" fill="{c}" text-anchor="{a}">{t}</text>'
 man=[]
 for rk in ('jade','amber'):
@@ -69,7 +79,7 @@ for rk in ('jade','amber'):
     o=[f'<rect x="{lx}" y="{ly}" width="{lw}" height="{lh}" fill="{CREAM}"/>',
        f'<rect x="{lx+1.4}" y="{ly+1.4}" width="{lw-2.8}" height="{lh-2.8}" fill="none" stroke="{ink}" stroke-width="0.15" opacity=".75"/>',
        T('THE VANILLA SHOP',cx,ly+6.6,1.4,ink,'RW',tr=0.42),
-       T('VANILLA TEA',cx,ly+15.2,6.2,ink,'ISR',tr=0.14),
+       f'<defs>{LEAF}</defs><text x="{cx}" y="{ly+15.2}" font-family="ISR" font-size="6.2" letter-spacing="{6.2*0.14:.3f}" text-anchor="middle"><tspan fill="url(#leaf)">VANILLA</tspan><tspan fill="{ink}"> TEA</tspan></text>',
        T('Ceylon black tea with natural vanilla',cx,ly+20.6,2.6,ink,'IS'),
        f'<path d="M{cx-6} {ly+23.4}H{cx+6}" stroke="{ink}" stroke-width="0.15" opacity=".6"/>',
        T('SINGLE ORIGIN  ·  HILL COUNTRY, SRI LANKA',cx,ly+26.8,1.3,ink,'RW',tr=0.26),
