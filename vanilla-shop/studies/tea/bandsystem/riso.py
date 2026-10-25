@@ -9,7 +9,7 @@ sys.argv=sys.argv[:1]; sys.path.insert(0,S+'teasoap')
 import build6 as b6, kit
 from build6 import canvas, B, K, hx, lion
 from build2 import shoot
-from foliage2 import paint_flower, paint_vbud
+from foliage2 import paint_flower, paint_vbud, trumpet
 import draw as DR
 import heat as H
 import estate_front as EF
@@ -71,7 +71,15 @@ def grain(v,amt,seed):
     """spray grain: fine clumped noise pushed through the tones, strongest in the middle of each gradient"""
     h,w=v.shape; g=0.65*nz(h,w,0.55,0.55,seed)+0.35*nz(h,w,1.4,1.4,seed+1)
     return np.clip(v+amt*g*(0.12+3.2*v*(1-v)),0,1)
-def render(name,ramp,frog):
+def lip_shadow(h,w):
+    """the shadow the flower's lip (tube and mouth, rebuilt exactly as paint_flower draws them) casts on the petal under it"""
+    tube,mouth,_=trumpet((B+11,B+9),30,7.5*2.35,1.1*2.35,3.6*2.35,2.6*2.35,0.13)
+    im=Image.new('L',(w,h),0); dr=ImageDraw.Draw(im)
+    for poly in (tube,mouth): dr.polygon([(x*K,y*K) for x,y in poly],fill=255)
+    m=np.asarray(im).astype(np.float32)/255
+    sh=cv2.GaussianBlur(np.roll(np.roll(m,int(1.5*K),0),int(-0.4*K),1),(0,0),0.45*K)               # cast down, a touch left
+    return np.clip(sh-m,0,1)
+def render(name,ramp,fr=None,gam=1.0):
     img,_=canvas(FW,FH); h,w=img.shape[:2]
     L=cv2.GaussianBlur(scene(h,w),(0,0),0.12*K); (Lf,af),(Ls,as_)=foreground(h,w)
     yy,xx=np.mgrid[0:h,0:w].astype(np.float32)/K-B
@@ -86,19 +94,21 @@ def render(name,ramp,frog):
     ins=cv2.distanceTransform(m,cv2.DIST_L2,5)/K
     lo,hi=np.percentile(Lf[af>0.5],(3,99)); sh=np.clip((Lf-lo)/(hi-lo+1e-6),0,1)
     heart=np.exp(-(((xx-30)/17)**2+((yy-19)/15)**2))
-    fv=0.68+0.16*sh+0.22*heart-0.17*np.exp(-ins/0.8)
-    L=L*(1-af)+np.clip(fv,0,1)*af
-    v=grain(L,0.075,21)
-    out=H.ramp(v,ramp)
+    fv=0.68+0.16*sh+0.22*heart-0.17*np.exp(-ins/0.8)-0.40*lip_shadow(h,w)
+    fv=np.clip(fv,0,1)
+    v=grain(L,0.075,21)**gam; out=H.ramp(v,ramp)                                                  # gam>1: deeper darks, the light kept
+    fg=grain(fv,0.075,23); fo=H.ramp(fg,ramp) if fr is None else H.ramp(np.clip((fg-0.45)/0.55,0,1),fr)   # the flower keeps its own warm light
+    out=out*(1-af[...,None])+fo*af[...,None]
     out*=(1-0.06*np.clip(nz(h,w,40*K,40*K,5),0,1))[...,None]                                            # faint unevenness of a print
     out+=np.random.default_rng(5).normal(0,3.0,(h,w))[...,None]
     Image.fromarray(out.clip(0,255).astype(np.uint8)).save(O+name+'.jpg',quality=95)
-RAMPS={'plum':['#1C0B1A','#341530','#57203A','#86333B','#BC5A38','#E58A4C','#F5B872','#FCE3A6'],
+FLOWER={'forest':['#A8935A','#D2BC7E','#E3CD8D','#F5E7B6','#FBF2D2']}
+RAMPS={'forest':['#142D25','#30513A','#71804A','#B3A663','#E3CD8D','#F5E7B6'],'plum':['#1C0B1A','#341530','#57203A','#86333B','#BC5A38','#E58A4C','#F5B872','#FCE3A6'],
        'green':['#08171A','#0F2A2C','#17433F','#2C6455','#6F8E62','#C99A5C','#EFC487','#FBEACB']}
-INK={'plum':'#3B1631','green':'#163F3D'}; CREAM={'plum':'#F3E6BE','green':'#F4EEDF'}
+INK={'forest':'#142D25','plum':'#3B1631','green':'#163F3D'}; CREAM={'forest':'#F3E6BE','plum':'#F3E6BE','green':'#F4EEDF'}
 if __name__=='__main__':
     man=[]
-    for k,ramp in RAMPS.items():
-        render(f'rs-{k}-art',ramp,0); EF.CREAM=CREAM[k]; EF.GREEN=INK[k]; EF.compose(f'rs-{k}-art.jpg',f'rs-{k}.jpg')
+    for k in ('forest','plum'):
+        ramp=RAMPS[k]; render(f'rs-{k}-art',ramp,FLOWER.get(k),1.3 if k=='forest' else 1.0); EF.CREAM=CREAM[k]; EF.GREEN=INK[k]; EF.compose(f'rs-{k}-art.jpg',f'rs-{k}.jpg')
         man.append(b6.face(f'rs-{k}',FW,FH,f'rs-{k}.jpg',EF.overlay()))
     json.dump(man,open(O+'rs.json','w')); print('ok')
