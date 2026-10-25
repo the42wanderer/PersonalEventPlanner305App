@@ -30,14 +30,23 @@ def compose(src,dst):
     Image.fromarray(out.clip(0,255).astype(np.uint8)).save(O+dst,quality=95)
 def T(t,x,y,sz,c,f,a='start',tr=0.0): return f'<text x="{x:.2f}" y="{y:.2f}" font-family="{f}" font-size="{sz}" letter-spacing="{sz*tr:.3f}" fill="{c}" text-anchor="{a}">{t}</text>'
 def overlay(x=8,top=False):
-    """top=True: the logo in the sky's free top-right corner, in the cream; the name block lifted toward the curve"""
-    M=8.0; lw=11.0; lh=lw*963/933                                                                  # one margin on every edge
-    lg=logo(FW-M-lw/2,M+lh/2,lw,CREAM) if top else logo(x+4.1,52.6,8.2,GREEN); dy=-5 if top else 0      # logo in the margin's top-right corner
+    """top=True: a corner system on one 6 mm margin. The logo large in the top-right corner; the type anchored to the
+    bottom-left (last baseline on the bottom margin, the V's overhang pulled in so its ink meets the caps' left edge);
+    the lion closing the bottom-right corner, standing on the same baseline. Ink boxes measured from the brand SVGs."""
+    if not top:
+        return [f'<defs>{LEAF}</defs>', logo(x+4.1,52.6,8.2,GREEN),
+                f'<text x="{x-0.3}" y="72.5" font-size="16"><tspan font-family="ISR" fill="url(#leaf)">Vanilla</tspan><tspan font-family="IS" fill="{GREEN}"> Tea</tspan></text>',
+                T('CEYLON BLACK TEA WITH NATURAL VANILLA',x,77.4,1.45,GREEN,'RW',tr=0.24),
+                T('12 TEA BAGS  ·  NET WT. 24 g',x,80.6,1.45,GREEN,'RW',tr=0.24), lion(FW-14.6,71.6,7.2,GREEN)]
+    M=6.0; base=FH-M; x=M
+    lw=15.0; s_=lw/933; ink=lambda v:v*s_                                                       # logo ink: 6..927.6 x 6.3..957.9 of 933 x 963
+    lg=f'<g transform="translate({FW-M-ink(927.6)+ink(0):.3f} {M-ink(6.3):.3f})">{logo(lw/2,963*s_/2,lw,CREAM)}</g>'
+    ln=8.4; sl=ln/1211; lnx=FW-M-1206*sl; lny=base-890*sl                                          # lion ink: 6..1206 x 6..890 of 1211 x 895
     return [f'<defs>{LEAF}</defs>', lg,
-            f'<text x="{x-0.3}" y="{72.5+dy}" font-size="16"><tspan font-family="ISR" fill="url(#leaf)">Vanilla</tspan><tspan font-family="IS" fill="{GREEN}"> Tea</tspan></text>',
-            T('CEYLON BLACK TEA WITH NATURAL VANILLA',x,77.4+dy,1.45,GREEN,'RW',tr=0.24),
-            T('12 TEA BAGS  ·  NET WT. 24 g',x,80.6+dy,1.45,GREEN,'RW',tr=0.24),
-            lion(FW-8-7.2,71.6+dy,7.2,GREEN)]                                                          # right edge on the logo's axis
+            f'<text x="{x+0.12}" y="{base-8.1:.2f}" font-size="16"><tspan font-family="ISR" fill="url(#leaf)">Vanilla</tspan><tspan font-family="IS" fill="{GREEN}"> Tea</tspan></text>',
+            T('CEYLON BLACK TEA WITH NATURAL VANILLA',x,base-3.2,1.45,GREEN,'RW',tr=0.24),
+            T('12 TEA BAGS  ·  NET WT. 24 g',x,base,1.45,GREEN,'RW',tr=0.24),
+            lion(lnx,lny,ln,GREEN)]
 if __name__=='__main__':
     import os; os.environ['NOSHOOT']='1'; import garden as G
     G.NEAR=lambda xs: edge(xs)-8.5                                                                  # the near hill's rows run with the edge
