@@ -91,7 +91,48 @@ def side(box): r=b4.side(box); return rename(r,box,'S')
 def rename(r,box,n):
     src=open(r[0]+'.html').read().replace(f'{box}4-front.jpg',f'{box}5-front.jpg').replace(f'{box}4-side.jpg',f'{box}5-side.jpg')
     nm=O+f'{box}5-{n}'; open(nm+'.html','w').write(src); return [nm,r[1],r[2]]
+
+def lid_art(box,k='teal'):
+    """the lid: one gesture in the shadow tone, a tea shoot sweeping from the front-left corner to a vanilla flower
+    cropped by the far edge; nothing else"""
+    d=BOX[box]; FW,LH=d['FW'],d['LH']; p=CW[k]; L=p['leaves']; s=1 if box=='long' else 0.62
+    W,H=FW+2*B,LH+2*B; w,h=int(W*K),int(H*K); P=Paint(W,H,seed=9)
+    a=np.ones((h,w,3),np.float32)*hx(p['band'])
+    def g(c):
+        shoot(P,c,(B-4,B+LH+4),-22,FW*0.95,-0.42,24*s+4,L,'#000000',31,1)
+        vleaf(P,c,(B+FW*0.45,B+LH+6),-48,58*s+10,7*s+1.5,0.3,'#000000')
+        paint_flower(P,c,(B+FW-20*s-6,B+18*s+4),205,2.5*s+0.5); paint_vbud(P,c,(B+FW-58*s-6,B+10*s+3),-100,7*s+1.5)
+    sh=silhouette(h,w,g); a=a*(1-sh[...,None])+hx(p['word'])*sh[...,None]; a=grain(a,19)
+    Image.fromarray(a.clip(0,255).astype(np.uint8)).save(O+f'{box}5-lid.jpg',quality=94)
+def lid(box,k='teal'):
+    d=BOX[box]; FW,LH=d['FW'],d['LH']; p=CW[k]; c=p['lt']; o=[]
+    x=12 if box=='long' else 8; s=1 if box=='long' else 0.8; cy=LH/2-4
+    o.append(logo(x+11*s,cy-8*s,22*s,c))                                     # left on the front's margin, as the column below
+    o.append(caps('AUTHENTIC CEYLON VANILLA TEA',x,cy+10*s,2.1*s,c,tr=0.3)); o.append(rule(x,cy+13.4*s,x+76*s,cy+13.4*s,c,0.2,0.55))
+    o.append(caps('SAVOUR THE CALM',x,cy+18*s,1.6*s,c,tr=0.35))
+    return face(f'{box}5-L',FW,LH,f'{box}5-lid.jpg',o)
+
+
+EMB=open('/home/user/PersonalEventPlanner305App/vanilla-shop/brand/emblem/vanilla-shop-emblem-savor-the-calm_cream.svg').read()
+EMB=EMB[EMB.index('>',EMB.index('<svg'))+1:EMB.rindex('</svg>')]
+def lid_art(box,k='teal'):
+    """the lid: one gesture in the shadow tone behind the emblem: a tea shoot sweeping in from the front-left corner,
+    a vanilla flower cropped by the far edge"""
+    d=BOX[box]; FW,LH=d['FW'],d['LH']; p=CW[k]; L=p['leaves']; s=1 if box=='long' else 0.62
+    W,H=FW+2*B,LH+2*B; w,h=int(W*K),int(H*K); P=Paint(W,H,seed=9)
+    a=np.ones((h,w,3),np.float32)*hx(p['band'])
+    def g(c):
+        shoot(P,c,(B-4,B+LH+4),-24,FW*0.62,-0.35,24*s+4,L,'#000000',31,1)
+        vleaf(P,c,(B+FW+6,B+LH*0.75),-170,58*s+12,7*s+1.5,0.3,'#000000')
+        paint_flower(P,c,(B+FW-18*s-4,B+16*s+3),205,2.5*s+0.5); paint_vbud(P,c,(B+FW-52*s-6,B+8*s+3),-100,7*s+1.5)
+    sh=silhouette(h,w,g); a=a*(1-sh[...,None])+hx(p['word'])*sh[...,None]; a=grain(a,19)
+    Image.fromarray(a.clip(0,255).astype(np.uint8)).save(O+f'{box}5-lid.jpg',quality=94)
+def lid(box,k='teal'):
+    d=BOX[box]; FW,LH=d['FW'],d['LH']; dia=LH*0.66; sc=dia/250
+    o=[f'<g transform="translate({FW/2-dia/2:.2f} {LH/2-dia/2:.2f}) scale({sc:.5f})">{EMB}</g>']   # the emblem, the box's seal
+    return face(f'{box}5-L',FW,LH,f'{box}5-lid.jpg',o)
+
 if __name__=='__main__':
     man=[]
-    for box in (sys.argv[1:] or BOX): art(box); man+=[front(box),side(box),back(box)]
+    for box in (sys.argv[1:] or BOX): art(box); lid_art(box); man+=[front(box),side(box),back(box),lid(box)]
     json.dump(man,open(O+'faces5.json','w')); print('ok')
