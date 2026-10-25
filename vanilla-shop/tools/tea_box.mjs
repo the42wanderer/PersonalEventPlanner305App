@@ -18,9 +18,11 @@ await import(path.join(root, 'dieline-long.js'));
 // text are the candle boxes' Roc Grotesk (Adobe Fonts, measured from CANDLE_FONTS, mapped by name).
 const FONT = {
   title: { ps: 'InstrumentSerif-Italic', file: path.join(root, 'fonts', 'instrument-serif-italic.ttf') },
+  roman: { ps: 'InstrumentSerif-Regular', file: path.join(root, 'fonts', 'instrument-serif.ttf') },
   wide: CFONT.wide, wideR: CFONT.wideR, body: CFONT.body,
 };
 FONT.title.ot = opentype.loadSync(FONT.title.file);
+FONT.roman.ot = opentype.loadSync(FONT.roman.file);
 const width = (f, s, sz, track = 0) => {
   const g = f.ot.stringToGlyphs(s), k = sz / f.ot.unitsPerEm;
   return g.reduce((w, gl) => w + gl.advanceWidth * k, 0) + track * Math.max(0, g.length - 1);
@@ -61,7 +63,11 @@ const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper:
   cC: { paper: '#F6EEDC', ink: '#1E4F50', art: true, light: true, split: { cube: 58, long: 92 } },
   wash: { paper: '#F6EEDE', ink: '#1F4A2C', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
   glow: { paper: '#F6EEDC', ink: '#1E4F50', art: true, light: true, blot: true, split: { cube: 58, long: 92 } },
-  glowcin: { paper: '#F6EEDC', ink: '#6B3420', art: true, light: true, blot: true, split: { cube: 58, long: 92 }, suffix: '-cin', cin: true } };
+  glowcin: { paper: '#F6EEDC', ink: '#6B3420', art: true, light: true, blot: true, split: { cube: 58, long: 92 }, suffix: '-cin', cin: true },
+  // The Estate: the grained tea-garden strip round the four walls on a cream ground, the lid the evening sky
+  // (studies/tea/bandsystem/wrap.py writes the art into TEA_ART). Forest greens, or plum and orange.
+  estate: { paper: '#F3E6BE', ink: '#142D25', art: true, light: true, estate: true },
+  estateplum: { paper: '#F3E6BE', ink: '#3B1631', art: true, light: true, estate: true } };
 const THEME = THEMES[process.env.TEA_THEME] ? process.env.TEA_THEME : null;
 const MM = 72 / 25.4, INK = THEME ? THEMES[THEME].ink : '#143A1D', PAPER = THEME ? THEMES[THEME].paper : '#F8E7C0';
 const GOLD = 'url(#foil)';
@@ -113,6 +119,7 @@ function build(boxKey) {
   const B = BOXES[boxKey], P = B.panels, pack = B.pack;
   const size = (k) => ({ w: P[k].panel.w / MM, h: P[k].panel.h / MM });
   const L = { Background: [], Ground: [], Painting: [], Name: [], Weave: [], Type: [], Barcode: [] };
+  const EST = THEME && THEMES[THEME].estate;
   let defs = '', ringPath = '';
   // Face helpers: draw in mm from a panel's top-left; rot turns the face 180 degrees (a lid hinged at the back).
   const face = (k, rot = false) => {
@@ -166,7 +173,15 @@ function build(boxKey) {
     defs += `<clipPath id="clip-pat-${k}"><rect x="${r.x}" y="${r.y}" width="${n(r.w)}" height="${n(r.h)}"/></clipPath>`;
     L.Ground.push(`<g clip-path="url(#clip-pat-${k})">${F.img(ART('pattern.jpg'), -40, -40, 260, 260)}</g>`);
   }
-  if (ART) { const F = face('front'); L.Ground.push(`<g clip-path="url(#clip-front)">${F.img(ART(THEMES[THEME].split ? `${boxKey}${THEMES[THEME].suffix || ''}${THEMES[THEME].blot ? '' : '-split'}-front.png` : `${boxKey}-${THEME}.png`), -3, -3, F.w + 6, F.h + 6)}</g>`); }
+  if (EST) {
+    // the four walls cut from one continuous strip (3 mm bleed each side), so the picture runs across the folds; the
+    // lid's dark sky drawn over the front's top bleed and 3 mm past its other edges
+    for (const k of ['front', 'sideA', 'back', 'sideB']) { const F = face(k); L.Ground.push(`<g clip-path="url(#clip-${k})">${F.img(ART(`est-${k}.jpg`), -3, -3, F.w + 6, F.h + 6)}</g>`); }
+    const F = face('top'), p = P.top.panel;
+    defs += `<clipPath id="clip-lid-art"><rect x="${n(p.x - 3 * MM)}" y="${n(p.y - 3 * MM)}" width="${n(p.w + 6 * MM)}" height="${n(p.h + 6 * MM)}"/></clipPath>`;
+    L.Ground.push(`<g clip-path="url(#clip-lid-art)">${F.img(ART('est-lid.jpg'), -3, -3, F.w + 6, F.h + 6)}</g>`);
+  }
+  if (ART && !EST) { const F = face('front'); L.Ground.push(`<g clip-path="url(#clip-front)">${F.img(ART(THEMES[THEME].split ? `${boxKey}${THEMES[THEME].suffix || ''}${THEMES[THEME].blot ? '' : '-split'}-front.png` : `${boxKey}-${THEME}.png`), -3, -3, F.w + 6, F.h + 6)}</g>`); }
   // ---- painting: one placement for the vine across front and right side
   if (!ART) {
     const F = face('front'), V = B.vine, vine = F.img(G('v6-vine-faded.png'), V.x, V.y, 3808 * V.s, 1651 * V.s);
@@ -179,7 +194,7 @@ function build(boxKey) {
   const head = (F, s, x0, x1, right) => F.text('title', s, x0, 10.9, 6) + F.rule(x0, 12.8, x1, 12.8) + (right ? F.caps(right, x1, 10.4, { anchor: 'end', size: 1.85 }) : '');
 
   // ---- front
-  {
+  if (!EST) {
     const F = face('front'), t = [];
     if (ART && THEMES[THEME].split) {
       // Cream left of the split: signature, pack line, the name stacked large, the plain-words line.
@@ -282,7 +297,7 @@ function build(boxKey) {
   }
 
   // ---- right side: how to brew as a numbered stepper; pack line at the foot
-  {
+  if (!EST) {
     const F = face('sideA'), t = [], sx = boxKey === 'cube' ? 40 : 8, r = boxKey === 'cube' ? F.w - 8 : F.w - 30, sy = 18;
     if (boxKey === 'long' && !ART) L.Painting.push(F.img(G('v6-climb.png'), F.w - 2 - 612 * 0.035, F.h + 1.5 - 2000 * 0.035, 667 * 0.035, 2000 * 0.035));
     t.push(head(F, 'How to brew', sx, r));
@@ -361,7 +376,55 @@ function build(boxKey) {
     return t.join('');
   };
 
-  if (boxKey === 'cube') {
+  // ---- the Estate: every wall on one 6 mm margin, the type in the cream under the curve (heights from wrap.py's
+  // edge, at least 3 mm clear); headings in the serif italic, as the front's "Tea"; the lid the sky with the emblem
+  // ring and logo in cream; the base cream with the batch block, barcode and distributor.
+  function estatePanels() {
+    const M = 6, CREAM = PAPER, cream = (s) => s.replaceAll(`fill="${INK}"`, `fill="${CREAM}"`).replaceAll(`stroke="${INK}"`, `stroke="${CREAM}"`);
+    const hd = (F, s, x, y, wMax) => F.text('title', s, x, y, Math.min(7, wMax / width(FONT.title, s, 1)));
+    {   // front: logo in the top-right corner; Vanilla over Tea, the facts beneath, the lion on the last baseline
+      const F = face('front'), base = F.h - M, t = [], sz = 17, d1 = base - 3.3, tb = d1 - 1.03 - 3.6, vb = tb - 0.78 * sz, lw = 15, ln = 8.4;
+      t.push(cream(F.logo(F.w - M - 927.6 * lw / 933 + lw / 2, M - 6.3 * lw / 933 + 0.52 * lw, lw)));      // ink box from brand/vanilla-shop-logo.svg
+      L.Name.push(F.text('roman', 'Vanilla', M + 0.018 * sz, vb, sz, { fill: GOLD }), F.text('title', 'Tea', M, tb, sz));
+      t.push(F.text('wideR', 'CEYLON BLACK TEA WITH NATURAL VANILLA', M, d1, 1.45, { track: 0.3 }));
+      t.push(F.text('wideR', `${pack.bags} TEA BAGS  ·  NET WT. ${pack.net} g`, M, base, 1.45, { track: 0.3 }));
+      t.push(F.lion(F.w - M - 1206 * ln / LION.vw, base - 890 * ln / LION.vw, ln));                         // ink box from the lion SVG
+      L.Type.push(`<g id="Front">${t.join('')}</g>`);
+    }
+    {   // right side: how to brew, a column clear of the valley at the fold, the last line on the bottom margin
+      const F = face('sideA'), base = F.h - M, x0 = 36, is = 5, pitch = 6.6, tx = x0 + is + 3, t = [hd(F, 'How to brew', x0, 56, F.w - M - x0)];
+      [['cup', '150 ML', 'One tea bag in hot water'], ['timer', '5 MINUTES', 'Then lift the bag out'], ['ice', 'OVER ICE', 'Let it cool, pour over ice']].forEach(([ic, h, d], i) => {
+        const y = base - 4.8 - (2 - i) * pitch;
+        t.push(F.icon(ic, x0, y - 0.2, is / 10), F.text('wideR', h, tx, y + 1.9, 1.7, { track: 0.3 }), F.text('body', d, tx, y + 4.8, 2.3));
+      });
+      L.Type.push(`<g id="Side_How_to_brew">${t.join('')}</g>`);
+    }
+    {   // back: the line, the description, a closing line on the bottom margin
+      const F = face('back'), base = F.h - M, t = [hd(F, 'Vanilla was never plain.', M, 56, F.w - 2 * M)];
+      t.push(F.body('The delicate sweetness of natural vanilla unfolds through warm, comforting notes and a smooth, mellow aroma.', M, 62.6, F.w - 2 * M - 8, { size: 2.6, lead: 3.7 }).svg);
+      t.push(F.text('title', 'Made with vanilla grown on our own farms.', M, base, 3.6));
+      L.Type.push(`<g id="Back">${t.join('')}</g>`);
+    }
+    {   // left side: what's inside, the declarations at the 1.5 mm minimum (DECL), the net weight on the bottom margin
+      const F = face('sideB'), base = F.h - M, t = [hd(F, 'What’s inside', M, 56, F.w - 2 * M)];
+      t.push(F.text('wideR', 'TEA BAGS', M, 61.6, DECL.caps, { track: 0.3, opacity: 0.75 }), F.body(`${pack.bags} tagged unbleached sachet tea bags`, M, 66, F.w - 2 * M, { size: DECL.body, lead: DECL.lead }).svg);
+      t.push(F.text('wideR', 'NET WEIGHT', M, base - 4.4, DECL.caps, { track: 0.3, opacity: 0.75 }), F.body(`${pack.net}g (2g x ${pack.bags})`, M, base, F.w - 2 * M, { size: DECL.body }).svg);
+      L.Type.push(`<g id="Side_Whats_inside">${t.join('')}</g>`);
+    }
+    const Fo = face('bottom'); L.Type.push(`<g id="Base">${baseInfo(Fo, 0, Fo.w)}</g>`);
+    {   // lid: the emblem ring and the logo in cream on the sky
+      const F = face('top'), cx = F.w / 2, cy = F.h / 2, r = 22, ring = 'SAVOR THE CALM · AUTHENTIC CEYLON VANILLA TEA · ';
+      const track = (2 * Math.PI * r - width(FONT.wide, ring, 2.5)) / ring.length;
+      ringPath = `M${F.X(cx - r)} ${F.Y(cy)}A${F.S(r)} ${F.S(r)} 0 1 1 ${F.X(cx + r)} ${F.Y(cy)}A${F.S(r)} ${F.S(r)} 0 1 1 ${F.X(cx - r)} ${F.Y(cy)}`;
+      defs += `<path id="ring" d="${ringPath}"/>`;
+      L.Type.push(cream(`<g id="Lid"><circle cx="${F.X(cx)}" cy="${F.Y(cy)}" r="${F.S(25.6)}" fill="none" stroke="${INK}" stroke-opacity=".5" stroke-width="${F.S(0.18)}"/>` +
+        `<circle cx="${F.X(cx)}" cy="${F.Y(cy)}" r="${F.S(18.6)}" fill="none" stroke="${INK}" stroke-opacity=".5" stroke-width="${F.S(0.18)}"/>` +
+        `<text font-family="'${FONT.wide.ps}'" font-size="${F.S(2.5)}" letter-spacing="${F.S(track)}" fill="${INK}"><textPath xlink:href="#ring">${esc(ring)}</textPath></text>` +
+        F.logo(cx, cy, 19) + '</g>'));
+    }
+  }
+  if (EST) estatePanels();
+  else if (boxKey === 'cube') {
     const Fb = face('back'); L.Type.push(`<g id="Back">${backPlate(Fb, 0, Fb.w)}</g>`);
     const Fs = face('sideB'); L.Type.push(`<g id="Side_Whats_inside">${inside(Fs, 0, Fs.w)}</g>`);
     const Fo = face('bottom'); L.Type.push(`<g id="Base">${baseInfo(Fo, 0, Fo.w)}</g>`);
@@ -375,7 +438,7 @@ function build(boxKey) {
 
   // ---- lid: two sprigs reaching in from opposite corners (from the vine set) frame the emblem ring (from the
   // candles). A long-box lid hangs off the back, so its whole group is turned to read from the front.
-  {
+  if (!EST) {
     const F = face('top'), cx = F.w / 2, cy = F.h / 2 - 2, r = 22, ring = THEME && THEMES[THEME].cin ? 'SAVOR THE CALM · VANILLA & CINNAMON CEYLON TEA · ' : 'SAVOR THE CALM · AUTHENTIC CEYLON VANILLA TEA · ';
     const len = 2 * Math.PI * r, track = (len - width(FONT.wide, ring, 2.5)) / ring.length;
     ringPath = `M${F.X(cx - r)} ${F.Y(cy)}A${F.S(r)} ${F.S(r)} 0 1 1 ${F.X(cx + r)} ${F.Y(cy)}A${F.S(r)} ${F.S(r)} 0 1 1 ${F.X(cx - r)} ${F.Y(cy)}`;
@@ -393,7 +456,9 @@ function build(boxKey) {
     if (B.lidTurn) ringPath = `M0 0`;   // the turned ring is inside a transformed group; no free guide path
   }
 
-  if (THEME && THEMES[THEME].light) defs += '<linearGradient id="foil" x1="0" y1="0" x2="1" y2="0.4"><stop offset="0" stop-color="#4A2C06"/><stop offset="0.3" stop-color="#8C5F1C"/>' +
+  if (EST) defs += '<linearGradient id="foil" x1="0" y1="0" x2="1" y2="0.3"><stop offset="0" stop-color="#8A6424"/><stop offset=".25" stop-color="#D9B465"/>' +
+    '<stop offset=".5" stop-color="#A27A30"/><stop offset=".75" stop-color="#E6C77E"/><stop offset="1" stop-color="#946B28"/></linearGradient>';   // the front studies' gold
+  else if (THEME && THEMES[THEME].light) defs += '<linearGradient id="foil" x1="0" y1="0" x2="1" y2="0.4"><stop offset="0" stop-color="#4A2C06"/><stop offset="0.3" stop-color="#8C5F1C"/>' +
     '<stop offset="0.5" stop-color="#5E3E0C"/><stop offset="0.75" stop-color="#9C7028"/><stop offset="1" stop-color="#4A2C06"/></linearGradient>';
   else if (THEME) defs += '<linearGradient id="foil" x1="0" y1="0" x2="1" y2="0.4"><stop offset="0" stop-color="#9A7230"/><stop offset="0.3" stop-color="#E9CB80"/>' +
     '<stop offset="0.5" stop-color="#B08336"/><stop offset="0.75" stop-color="#F2D995"/><stop offset="1" stop-color="#9A7230"/></linearGradient>';
@@ -404,7 +469,7 @@ function build(boxKey) {
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${B.sheet.w}pt" height="${B.sheet.h}pt" viewBox="0 0 ${B.sheet.w} ${B.sheet.h}">` +
     `<title>The Vanilla Shop: Natural Vanilla Tea, ${pack.bags} bags</title><defs>${defs}</defs>` +
     g('Background', L.Background.join('')) + g('Ground', L.Ground.join('')) + g('Painting', L.Painting.join('')) + g('Name', L.Name.join('')) + g('Weave', L.Weave.join('')) +
-    g('Texture', `<rect width="${B.sheet.w}" height="${B.sheet.h}" fill="url(#grain)" opacity=".55" clip-path="url(#clip-all)"/>`) +
+    g('Texture', `<rect width="${B.sheet.w}" height="${B.sheet.h}" fill="url(#grain)" opacity="${EST ? '.25' : '.55'}" clip-path="url(#clip-all)"/>`) +
     g('Type_and_Icons', L.Type.join('')) + g('Barcode', L.Barcode.join('')) +
     g('Lid_ring_path', `<path d="${ringPath}" fill="none" stroke="none"/>`) +
     g('Dieline', B.dieline.replace(/stroke="#B[0-9A-F]{5}"/g, 'stroke="#E4007C"')) + '</svg>';
