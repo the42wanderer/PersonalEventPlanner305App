@@ -29,12 +29,14 @@ def compose(src,dst):
     out=a*(1-m[...,None])+paper*m[...,None]
     Image.fromarray(out.clip(0,255).astype(np.uint8)).save(O+dst,quality=95)
 def T(t,x,y,sz,c,f,a='start',tr=0.0): return f'<text x="{x:.2f}" y="{y:.2f}" font-family="{f}" font-size="{sz}" letter-spacing="{sz*tr:.3f}" fill="{c}" text-anchor="{a}">{t}</text>'
-def overlay(x=8):
-    return [f'<defs>{LEAF}</defs>', logo(x+4.1,52.6,8.2,GREEN),
-            f'<text x="{x-0.3}" y="72.5" font-size="16"><tspan font-family="ISR" fill="url(#leaf)">Vanilla</tspan><tspan font-family="IS" fill="{GREEN}"> Tea</tspan></text>',
-            T('CEYLON BLACK TEA WITH NATURAL VANILLA',x,77.4,1.45,GREEN,'RW',tr=0.24),
-            T('12 TEA BAGS  ·  NET WT. 24 g',x,80.6,1.45,GREEN,'RW',tr=0.24),
-            lion(FW-14.6,71.6,7.2,GREEN)]
+def overlay(x=8,top=False):
+    """top=True: the logo in the sky's free top-right corner, in the cream; the name block lifted toward the curve"""
+    lg=logo(FW-8-6.6,13.6,13.2,CREAM) if top else logo(x+4.1,52.6,8.2,GREEN); dy=-5 if top else 0
+    return [f'<defs>{LEAF}</defs>', lg,
+            f'<text x="{x-0.3}" y="{72.5+dy}" font-size="16"><tspan font-family="ISR" fill="url(#leaf)">Vanilla</tspan><tspan font-family="IS" fill="{GREEN}"> Tea</tspan></text>',
+            T('CEYLON BLACK TEA WITH NATURAL VANILLA',x,77.4+dy,1.45,GREEN,'RW',tr=0.24),
+            T('12 TEA BAGS  ·  NET WT. 24 g',x,80.6+dy,1.45,GREEN,'RW',tr=0.24),
+            lion(FW-14.6,71.6+dy,7.2,GREEN)]
 if __name__=='__main__':
     import os; os.environ['NOSHOOT']='1'; import garden as G
     G.NEAR=lambda xs: edge(xs)-8.5                                                                  # the near hill's rows run with the edge

@@ -80,8 +80,8 @@ def lip_shadow(h,w):
         for poly in polys: dr.polygon([(x*K,y*K) for x,y in poly],fill=255)
         return np.asarray(im).astype(np.float32)/255
     lip=cv2.GaussianBlur(mask((tube,mouth)),(0,0),0.5*K); src=mask((mouth,))
-    sh=cv2.GaussianBlur(np.roll(src,int(0.9*K),0),(0,0),1.3*K)
-    return np.clip(sh*(1-lip)*1.6,0,1)
+    sh=cv2.GaussianBlur(np.roll(src,int(0.5*K),0),(0,0),1.5*K)
+    return np.clip(sh*(1-0.6*lip)*1.6,0,1)                                                        # creeping a little up the lip's underside
 def render(name,ramp,fr=None,gam=1.0):
     img,_=canvas(FW,FH); h,w=img.shape[:2]
     L=cv2.GaussianBlur(scene(h,w),(0,0),0.12*K); (Lf,af),(Ls,as_)=foreground(h,w)
@@ -113,5 +113,5 @@ if __name__=='__main__':
     man=[]
     for k in ('forest','plum'):
         ramp=RAMPS[k]; render(f'rs-{k}-art',ramp,FLOWER.get(k),1.3 if k=='forest' else 1.0); EF.CREAM=CREAM[k]; EF.GREEN=INK[k]; EF.compose(f'rs-{k}-art.jpg',f'rs-{k}.jpg')
-        man.append(b6.face(f'rs-{k}',FW,FH,f'rs-{k}.jpg',EF.overlay()))
+        man.append(b6.face(f'rs-{k}',FW,FH,f'rs-{k}.jpg',EF.overlay(top=True)))
     json.dump(man,open(O+'rs.json','w')); print('ok')
