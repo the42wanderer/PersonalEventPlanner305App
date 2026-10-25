@@ -42,10 +42,14 @@ def overlay(x=8,top=False):
     lw=15.0; s_=lw/933; ink=lambda v:v*s_                                                       # logo ink: 6..927.6 x 6.3..957.9 of 933 x 963
     lg=f'<g transform="translate({FW-M-ink(927.6)+ink(0):.3f} {M-ink(6.3):.3f})">{logo(lw/2,963*s_/2,lw,CREAM)}</g>'
     ln=8.4; sl=ln/1211; lnx=FW-M-1206*sl; lny=base-890*sl                                          # lion ink: 6..1206 x 6..890 of 1211 x 895
+    # the name stacked: Vanilla over Tea, Tea on the bottom baseline; the facts in a small column beside Tea, its last
+    # line on the same baseline and its first line's capitals level with Tea's x-height (Instrument Serif metrics)
+    sz=17; vb=base-0.8*sz; cx_=x+20.7+3.5; xh=base-0.516*sz; first=xh+0.71*1.45; ld=2.9                                     # description as a tight pair; contents apart, on the baseline
     return [f'<defs>{LEAF}</defs>', lg,
-            f'<text x="{x+0.12}" y="{base-8.1:.2f}" font-size="16"><tspan font-family="ISR" fill="url(#leaf)">Vanilla</tspan><tspan font-family="IS" fill="{GREEN}"> Tea</tspan></text>',
-            T('CEYLON BLACK TEA WITH NATURAL VANILLA',x,base-3.2,1.45,GREEN,'RW',tr=0.24),
-            T('12 TEA BAGS  ·  NET WT. 24 g',x,base,1.45,GREEN,'RW',tr=0.24),
+            T('Vanilla',x+0.018*sz,vb,sz,'url(#leaf)','ISR'), T('Tea',x,base,sz,GREEN,'IS'),
+            T('CEYLON BLACK TEA',cx_,first,1.45,GREEN,'RW',tr=0.24),
+            T('WITH NATURAL VANILLA',cx_,first+ld,1.45,GREEN,'RW',tr=0.24),
+            T('12 TEA BAGS  ·  NET WT. 24 g',cx_,base,1.45,GREEN,'RW',tr=0.24),
             lion(lnx,lny,ln,GREEN)]
 if __name__=='__main__':
     import os; os.environ['NOSHOOT']='1'; import garden as G
