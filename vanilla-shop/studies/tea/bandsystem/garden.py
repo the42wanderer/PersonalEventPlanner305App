@@ -48,6 +48,56 @@ def landscape(h,w):
             dr.ellipse([X-th*wf*K,(y0-th+dy-hf+B)*K,X+th*wf*K,(y0-th+dy+hf+B)*K],fill=255)
     t=np.asarray(im).astype(np.float32)/255; L=L*(1-t)+0.16*t
     return np.clip(L,0,1)
+def estate(h,w):
+    """Ceylon hill country after the reference photos (Haputale, Nuwara Eliya): misty ranges and a distant peak; rolling
+    estate hills carpeted in contour hedges of cushion-like bushes; a red-earth path winding across the near slope;
+    silver-oak shade trees, tall and sparse, fading into the mist with distance. Returns light, 0..1"""
+    xs=np.arange(w,dtype=np.float32)/K-B; ys=np.arange(h,dtype=np.float32)[:,None]/K-B; X=xs[None,:]
+    L=np.broadcast_to(0.06+0.58*np.exp(-((ys-31)/10)**2)+0.06*np.exp(-((ys-31)/38)**2),(h,w)).copy()
+    def hump(cs): 
+        r=np.full(xs.shape,99.0,np.float32)
+        for c,top,hw in cs: r=np.minimum(r,top+(np.abs(xs-c)/hw)**1.8*(99-top)/6)
+        return r
+    def layer(crest,tone,mist=0.0,seed=0):
+        nonlocal L; m=ys>=crest[None,:]; L=np.where(m,tone+0.02*nz(h,w,8*K,2*K,seed),L)
+        if mist: L=L+mist*np.exp(-((ys-crest[None,:]-1.8)/2.0)**2)*np.clip(0.7+0.4*nz(h,w,16*K,1.5*K,seed+1),0,1.2)
+        return m
+    far=np.minimum(hump([(8,27,26),(44,29,22),(96,28,30)]),28.5+np.abs(xs-80)**1.3*0.35-5.5)              # a distant peak, small
+    layer(far,0.56,0.12,1)
+    layer(hump([(-6,31,20),(28,32,18),(62,33,16),(92,31,22)]),0.46,0.12,3)
+    def hedges(m,crest,p0,amp,seed,dark=0.0):
+        """contour hedges: rows following the hill's own shape, each row a line of rounded bushes, dark gaps between"""
+        nonlocal L; d=np.clip(ys-crest[None,:],0,None); per=p0*(1+0.05*d)
+        ph=np.cumsum(1/np.maximum(per,0.3),axis=0)/K
+        row=np.clip(0.5+0.5*np.cos(2*np.pi*ph),0,1)**0.55
+        bush=0.7+0.3*np.cos(2*np.pi*(X/(per*1.25))+2.4*np.floor(ph))*(0.8+0.2*nz(h,w,1.5*K,1.5*K,seed))
+        L=np.where(m,L+amp*row*bush-dark,L)
+    cA=hump([(56,33.5,30)]); mA=layer(cA,0.24,0.0,5); hedges(mA,cA,1.8,0.30,6)                                # the estate hill, right of the flower
+    cB=hump([(6,37,20)]); mB=layer(cB,0.20,0.0,7); hedges(mB,cB,1.7,0.28,8)
+    cN=hump([(30,44,40),(86,45,20)]); mN=layer(cN,0.14,0.0,9); hedges(mN,cN,2.2,0.24,10)                          # the near slope
+    # a red-earth footpath climbing the estate hill
+    im=Image.new('L',(w*2,h*2),0); dr=ImageDraw.Draw(im)
+    import draw as DR; sp=DR.cr([(66,34.5),(60,36.5),(64,39),(54,41.5),(46,44.5)],14); rib=DR.ribbon(sp,lambda u:0.25+0.55*u)
+    dr.polygon([((x+B)*K*2,(y+B)*K*2) for x,y in rib],fill=255)
+    pm=cv2.GaussianBlur(np.asarray(im.resize((w,h),Image.LANCZOS)).astype(np.float32)/255,(0,0),0.5)*np.maximum(mA,mN)
+    L=L*(1-pm)+0.44*pm
+    # silver-oak shade trees: tall thin trunk, a few forked limbs, small sparse tufts; paler with distance
+    rng=np.random.default_rng(11)
+    def tree(x0,crest,hgt,tone,lw):
+        nonlocal L; j=int(np.clip((x0+B)*K,0,w-1)); y0=crest[j]+0.4; tm=Image.new('L',(w,h),0); td=ImageDraw.Draw(tm)
+        P=lambda x,y:((x+B)*K,(y+B)*K)
+        top=(x0+rng.uniform(-0.5,0.5),y0-hgt); td.line([P(x0,y0),P(*top)],fill=255,width=max(1,int(lw*K)))
+        for k in range(rng.integers(4,7)):
+            f=rng.uniform(0.4,0.95); bx=x0+(top[0]-x0)*f; by=y0-hgt*f; ang=rng.choice([-1,1])*rng.uniform(0.3,1.0); ln=hgt*rng.uniform(0.12,0.26)
+            ex,ey=bx+np.sin(ang)*ln,by-np.cos(ang)*ln*0.75; td.line([P(bx,by),P(ex,ey)],fill=255,width=max(1,int(lw*0.55*K)))
+            for q in range(rng.integers(2,5)):
+                tx,ty=ex+rng.uniform(-1,1)*hgt*0.05,ey+rng.uniform(-1,0.4)*hgt*0.04; rr=hgt*rng.uniform(0.022,0.04)
+                td.ellipse([P(tx-rr*1.5,0)[0],P(0,ty-rr)[1],P(tx+rr*1.5,0)[0],P(0,ty+rr)[1]],fill=255)
+        tt=np.asarray(tm).astype(np.float32)/255; L=L*(1-tt)+tone*tt
+    for x0,hg in ((40,6),(47,7.5),(58,6.5),(70,8),(78,6)): tree(x0,cA,hg,0.33,0.16)
+    for x0,hg in ((2,6),(12,5)): tree(x0,cB,hg,0.30,0.16)
+    for x0,hg in ((84,20),(-1,16)): tree(x0,cN,hg,0.07,0.35)
+    return np.clip(L,0,1)
 def foreground(h,w):
     img,P=canvas(FW,FH); bg=img.copy()
     shoot(P,img,(B-4,B+FH+4),-66,58,0.45,22,('#6E8E66','#88A57A','#A3BC92','#C2D4AE'),'#E6EFD6',9,1)
@@ -56,7 +106,7 @@ def foreground(h,w):
     return Lf,a
 def render(name,ramp,DOT='#081A1B'):
     img,_=canvas(FW,FH); h,w=img.shape[:2]
-    L=cv2.GaussianBlur(landscape(h,w),(0,0),0.5*K); Lf,a=foreground(h,w)
+    L=cv2.GaussianBlur(estate(h,w),(0,0),0.3*K); Lf,a=foreground(h,w)
     Lf=cv2.GaussianBlur(Lf*a,(0,0),1.25*K); a=cv2.GaussianBlur(a,(0,0),1.25*K)                     # the near things softest: depth
     L=L*(1-a)+np.clip(Lf/np.maximum(a,1e-3)*1.05,0,1)*a
     v=np.clip(L,0,1)**1.05
@@ -67,7 +117,7 @@ def render(name,ramp,DOT='#081A1B'):
     dc=np.hypot(u-np.round(u),t-np.round(t))*pitch                                         # mm to the nearest dot centre
     dark=np.clip(1-v,0,1); r=pitch*0.5*np.sqrt(np.clip((dark-0.18)/0.82,0,1))*1.05
     dot=np.clip((r-dc)*K+0.5,0,1)                                                          # anti-aliased dot edge
-    out=out*(1-0.42*dot[...,None]*(1-hx(DOT)/255))
+    out=out*(1-0.32*dot[...,None]*(1-hx(DOT)/255))
     out+=np.random.default_rng(5).normal(0,2.6,(h,w))[...,None]
     Image.fromarray(out.clip(0,255).astype(np.uint8)).save(O+name+'.jpg',quality=95)
 LEAF=('<linearGradient id="leaf" x1="0" y1="0" x2="1" y2="0.3"><stop offset="0" stop-color="#8A6424"/><stop offset=".25" stop-color="#D9B465"/>'
