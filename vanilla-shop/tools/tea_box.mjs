@@ -127,6 +127,7 @@ function build(boxKey) {
     const X = (x) => n(rot ? p.x + (w - x) * MM : p.x + x * MM), Y = (y) => n(rot ? p.y + (h - y) * MM : p.y + y * MM), S = (v) => n(v * MM);
     const tr = (x, y) => rot ? ` transform="rotate(180 ${X(x)} ${Y(y)})"` : '';
     const text = (f, s, x, y, sz, o = {}) => {
+      if (INK_BOXES) INK_BOXES.push(...inkBoxes(k, f, s, x, y, sz, o));
       const a = o.anchor ? ` text-anchor="${o.anchor}"` : '';
       return `<text x="${X(x)}" y="${Y(y)}" font-family="'${FONT[f].ps}'" font-size="${S(sz)}"${o.track ? ` letter-spacing="${S(o.track)}"` : ''} fill="${o.fill || INK}"${o.opacity ? ` opacity="${o.opacity}"` : ''}${a}${tr(x, y)}>${esc(s)}</text>`;
     };
@@ -524,11 +525,26 @@ function barcode(F, code, right, top) {
     `<path d="${d}" fill="#141414"/><path d="${dig(code[0], x0 + q - 1.2 * m, 'end') + dig(code.slice(1, 7), x0 + q + 24 * m) + dig(code.slice(7), x0 + q + 71 * m)}" fill="#141414"/></g>`;
 }
 
+// TEXT_INK=<file.json>: also write the ink box of every glyph set (panel, mm from the panel's top-left, y down), for
+// checking the artwork's boundary against the real type
+const INK_BOXES = process.env.TEXT_INK ? [] : null;
+function inkBoxes(panel, f, s, x, y, sz, o) {
+  const ot = FONT[f].ot, k = sz / ot.unitsPerEm, tr = o.track || 0, gl = ot.stringToGlyphs(s);
+  const adv = gl.map((g) => g.advanceWidth * k), total = adv.reduce((a, v) => a + v, 0) + tr * Math.max(0, gl.length - 1);
+  let cx = x - (o.anchor === 'middle' ? total / 2 : o.anchor === 'end' ? total : 0); const out = [];
+  gl.forEach((g, i) => {
+    const bb = g.getBoundingBox();
+    if (bb.x2 > bb.x1) out.push({ panel, s, x0: cx + bb.x1 * k, x1: cx + bb.x2 * k, y0: y - bb.y2 * k, y1: y - bb.y1 * k });
+    cx += adv[i] + tr;
+  });
+  return out;
+}
 const keys = process.argv[2] ? [process.argv[2]] : Object.keys(BOXES);
 for (const k of keys) {
   const svg = build(k), dir = path.join(root, 'export', THEME ? `tea-${THEME}` : 'tea', k);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, `vanilla-tea-${k}_EDITABLE.svg`), svg);
+  if (INK_BOXES) fs.writeFileSync(process.env.TEXT_INK, JSON.stringify(INK_BOXES));
   if (process.env.PREVIEW_DIR) {
     const ff = Object.values(FONT).map((f) => `@font-face{font-family:'${f.ps}';src:url(file://${path.isAbsolute(f.file) ? f.file : path.join(process.env.CANDLE_FONTS, f.file)})}`).join('');
     fs.writeFileSync(path.join(process.env.PREVIEW_DIR, `tea-${k}.html`), `<html><head><meta charset="utf-8"><style>${ff}html,body{margin:0}</style></head><body>${svg}</body></html>`);

@@ -23,16 +23,15 @@ LID=(87.65,84.97)
 def bez(P,n=400):
     P=np.array(P,float); t=np.linspace(0,1,n)[:,None]
     return (1-t)**3*P[0]+3*(1-t)**2*t*P[1]+3*(1-t)*t**2*P[2]+t**3*P[3]
-# The cream's edge: ONE continuous C2 path (a natural cubic spline) round all four walls, so tangent and curvature run
-# smoothly across every fold. Knots on the left side, the front's sweep and the back are sampled from the approved curve;
-# from x=50 the front eases early, crosses the right-hand fold almost level (about 9 degrees), settles into a wide,
-# shallow trough a quarter of the way into the How to brew panel, and rises gently into the side's level boundary.
-from scipy.interpolate import CubicSpline
-KNOTS=[(X0,46.5),(-70,46.74),(-55,46.4),(-40,45.6),(-25,43.9),(-12,41.5),(0,37.81),(10,37.69),(20,38.3),(30,39.59),(40,41.48),(50,43.9),
-       (62,47.0),(75,50.4),(87.65,52.9),(98.5,54.2),(109.5,54.65),(120.5,53.5),(131,49.9),(143,47.1),(160,46.3),(172.22,46.3),
-       (186,45.8),(200,45.94),(215,46.43),(232,46.96),(248,47.07),(X1,46.5)]
-_cs=CubicSpline(*np.array(KNOTS).T,bc_type='natural')
-def edge(x): return _cs(x)
+# The cream's edge: boundary.py's function over the unfolded strip (five anchors, quintic smootherstep between them,
+# no anchor on the front/side fold), raised by the least amount that keeps 0.04H above the real type. Used only as a
+# mask: the landscape is not warped to it. Strip x is box mm with the front at 0 and the other side at negative x.
+import boundary as BD
+BD.DELTA=BD.lift(os.path.join(S,'boxprev','ink.json'))
+def edge(x):
+    x=np.asarray(x,float); u=np.where(x<0,x+BD.P,x)
+    yp=BD.y(u)                                                                                     # panel mm (height H)
+    return (yp+B)*(FH+2*B)/(BD.H+2*B)-B                                                            # -> strip art mm (the art is FH tall)
 def scene(h,w):
     """RS.scene, over the whole strip: the front's ranges, hills and trees where they were, more of the same either side"""
     xs=np.arange(w,dtype=np.float32)/K+X0; ys=np.arange(h,dtype=np.float32)[:,None]/K-B; X=xs[None,:]
@@ -91,7 +90,7 @@ def foreground(h,w):
         a=np.clip(np.abs(img-bg).max(2)/30,0,1); return (img@np.array([0.3,0.59,0.11],np.float32))/255,a
     u=lambda x:x-X0                                                                                  # front mm -> strip canvas mm
     fl=lay(lambda P,c:(paint_flower(P,c,(u(11),B+9),30,2.35),paint_vbud(P,c,(u(34),B+6),-40,6)))
-    sh=lay(lambda P,c:shoot(P,c,(u(74),B+72),-100,46,                                             # two leaves and a bud, upright, between flower and logo; only the stem meets the edge
+    sh=lay(lambda P,c:shoot(P,c,(u(78),B+72),-100,46,                                             # two leaves and a bud, upright, between flower and logo; only the stem meets the edge
                               -0.35,15,('#2A3A2A','#3C5038','#5A6E4E','#8DA07A'),'#C9D6B4',9,1))
     return fl,sh
 def lip_shadow(h,w):
