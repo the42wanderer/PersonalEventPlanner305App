@@ -398,14 +398,30 @@ function build(boxKey) {
     }
     {   // right side: how to brew, a column clear of the valley at the fold, the last line on the bottom margin
       // the column sits past the boundary's trough (a quarter into the panel), the heading 3.4 mm under the rising edge
-      const SP = THEMES[THEME].sidePlum;                                                   // on plum the column takes the 6 mm margin
-      const F = face('sideA'), base = F.h - M, x0 = SP ? M : 44, is = 5, pitch = 6.0, tx = x0 + is + 2.6, t = [hd(F, 'How to brew', x0, 58.3, F.w - M - x0)];
+      const SP = THEMES[THEME].sidePlum;
       const steps = [['cup', '150 ML', 'One tea bag in hot water'], ['timer', '5 MINUTES', 'Then lift the bag out'], ['ice', 'OVER ICE', 'Let it cool, pour over ice']];
-      const bs = Math.min(2.3, ...steps.map(([, , d]) => (F.w - M - tx) / width(FONT.body, d, 1)));   // body fits the column
-      steps.forEach(([ic, h, d], i) => {
-        const y = base - 4.8 - (2 - i) * pitch;
-        t.push(F.icon(ic, x0, y - 0.2, is / 10), F.text('wideR', h, tx, y + 1.9, 1.7, { track: 0.3 }), F.text('body', d, tx, y + 4.8, bs));
-      });
+      const F = face('sideA'), base = F.h - M, t = [];
+      if (SP) {
+        // the guide as one block centred between 12% margins (text still left-aligned): the heading, then three rows,
+        // icons in one column centred on their two lines, the label (cap) over its explanation; rows spread evenly
+        // from under the heading to the bottom margin. Sizes about 1.2x the cream-panel version.
+        const mg = 0.12 * F.w, is = 6, gap = 3.2, ls = 2.8, lt = 0.25, bs = 2.6, lb = 2.0, eb = 4.8, hs = 7, hb = 54.6;   // label and explanation tight; rows apart
+        const tw = Math.max(...steps.map(([, h, d]) => Math.max(width(FONT.wideR, h, ls, lt), width(FONT.body, d, bs))));
+        const gw = Math.max(is + gap + tw, width(FONT.title, 'How to brew', hs)), x0 = mg + (F.w - 2 * mg - gw) / 2, tx = x0 + is + gap;
+        const r1 = hb + 3.2, r3 = base - eb, pitch = (r3 - r1) / 2;
+        t.push(F.text('title', 'How to brew', x0, hb, hs));
+        steps.forEach(([ic, h, d], i) => {
+          const y = r1 + i * pitch;
+          t.push(F.icon(ic, x0, y + eb / 2 - is / 2, is / 10), F.text('wideR', h, tx, y + lb, ls, { track: lt }), F.text('body', d, tx, y + eb, bs));
+        });
+      } else {
+        const x0 = 44, is = 5, pitch = 6.0, tx = x0 + is + 2.6; t.push(hd(F, 'How to brew', x0, 58.3, F.w - M - x0));
+        const bs = Math.min(2.3, ...steps.map(([, , d]) => (F.w - M - tx) / width(FONT.body, d, 1)));   // body fits the column
+        steps.forEach(([ic, h, d], i) => {
+          const y = base - 4.8 - (2 - i) * pitch;
+          t.push(F.icon(ic, x0, y - 0.2, is / 10), F.text('wideR', h, tx, y + 1.9, 1.7, { track: 0.3 }), F.text('body', d, tx, y + 4.8, bs));
+        });
+      }
       L.Type.push(`<g id="Side_How_to_brew">${SP ? cream(t.join('')) : t.join('')}</g>`);
     }
     {   // back: the line, the description, a closing line on the bottom margin
