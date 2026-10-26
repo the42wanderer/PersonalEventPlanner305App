@@ -223,10 +223,19 @@ base=f'''<svg xmlns="http://www.w3.org/2000/svg" width="365mm" height="227mm" vi
 <g id="seasonal-ornaments">{star}{orn}</g>
 '''
 (OUT/'christmas-vine-v3-artwork.svg').write_text(base+'</svg>')
-types=f'''<g id="editable-type" fill="{I}" text-anchor="middle">
-<text x="730" y="317" font-family="Nimbus Sans,Arial,sans-serif" font-size="18" letter-spacing="4.8">THE VANILLA SHOP</text>
-<text x="730" y="439" font-family="Nimbus Roman,Times New Roman,serif" font-size="94" font-style="italic">Christmas</text>
-<text x="730" y="492" font-family="Nimbus Sans,Arial,sans-serif" font-size="16" letter-spacing="7.5">COLLECTION</text>
+import base64
+FONTS=Path(__file__).resolve().parents[3]/'fonts'
+def face(fam,file,style='normal',weight=400):
+ b=base64.b64encode((FONTS/file).read_bytes()).decode()
+ return f"@font-face{{font-family:'{fam}';font-style:{style};font-weight:{weight};src:url(data:font/ttf;base64,{b})}}"
+# Brand type: Instrument Serif Italic for the name, Archivo Expanded Light for the tracked capitals (both OFL, in fonts/).
+# The faces are embedded so the SVG renders anywhere; in Illustrator install the two fonts and the text stays live.
+css=face('Instrument Serif','instrument-serif-italic.ttf','italic')+face('Archivo Expanded','archivo-expanded-light.ttf','normal',300)
+types=f'''<defs><style>{css}</style></defs>
+<g id="editable-type" fill="{I}" text-anchor="middle">
+<text x="730" y="320" font-family="Archivo Expanded" font-weight="300" font-size="14" letter-spacing="6">THE VANILLA SHOP</text>
+<text x="730" y="446" font-family="Instrument Serif" font-style="italic" font-size="112">Christmas</text>
+<text x="730" y="500" font-family="Archivo Expanded" font-weight="300" font-size="13" letter-spacing="8">COLLECTION</text>
 </g>
 <g id="centre-flourish">{p('M683 545 C705 550 720 554 730 545 C740 554 755 550 777 545','none',G,1.7)}{p('M730 539 L735 545 L730 551 L725 545Z',G,'none',0)}</g>'''
 (OUT/'christmas-vine-v3-typeset.svg').write_text(base+types+'</svg>')
