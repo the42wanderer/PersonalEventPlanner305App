@@ -58,7 +58,8 @@ X0,X1=PAN['sideB'][0]-B,PAN['back'][1]+B
 # onto the front's centre line CM (tea_box.mjs centres the Sinhala name and the descriptor on it, boundary.py puts the
 # valley there), so the sprig rises from the valley between the name and the facts; the right side moved with its fold;
 # the back's pattern laid twice across the wider back; the front's right end given hills and trees of its own.
-CM=100.67                                                                                         # tea_box.mjs prints it
+CM=float(os.environ.get('CM',100.67))                                                             # tea_box.mjs prints it
+FILL_MID=CM>130          # with the group at the right end, the middle of the front gets the new hills instead
 def place(items,extra=()):
     if BOXK!='long': return list(items)
     dC=CM-80; dF=PAN['front'][1]-87.65; dB=PAN['sideA'][1]-172.22; out=[]
@@ -102,10 +103,10 @@ def scene(h,w):
     peak=lambda c,lift:28.5+np.abs(xs-c)**1.3*0.35-lift
     pk=[(80,5.5),(206,4.5),(-48,4.0)] if BOXK!='long' else [(CM,5.5),(206+88.84,4.5),(-48,4.0),(206+176.42,3.2)]
     far=np.minimum.reduce([hump(place([(8,27,26),(44,29,22),(96,28,30),(-70,28,26),(-32,27.5,24),(132,27,26),(168,29,22),(214,28,28),(250,27.5,24)],
-                                      [(128,28,26),(158,27.5,24)])),*[peak(c,l) for c,l in pk]])
+                                      [(80,28,26),(116,27.5,24)] if FILL_MID else [(128,28,26),(158,27.5,24)])),*[peak(c,l) for c,l in pk]])
     layer(far,0.46,0.20,2.0,0.10,1)
     layer(hump(place([(-6,31,20),(28,32,18),(62,33,16),(92,31,22),(-76,31.5,20),(-40,32,18),(118,32,18),(150,31,20),(186,32.5,18),(226,31,20),(256,32,18)],
-                     [(124,32,18),(148,31,20),(170,32.5,18)])),0.34,0.20,1.6,0.10,3)
+                     [(72,32,18),(104,31,20),(130,32.5,18)] if FILL_MID else [(124,32,18),(148,31,20),(170,32.5,18)])),0.34,0.20,1.6,0.10,3)
     def hedges(m,crest,p0,amp,seed):
         """contour rows of tea, varied as a real estate is: the spacing changes along the hill, the rows bend a little,
         and here and there a planting patch where the rows give way to loose bushes"""
@@ -117,9 +118,11 @@ def scene(h,w):
         patch=np.clip((nz(h,w,4.5*K,2.5*K,seed+42)-0.95)*2.0,0,1)                                  # ~17% of the slope
         loose=np.clip(0.35+0.65*nz(h,w,0.6*K,0.5*K,seed+43),0,1)**1.4                                # rounder, darker-gapped bushes than the rows
         L=np.where(m,L+amp*(row*bush*(1-patch)+0.75*loose*patch),L)
-    cA=hump(place([(56,33.5,30),(140,34,28),(222,33.5,30),(-50,34,28)],[(150,34,28)])); mA=layer(cA,0.16,0.26,2.4,0.0,5); hedges(mA,cA,1.7,0.24,6)
-    cB=hump(place([(6,37,20),(190,37,18),(-64,37,18)],[(164,37,20)])); mB=layer(cB,0.14,0.22,2.2,0.0,7); hedges(mB,cB,1.6,0.22,8)
-    cN=edge(xs)-8.5; mN=layer(cN,0.10,0.24,3.0,0.0,9); hedges(mN,cN,2.1,0.24,10)
+    cA=hump(place([(56,33.5,30),(140,34,28),(222,33.5,30),(-50,34,28)],[(108,34,28)] if FILL_MID else [(150,34,28)])); mA=layer(cA,0.16,0.26,2.4,0.0,5); hedges(mA,cA,1.7,0.24,6)
+    cB=hump(place([(6,37,20),(190,37,18),(-64,37,18)],[(124,37,20)] if FILL_MID else [(164,37,20)])); mB=layer(cB,0.14,0.22,2.2,0.0,7); hedges(mB,cB,1.6,0.22,8)
+    cN=edge(xs)-8.5
+    if BOXK=='long': cN=np.maximum(cN,float(os.environ.get('NEAR_TOP',0)))   # where the cream rides high, the near rows stop short of the far hills
+    mN=layer(cN,0.10,0.24,3.0,0.0,9); hedges(mN,cN,2.1,0.24,10)
     rng=np.random.default_rng(11); tm=Image.new('L',(w,h),0); rm=Image.new('L',(w,h),0)
     td,rd=ImageDraw.Draw(tm),ImageDraw.Draw(rm); P=lambda x,y:((x-X0)*K,(y+B)*K)
     tms={3:Image.new('L',(w,h),0),4:Image.new('L',(w,h),0),5:Image.new('L',(w,h),0)}                # the trees, by the hill they stand on
@@ -130,14 +133,14 @@ def scene(h,w):
             td.ellipse([*P(cx-r,cy-r*0.85),*P(cx+r,cy+r*0.85)],fill=255); tq.ellipse([*P(cx-r,cy-r*0.85),*P(cx+r,cy+r*0.85)],fill=255)
             rd.ellipse([*P(cx-r+0.12*s,cy-r*0.85),*P(cx+r+0.12*s,cy+r*0.85)],fill=255)
     cN6=cN+0.6
-    for x0,s in place(((36,0.9),(41,1.1),(45,0.8),(62,1.0),(67,0.8),(74,1.2)),((134,0.9),(140,1.1),(146,0.8))): clump(x0,cA,s)   # the front's own trees first
-    for x0,s in place(((3,1.0),(10,0.8),(16,1.1)),((158,0.9),(167,1.0))): clump(x0,cB,s)
-    for x0,s in place(((26,1.5),(52,1.3),(80,2.2),(85,1.8)),((126,1.5),(150,1.3))): clump(x0,cN6,s)
+    for x0,s in place(((36,0.9),(41,1.1),(45,0.8),(62,1.0),(67,0.8),(74,1.2)),((96,0.9),(101,1.1),(112,0.8)) if FILL_MID else ((134,0.9),(140,1.1),(146,0.8))): clump(x0,cA,s)   # the front's own trees first
+    for x0,s in place(((3,1.0),(10,0.8),(16,1.1)),((118,0.9),(126,1.0)) if FILL_MID else ((158,0.9),(167,1.0))): clump(x0,cB,s)
+    for x0,s in place(((26,1.5),(52,1.3),(80,2.2),(85,1.8)),((74,1.4),(104,1.6)) if FILL_MID else ((126,1.5),(150,1.3))): clump(x0,cN6,s)
     for x0,s in place(((128,0.9),(134,1.1),(146,0.8),(151,1.0),(212,1.0),(218,0.8),(229,1.1),(-58,0.9),(-52,1.1),(-41,0.8))): clump(x0,cA,s)
     for x0,s in place(((184,0.9),(193,1.0),(-69,1.0),(-60,0.8))): clump(x0,cB,s)
     for x0,s in place(((112,1.6),(158,1.4),(198,1.5),(244,1.7),(-28,1.5),(-74,1.4))): clump(x0,cN6,s)
     for x0,dy,s in place(((-66,3.5,0.8),(-38,5.0,0.7),(-12,4.0,0.9),(120,4.5,0.8),(141,3.0,0.7),(163,5.0,0.9),(188,4.0,0.8),
-                    (207,5.5,0.7),(226,3.5,0.9),(252,4.5,0.8)),((120,4.0,0.8),(140,5.0,0.7),(162,3.5,0.9))): clump(x0,cN+dy,s)   # shade trees standing in the rows
+                    (207,5.5,0.7),(226,3.5,0.9),(252,4.5,0.8)),((88,4.0,0.8),(116,5.0,0.7),(134,3.5,0.9)) if FILL_MID else ((120,4.0,0.8),(140,5.0,0.7),(162,3.5,0.9))): clump(x0,cN+dy,s)   # shade trees standing in the rows
     t=np.asarray(tm).astype(np.float32)/255; r=np.asarray(rm).astype(np.float32)/255
     for q in (3,4,5): REG[np.asarray(tms[q])>127]=q
     return np.clip(L*(1-t)+0.06*t+0.16*np.clip(r-t,0,1),0,1)
@@ -255,7 +258,7 @@ def lid(ramp,gam,D=None):
 if __name__=='__main__':
     ks=os.environ.get('PALETTES','forest plum').split()
     for k in ks:
-        d=os.path.join(S,'teasoap','estate-art',k+('-sideplum' if SIDE_PLUM else '')+('-long' if BOXK=='long' else '')); os.makedirs(d,exist_ok=True)
+        d=os.path.join(S,'teasoap','estate-art',k+('-sideplum' if SIDE_PLUM else '')+('-long' if BOXK=='long' else '')+os.environ.get('ART_SUFFIX','')); os.makedirs(d,exist_ok=True)
         gam={'forest':1.3,'ceylon':1.15,'evergreen':1.0,'emerald':1.15,'emeraldhoney':1.15,'apricot':1.15,'citron':1.15,'citronA':1.15,'citronB':1.15,'citronC':1.15,'ochre':1.15,'rose':1.15,'celadon':1.15,'chartreuse':1.15,'jade':1.15,'sage':1.1}.get(k,1.0)
         D=getattr(RS,'DIRS',{}).get(k); rp=RS.RAMPS.get(k,RS.RAMPS['emerald'])
         st=render(rp,RS.FLOWER.get(k,RS.FLOWER['emerald']),gam,RS.CREAM.get(k,D and D['cream']),D); Image.fromarray(st).save(os.path.join(d,'strip.jpg'),quality=93)

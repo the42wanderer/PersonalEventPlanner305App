@@ -457,7 +457,9 @@ function build(boxKey) {
           L.Name.push(shaped(F, k, zs, gx - bb[0] * zs, sb, 1)); shapedInk('front', k, zs, gx - bb[0] * zs, sb); t.push(...desc(gx));
           console.log(`A: name ${(x0 / W * 100).toFixed(1)}%..${((gx - 0.05 * W) / W * 100).toFixed(1)}%, group from ${gx.toFixed(1)} mm = ${(gx / W * 100).toFixed(1)}%`);
         } else {
-          const s = Number(process.env.TITLE_SIZE || 16), tb = sb + bb[1] * zs - 3.0, vx = x0 - 1.496 * s / 17;
+          // TITLE_FRAC sizes the title by its width (a fraction of the panel), TITLE_GAP is the space above the Sinhala
+          const s = process.env.TITLE_FRAC ? Number(process.env.TITLE_FRAC) * W / width(FONT.title, 'Vanilla Tea', 1) : Number(process.env.TITLE_SIZE || 16);
+          const tb = sb + bb[1] * zs - Number(process.env.TITLE_GAP || 3.0), vx = x0 - 1.496 * s / 17;
           L.Name.push(F.text('title', 'Vanilla', vx, tb, s, { fill: GOLD }), F.text('title', 'Tea', vx + width(FONT.title, 'Vanilla ', s), tb, s));
           L.Name.push(shaped(F, k, zs, x0 - bb[0] * zs, sb, 1)); shapedInk('front', k, zs, x0 - bb[0] * zs, sb); t.push(...desc(x0));
           const tw = width(FONT.title, 'Vanilla Tea', s);
