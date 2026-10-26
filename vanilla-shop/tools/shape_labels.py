@@ -27,6 +27,8 @@ FONTS = {'sinhala': 'noto-sans-sinhala.ttf', 'tamil': 'noto-sans-tamil.ttf'}
 EXTRA = {
     'B:වැනිලා තේ': ('NotoSerifSinhala-Bold.ttf', 'වැනිලා තේ'),
     'B:வெனிலா தேயிலை': ('NotoSerifTamil-Bold.ttf', 'வெனிலா தேயிலை'),
+    'B:වැනිලා': ('NotoSerifSinhala-Bold.ttf', 'වැනිලා'),                                # the Sinhala name stacked, under Vanilla
+    'B:තේ': ('NotoSerifSinhala-Bold.ttf', 'තේ'),
     'උණු වතුරට තේ බෑගයක්': ('noto-sans-sinhala.ttf', 'උණු වතුරට තේ බෑගයක්'),
     'විනාඩි 5කින් බෑගය ඉවත් කරන්න': ('noto-sans-sinhala.ttf', 'විනාඩි 5කින් බෑගය ඉවත් කරන්න'),
     'හෝ නිවා අයිස් මත වත් කරන්න': ('noto-sans-sinhala.ttf', 'හෝ නිවා අයිස් මත වත් කරන්න'),

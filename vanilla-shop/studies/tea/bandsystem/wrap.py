@@ -14,6 +14,22 @@ from build6 import canvas, B, K, hx
 from build2 import shoot
 from foliage2 import paint_flower, paint_vbud, trumpet
 import heat as H
+import build2, foliage2
+def tea_leaf(p0,ang,L,W,bend,rng):
+    """foliage2.tealeaf, made more like Camellia sinensis for the sprig: about 30% narrower (2.5:1), the tip pointed
+    (the sides run straighter into it), and fine regular forward-facing serrations instead of spiky teeth"""
+    W=W*0.7; sp=foliage2.arc(p0,ang,L,bend,n=5); n=len(sp); t=np.linspace(0,1,n)
+    u=np.clip((t-0.07)/0.93,0,1); sn=np.sin(np.pi*u)
+    prof=W*sn**np.where(u>0.5,1.25,0.8)*(1-0.25*u**2)+0.03                  # widest just below the middle, acute tip
+    prof=np.where(t<0.07,0.05*W+0.04,prof)                                   # the petiole
+    teeth=np.mod(t*n/1.6+rng.uniform(),1.0)*0.045*W*((u>0.15)&(u<0.94))      # a fine saw, pointing to the tip
+    d=np.gradient(sp,axis=0); d/=np.linalg.norm(d,axis=1,keepdims=True)+1e-9; nrm=np.stack([-d[:,1],d[:,0]],1)
+    kl,kr=rng.uniform(0.92,1.0),rng.uniform(0.92,1.0)
+    Ls=sp+nrm*(prof*kl+teeth)[:,None]; Rs=sp-nrm*(prof*kr+teeth)[:,None]
+    shadeL=float(nrm[n//2]@foliage2.LIGHT)>0
+    half=np.vstack([Ls,sp[::-1]]) if shadeL else np.vstack([Rs,sp[::-1]])
+    return np.vstack([Ls,Rs[::-1]]),sp,half,d,nrm,u,prof
+build2.tealeaf=tea_leaf                                                       # the sprig's shoot() draws with this
 nz,grain=RS.nz,RS.grain
 FH=EF.FH
 # panel spans in box millimetres along the walls, measured from the cube dieline (research/source 2.pdf)

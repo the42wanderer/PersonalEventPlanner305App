@@ -392,15 +392,18 @@ function build(boxKey) {
     // Wide, 1.5 mm caps; bold where it carries the net contents or a brewing step). Headings share one baseline round
     // the walls (HB). Exceptions, named: the back's closing line (serif italic 4.1), the base's optional contact lines.
     const TS = { head: 7, body: DECL.body, lead: DECL.lead, label: DECL.caps, ltr: 0.3 }, HB = 54.6;
-    {   // front: two groups under the curve. Left, the name as one stack: Vanilla, Tea, and the common name in Sinhala on
-      // its own line (the second language the main panel needs; bold, exactly 3 mm x-height, Noto Serif Sinhala Bold),
-      // its baseline on the bottom margin. Right, the facts as a column on the right margin: the lion, then the net
-      // contents in bold at the legal 1.5 mm (lowercase g sets the size), the last line on the same bottom baseline.
+    {   // front: two groups under the curve. Left, the name: "Vanilla" a roof over "Tea" and, under its "illa", the
+      // common name in Sinhala stacked as "වැනිලා" over "තේ" (the second language the main panel needs; bold, exactly
+      // 3 mm x-height, Noto Serif Sinhala Bold) - the English stack echoed in Sinhala. "Tea" and "තේ" stand on the
+      // bottom margin. Right, the facts as a column on the right margin: the lion over the net contents in bold at the
+      // legal 1.5 mm (lowercase g sets the size), the last line on the same bottom baseline.
       const F = face('front'), base = F.h - M, t = [], sz = 17, lw = 15, ln = 8.4, rx = F.w - M;
-      const k = 'B:වැනිලා තේ', zs = 3 / 0.536, tb = base + SHAPED[k].bbox[1] * zs - 2.0, vb = tb - 0.78 * sz;
+      const tb = base, vb = tb - 0.82 * sz, zs = 3 / 0.536, vx = M + 0.018 * sz;
+      const ri = FONT.roman.ot, ik = sz / ri.unitsPerEm;
+      const xi = vx + width(FONT.roman, 'Van', sz) + ri.charToGlyph('i').getBoundingBox().x1 * ik;          // where "illa" starts
       t.push(cream(F.logo(F.w - M - 927.6 * lw / 933 + lw / 2, M - 6.3 * lw / 933 + 0.52 * lw, lw)));      // ink box from brand/vanilla-shop-logo.svg
-      L.Name.push(F.text('roman', 'Vanilla', M + 0.018 * sz, vb, sz, { fill: GOLD }), F.text('title', 'Tea', M, tb, sz));
-      L.Name.push(shaped(F, k, zs, M - SHAPED[k].bbox[0] * zs, base, 1)); shapedInk('front', k, zs, M - SHAPED[k].bbox[0] * zs, base);
+      L.Name.push(F.text('roman', 'Vanilla', vx, vb, sz, { fill: GOLD }), F.text('title', 'Tea', M, tb, sz));
+      [['B:වැනිලා', tb - 7.6], ['B:තේ', tb]].forEach(([k, y]) => { const x = xi - SHAPED[k].bbox[0] * zs; L.Name.push(shaped(F, k, zs, x, y, 1)); shapedInk('front', k, zs, x, y); });
       const c1 = base - 0.658 * TS.body - 2.3;                                                           // two lines, 2.3 mm apart
       t.push(F.text('wideB', `${pack.bags} TEA BAGS`, rx, c1, TS.body, { track: 0.15, anchor: 'end' }), F.text('wideB', `NET WT. ${pack.net} g`, rx, base, TS.body, { track: 0.15, anchor: 'end' }));
       const lb = c1 - 0.658 * TS.body - 2.4;                                                             // the lion stands above them

@@ -64,8 +64,8 @@ packer's licence from the Board; check the licence covers these packs and any mi
 
 How it meets the rules above, after the regulatory review of 26 October 2026 (Gazette 2494/47, CAA Direction 71):
 
-- Common name in two languages on the main panel, the third elsewhere: Sinhala "වැනිලා තේ" on its own line under
-  "Tea" on the front (the name as one stack), Tamil "வெனிலா தேயிலை" as the left side's heading; both bold (Noto Serif Sinhala / Tamil Bold, shaped
+- Common name in two languages on the main panel, the third elsewhere: Sinhala "වැනිලා" over "තේ" under the "illa"
+  of "Vanilla" on the front, beside "Tea" (the English stack echoed, "Vanilla" the roof over both), Tamil "வெனிலா தேயிலை" as the left side's heading; both bold (Noto Serif Sinhala / Tamil Bold, shaped
   with HarfBuzz into brand/shaped-labels.json) at exactly 3 mm x-height.
 - Net contents on the front in bold at the 1.5 mm Schedule III height ("12 TEA BAGS" / "NET WT. 24 g", Roc Grotesk
   Wide Bold 3.05 mm: lowercase g sets the size), right-aligned under the lion. On the left side the net weight is labelled in English, Sinhala ("ශුද්ධ බර")
