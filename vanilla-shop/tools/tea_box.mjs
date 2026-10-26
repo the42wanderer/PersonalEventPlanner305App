@@ -74,7 +74,11 @@ const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper:
   estateplumside: { paper: '#F3E6BE', ink: '#3B1631', art: true, light: true, estate: true, sidePlum: true },
   // the same carton in tea's own colours: Ceylon (tea-leaf greens to brewed amber) and black tea (the cup, mahogany to cream)
   estateceylonside: { paper: '#F3E6BE', ink: '#1E3527', art: true, light: true, estate: true, sidePlum: true },
-  estatebrewside: { paper: '#F3E6BE', ink: '#2E1A10', art: true, light: true, estate: true, sidePlum: true } };
+  estatebrewside: { paper: '#F3E6BE', ink: '#2E1A10', art: true, light: true, estate: true, sidePlum: true },
+  // greens: deep emerald with golden light; bottle green to jade; misty highland sage
+  estateemeraldside: { paper: '#F3E6BE', ink: '#0D2E1D', art: true, light: true, estate: true, sidePlum: true },
+  estatejadeside: { paper: '#F3E6BE', ink: '#14382A', art: true, light: true, estate: true, sidePlum: true },
+  estatesageside: { paper: '#F2EED6', ink: '#26372F', art: true, light: true, estate: true, sidePlum: true } };
 const THEME = THEMES[process.env.TEA_THEME] ? process.env.TEA_THEME : null;
 const MM = 72 / 25.4, INK = THEME ? THEMES[THEME].ink : '#143A1D', PAPER = THEME ? THEMES[THEME].paper : '#F8E7C0';
 const GOLD = 'url(#foil)';

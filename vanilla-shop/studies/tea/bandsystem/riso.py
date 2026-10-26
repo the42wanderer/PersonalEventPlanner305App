@@ -105,12 +105,15 @@ def render(name,ramp,fr=None,gam=1.0):
     out*=(1-0.06*np.clip(nz(h,w,40*K,40*K,5),0,1))[...,None]                                            # faint unevenness of a print
     out+=np.random.default_rng(5).normal(0,3.0,(h,w))[...,None]
     Image.fromarray(out.clip(0,255).astype(np.uint8)).save(O+name+'.jpg',quality=95)
-FLOWER={'forest':['#B9874A','#D8AA68','#EBC98C','#F5E4B3','#FCF3D6'],'ceylon':['#B9874A','#D8AA68','#EBC98C','#F5E4B3','#FCF3D6']}   # warm honey in the shade, never khaki
-RAMPS={'ceylon':['#0F1E17','#1E3527','#3D4F2E','#7A6A35','#B5813A','#DDA65A','#F2D08F','#FBEBC4'],   # tea-leaf greens to brewed amber
+FLOWER={'emerald':['#B9874A','#D8AA68','#EBC98C','#F5E4B3','#FCF3D6'],'jade':['#B9874A','#D8AA68','#EBC98C','#F5E4B3','#FCF3D6'],'sage':['#B9874A','#D8AA68','#EBC98C','#F5E4B3','#FCF3D6'],'forest':['#B9874A','#D8AA68','#EBC98C','#F5E4B3','#FCF3D6'],'ceylon':['#B9874A','#D8AA68','#EBC98C','#F5E4B3','#FCF3D6']}   # warm honey in the shade, never khaki
+RAMPS={'emerald':['#06180F','#0D2E1D','#17482C','#2F6B3C','#7C9A4A','#D2B45C','#F2DC98','#FCF1CF'],   # deep emerald, golden light
+       'jade':['#0B1F18','#14382A','#1F5A3E','#4E8A5A','#9DBB6E','#DCD892','#F6EFC6'],               # bottle green to jade, lime-gold glow
+       'sage':['#17221D','#26372F','#3E5448','#677D69','#9FAF92','#D3D7B6','#F2EED6'],               # misty highland sage
+       'ceylon':['#0F1E17','#1E3527','#3D4F2E','#7A6A35','#B5813A','#DDA65A','#F2D08F','#FBEBC4'],   # tea-leaf greens to brewed amber
        'brew':['#1A0F0A','#2E1A10','#4E2C17','#7C4521','#AD6A2F','#D6964F','#EDC388','#FAE6C2'],     # a cup of black tea
        'forest':['#142D25','#30513A','#71804A','#B3A663','#E3CD8D','#F5E7B6'],'plum':['#1C0B1A','#341530','#57203A','#86333B','#BC5A38','#E58A4C','#F5B872','#FCE3A6'],
        'green':['#08171A','#0F2A2C','#17433F','#2C6455','#6F8E62','#C99A5C','#EFC487','#FBEACB']}
-INK={'ceylon':'#1E3527','brew':'#2E1A10','forest':'#142D25','plum':'#3B1631','green':'#163F3D'}; CREAM={'ceylon':'#F3E6BE','brew':'#F3E6BE','forest':'#F3E6BE','plum':'#F3E6BE','green':'#F4EEDF'}
+INK={'emerald':'#0D2E1D','jade':'#14382A','sage':'#26372F','ceylon':'#1E3527','brew':'#2E1A10','forest':'#142D25','plum':'#3B1631','green':'#163F3D'}; CREAM={'emerald':'#F3E6BE','jade':'#F3E6BE','sage':'#F2EED6','ceylon':'#F3E6BE','brew':'#F3E6BE','forest':'#F3E6BE','plum':'#F3E6BE','green':'#F4EEDF'}
 if __name__=='__main__':
     man=[]
     for k in ('forest','plum'):
