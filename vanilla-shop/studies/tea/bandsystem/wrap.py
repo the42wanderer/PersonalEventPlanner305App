@@ -135,6 +135,24 @@ def lip_shadow(h,w):
     ys=np.nonzero(src.max(1)>0.5)[0]; t=((np.arange(h,dtype=np.float32)-ys[0])/(ys[-1]-ys[0]))[:,None]   # 0 at the mouth's top, 1 at its foot
     up=np.clip((t-0.42)/0.38,0,1); up=up*up*(3-2*up)                                               # the shade reaches further up the mouth's
     return np.clip(sh*(1-0.6*lip*(1-0.75*up))*1.6,0,1)                                              # lower part, the top stays clean
+def horn_shade(h,w):
+    """the horn's underside against the petal behind it: a contact shade, not a cast shadow. Along the horn's edges
+    that face down and away from the light (upper left), a slight shade on the petal just outside, falling off within
+    about a millimetre, and a gentler one on the horn just inside, as its surface turns away; faded out towards the
+    flower's heart so the centre stays clean"""
+    tube,mouth,_=trumpet((11-X0,B+9),30,7.5*2.35,1.1*2.35,3.6*2.35,2.6*2.35,0.13)
+    im=Image.new('L',(w,h),0); dr=ImageDraw.Draw(im)
+    for poly in (tube,mouth): dr.polygon([(x*K,y*K) for x,y in poly],fill=255)
+    m=(np.asarray(im)>127).astype(np.uint8)
+    dout=cv2.distanceTransform(1-m,cv2.DIST_L2,5)/K; din=cv2.distanceTransform(m,cv2.DIST_L2,5)/K
+    sm=cv2.GaussianBlur(m.astype(np.float32),(0,0),1.0*K); gy,gx=np.gradient(sm); g=np.hypot(gx,gy)+1e-6
+    d=np.array([0.42,0.91]); face=np.clip((-gx*d[0]-gy*d[1])/g,0,1)**1.3                        # outward normal against the shade's way
+    face=cv2.GaussianBlur(face.astype(np.float32),(0,0),0.6*K)
+    base=np.array(tube[0]+tube[-1])/2 if len(tube)==4 else np.array(tube).mean(0)              # the tube's root, at the heart
+    tip=np.array(mouth).mean(0); ax=tip-base; yy,xx=np.mgrid[0:h,0:w].astype(np.float32)/K
+    t=np.clip(((xx-base[0])*ax[0]+(yy-base[1])*ax[1])/(ax@ax),0,1); along=np.clip((t-0.12)/0.3,0,1); along=along*along*(3-2*along)
+    out=np.where(m==0,np.exp(-dout/0.75),0); inn=np.where(m==1,0.55*np.exp(-din/1.1),0)
+    return (face*along*(out+inn)).astype(np.float32)
 def pramp(v,cols):
     """H.ramp, or, when the stops are (position, colour) pairs, a gradient map with the stops where they are put"""
     if not isinstance(cols[0],tuple): return H.ramp(v,cols)
@@ -177,7 +195,7 @@ def render(ramp,fr,gam,cream,D=None):
     af=cv2.GaussianBlur(af,(0,0),0.06*K); m=(af>0.5).astype(np.uint8); ins=cv2.distanceTransform(m,cv2.DIST_L2,5)/K
     lo,hi=np.percentile(Lf[af>0.5],(3,99)); sh=np.clip((Lf-lo)/(hi-lo+1e-6),0,1)
     heart=np.exp(-(((xx-30)/17)**2+((yy-19)/15)**2))
-    fv=np.clip(0.68+0.16*sh+0.22*heart-0.17*np.exp(-ins/0.8)-0.22*lip_shadow(h,w),0,1)
+    fv=np.clip(0.68+0.16*sh+0.22*heart-0.17*np.exp(-ins/0.8)-0.22*lip_shadow(h,w)-0.21*horn_shade(h,w),0,1)
     if D is not None: V0=grain(L,0.075,21)**gam
     g=np.zeros_like(L)
     if SIDE_PLUM:                                                                                   # How to brew: the hills across its top, then the
