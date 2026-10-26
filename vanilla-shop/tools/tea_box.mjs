@@ -392,18 +392,19 @@ function build(boxKey) {
     // Wide, 1.5 mm caps; bold where it carries the net contents or a brewing step). Headings share one baseline round
     // the walls (HB). Exceptions, named: the back's closing line (serif italic 4.1), the base's optional contact lines.
     const TS = { head: 7, body: DECL.body, lead: DECL.lead, label: DECL.caps, ltr: 0.3 }, HB = 54.6;
-    {   // front: logo in the top-right corner; Vanilla over Tea; the descriptor as a caption beside Tea; the net contents
-      // in bold at the legal height (lowercase g: 1.5 mm x-height) on the bottom margin, the lion on the same baseline
-      const F = face('front'), base = F.h - M, t = [], sz = 17, lw = 15, ln = 8.4;
-      const tb = base - 0.658 * TS.body - 4.0, vb = tb - 0.78 * sz, cx = M + width(FONT.title, 'Tea', sz) + 4;
+    {   // front: two groups under the curve. Left, the name as one stack: Vanilla, Tea, and the common name in Sinhala on
+      // its own line (the second language the main panel needs; bold, exactly 3 mm x-height, Noto Serif Sinhala Bold),
+      // its baseline on the bottom margin. Right, the facts as a column on the right margin: the lion, then the net
+      // contents in bold at the legal 1.5 mm (lowercase g sets the size), the last line on the same bottom baseline.
+      const F = face('front'), base = F.h - M, t = [], sz = 17, lw = 15, ln = 8.4, rx = F.w - M;
+      const k = 'B:වැනිලා තේ', zs = 3 / 0.536, tb = base + SHAPED[k].bbox[1] * zs - 2.0, vb = tb - 0.78 * sz;
       t.push(cream(F.logo(F.w - M - 927.6 * lw / 933 + lw / 2, M - 6.3 * lw / 933 + 0.52 * lw, lw)));      // ink box from brand/vanilla-shop-logo.svg
       L.Name.push(F.text('roman', 'Vanilla', M + 0.018 * sz, vb, sz, { fill: GOLD }), F.text('title', 'Tea', M, tb, sz));
-      t.push(F.text('wideB', `${pack.bags} TEA BAGS  ·  NET WT. ${pack.net} g`, M, base, TS.body, { track: 0.15 }));
-      t.push(F.lion(F.w - M - 1206 * ln / LION.vw, base - 890 * ln / LION.vw, ln));                         // ink box from the lion SVG
-      // the common name in Sinhala (the second language the main panel needs), bold, at exactly the 3 mm minimum
-      // x-height (Noto Serif Sinhala Bold, shaped), set as the caption beside Tea on Tea's baseline, so it reads as part
-      // of the name, not a second headline. The descriptor moves to What's inside; Tamil, the third, is on that side.
-      { const k = 'B:වැනිලා තේ', zs = 3 / 0.536; L.Name.push(shaped(F, k, zs, cx, tb, 1)); shapedInk('front', k, zs, cx, tb); }
+      L.Name.push(shaped(F, k, zs, M - SHAPED[k].bbox[0] * zs, base, 1)); shapedInk('front', k, zs, M - SHAPED[k].bbox[0] * zs, base);
+      const c1 = base - 0.658 * TS.body - 2.3;                                                           // two lines, 2.3 mm apart
+      t.push(F.text('wideB', `${pack.bags} TEA BAGS`, rx, c1, TS.body, { track: 0.15, anchor: 'end' }), F.text('wideB', `NET WT. ${pack.net} g`, rx, base, TS.body, { track: 0.15, anchor: 'end' }));
+      const lb = c1 - 0.658 * TS.body - 2.4;                                                             // the lion stands above them
+      t.push(F.lion(rx - 1206 * ln / LION.vw, lb - 890 * ln / LION.vw, ln));                               // ink box from the lion SVG
       L.Type.push(`<g id="Front">${t.join('')}</g>`);
     }
     {   // right side: how to brew
@@ -416,13 +417,12 @@ function build(boxKey) {
         // an option, said in the words ("Or", "හෝ") and by a little more space above it. Icons a heavier stroke to sit
         // with the bold labels, centred on their two lines. The heading has 4 mm of plum above it (wrap.py fades the
         // land out by 41 mm on this side).
-        const SI = ['උණු වතුරට තේ බෑගයක්', 'විනාඩි 5කින් බෑගය ඉවත් කරන්න', 'හෝ නිවා අයිස් මත වත් කරන්න'], ss = 2.8;
+        const SI = ['උණු වතුර, තේ බෑගයක්', 'විනාඩි 5කින් ඉවත් කරන්න', 'හෝ නිවා අයිස් මත'], ss = 2.8;          // shortened with the English
         const LB = ['150 ML', '5 MINUTES', 'OVER ICE'], ic = ['cup', 'timer', 'ice2'];
         const mg = 0.12 * F.w, is = 6, gap = 3.2, lg = 2.2, Hb = 51.0, dl = 4.0, opt = 1.0;
         const lw = (i, e) => width(FONT.wideB, LB[i], TS.label, TS.ltr) + lg + width(FONT.body, e, TS.body);
         const room = F.w - 2 * mg - is - gap;
-        const EN = ['One tea bag in hot water', 'Then lift the bag out',
-          ['Or let it cool, pour over ice', 'Or cool it, pour over ice', 'Or cool, pour over ice'].find((e) => lw(2, e) <= room)];
+        const EN = ['Hot water, one tea bag', 'Steep, then lift out', 'Or cool and pour'];
         const tw = Math.max(...EN.map((e, i) => lw(i, e)), ...SI.map((k) => SHAPED[k].advance * ss));
         const gw = Math.max(is + gap + tw, width(FONT.title, 'How to brew', TS.head)), x0 = mg + (F.w - 2 * mg - gw) / 2, tx = x0 + is + gap;
         const b0 = Hb + 5.6, p = (base - dl - opt - b0) / 2;
@@ -453,9 +453,10 @@ function build(boxKey) {
     {   // left side: what's inside, the heading on the shared baseline; the common name in Tamil under it (the third
       // language, bold, 3 mm x-height); the blend and the bags as one short paragraph; the net weight on the bottom
       // margin with its label in English, Sinhala and Tamil (CAA Direction 71)
-      const F = face('sideB'), base = F.h - M, t = [hd(F, 'What’s inside', M, HB, F.w - 2 * M)];
-      { const k = 'B:வெனிலா தேயிலை', zs = 3 / 0.563; t.push(shaped(F, k, zs, M, HB + 6.6, 1)); shapedInk('sideB', k, zs, M, HB + 6.6); }
-      ['Ceylon black tea with natural vanilla,', `in ${pack.bags} tagged unbleached sachet tea bags.`].forEach((l, i) => t.push(F.text('body', l, M, HB + 11.0 + i * TS.lead, TS.body)));
+      // the product's name in Tamil is this side's heading, on the shared baseline: the side reads as the name panel
+      const F = face('sideB'), base = F.h - M, t = [];
+      { const k = 'B:வெனிலா தேயிலை', zs = 3 / 0.563; t.push(shaped(F, k, zs, M, HB, 1)); shapedInk('sideB', k, zs, M, HB); }
+      ['Ceylon black tea with natural vanilla,', `in ${pack.bags} tagged unbleached sachet tea bags.`].forEach((l, i) => t.push(F.text('body', l, M, HB + 7.0 + i * TS.lead, TS.body)));
       let x = M; const ly = base - 4.8;
       t.push(F.text('wideR', 'NET WEIGHT', x, ly, TS.label, { track: TS.ltr, opacity: 0.75 })); x += width(FONT.wideR, 'NET WEIGHT', TS.label, TS.ltr) + 2.6;
       t.push(shaped(F, 'ශුද්ධ බර', 2.8, x, ly, 0.75)); x += SHAPED['ශුද්ධ බර'].advance * 2.8 + 2.6;

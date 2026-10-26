@@ -64,13 +64,14 @@ packer's licence from the Board; check the licence covers these packs and any mi
 
 How it meets the rules above, after the regulatory review of 26 October 2026 (Gazette 2494/47, CAA Direction 71):
 
-- Common name in two languages on the main panel, the third elsewhere: Sinhala "වැනිලා තේ" beside "Tea" on the front,
-  Tamil "வெனிலா தேயிலை" under "What's inside" on the left side; both bold (Noto Serif Sinhala / Tamil Bold, shaped
+- Common name in two languages on the main panel, the third elsewhere: Sinhala "වැනිලා තේ" on its own line under
+  "Tea" on the front (the name as one stack), Tamil "வெனிலா தேயிலை" as the left side's heading; both bold (Noto Serif Sinhala / Tamil Bold, shaped
   with HarfBuzz into brand/shaped-labels.json) at exactly 3 mm x-height.
-- Net contents on the front in bold at the 1.5 mm Schedule III height ("12 TEA BAGS · NET WT. 24 g", Roc Grotesk Wide
-  Bold 3.05 mm: lowercase g sets the size). On the left side the net weight is labelled in English, Sinhala ("ශුද්ධ බර")
+- Net contents on the front in bold at the 1.5 mm Schedule III height ("12 TEA BAGS" / "NET WT. 24 g", Roc Grotesk
+  Wide Bold 3.05 mm: lowercase g sets the size), right-aligned under the lion. On the left side the net weight is labelled in English, Sinhala ("ශුද්ධ බර")
   and Tamil ("நிகர எடை") for Direction 71; the batch block on the base was already trilingual.
-- How to brew in English and Sinhala (use instructions in two languages), every line at the 1.5 mm minimum.
+- How to brew in English and Sinhala (use instructions in two languages), shortened to the essentials, every line at
+  the 1.5 mm minimum. The story panel and tagline stay English only; no rule asks for them to be translated.
 
 Still to settle before print:
 

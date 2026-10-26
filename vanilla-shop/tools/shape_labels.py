@@ -30,6 +30,9 @@ EXTRA = {
     'උණු වතුරට තේ බෑගයක්': ('noto-sans-sinhala.ttf', 'උණු වතුරට තේ බෑගයක්'),
     'විනාඩි 5කින් බෑගය ඉවත් කරන්න': ('noto-sans-sinhala.ttf', 'විනාඩි 5කින් බෑගය ඉවත් කරන්න'),
     'හෝ නිවා අයිස් මත වත් කරන්න': ('noto-sans-sinhala.ttf', 'හෝ නිවා අයිස් මත වත් කරන්න'),
+    'උණු වතුර, තේ බෑගයක්': ('noto-sans-sinhala.ttf', 'උණු වතුර, තේ බෑගයක්'),          # How to brew, shortened: hot water, a tea bag
+    'විනාඩි 5කින් ඉවත් කරන්න': ('noto-sans-sinhala.ttf', 'විනාඩි 5කින් ඉවත් කරන්න'),  # remove after 5 minutes
+    'හෝ නිවා අයිස් මත': ('noto-sans-sinhala.ttf', 'හෝ නිවා අයිස් මත'),                  # or, cooled, over ice
     'ශුද්ධ බර': ('noto-sans-sinhala.ttf', 'ශුද්ධ බර'),                                  # net weight (CAA Direction 71: three languages)
     'நிகர எடை': ('noto-sans-tamil.ttf', 'நிகர எடை'),
 }
