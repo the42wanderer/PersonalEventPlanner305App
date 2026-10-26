@@ -5,7 +5,7 @@
 # rising to a calm column on the right side, a gentle shoulder across the back, level along the left side into the
 # front's high left edge. Also renders the lid ground (the evening sky, dark, a soft glow behind the emblem).
 # Output, per palette: <TEA_ART>/est-<panel>.jpg with 3 mm bleed on every side, for tools/tea_box.mjs (TEA_THEME=estate*).
-import os, sys, numpy as np, cv2
+import os, sys, json, numpy as np, cv2
 from PIL import Image, ImageDraw
 S='/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/'
 sys.argv=sys.argv[:1]; sys.path.insert(0,S+'teasoap')
@@ -58,7 +58,7 @@ X0,X1=PAN['sideB'][0]-B,PAN['back'][1]+B
 # onto the front's centre line CM (tea_box.mjs centres the Sinhala name and the descriptor on it, boundary.py puts the
 # valley there), so the sprig rises from the valley between the name and the facts; the right side moved with its fold;
 # the back's pattern laid twice across the wider back; the front's right end given hills and trees of its own.
-CM=float(os.environ.get('CM',100.67))                                                             # tea_box.mjs prints it
+CM=float(os.environ.get('CM',165.0))                                                             # tea_box.mjs prints it
 FILL_MID=CM>130          # with the group at the right end, the middle of the front gets the new hills instead
 def place(items,extra=()):
     if BOXK!='long': return list(items)
@@ -121,7 +121,7 @@ def scene(h,w):
     cA=hump(place([(56,33.5,30),(140,34,28),(222,33.5,30),(-50,34,28)],[(108,34,28)] if FILL_MID else [(150,34,28)])); mA=layer(cA,0.16,0.26,2.4,0.0,5); hedges(mA,cA,1.7,0.24,6)
     cB=hump(place([(6,37,20),(190,37,18),(-64,37,18)],[(124,37,20)] if FILL_MID else [(164,37,20)])); mB=layer(cB,0.14,0.22,2.2,0.0,7); hedges(mB,cB,1.6,0.22,8)
     cN=edge(xs)-8.5
-    if BOXK=='long': cN=np.maximum(cN,float(os.environ.get('NEAR_TOP',0)))   # where the cream rides high, the near rows stop short of the far hills
+    if BOXK=='long': cN=np.maximum(cN,float(os.environ.get('NEAR_TOP',29.5)))   # where the cream rides high, the near rows stop short of the far hills
     mN=layer(cN,0.10,0.24,3.0,0.0,9); hedges(mN,cN,2.1,0.24,10)
     rng=np.random.default_rng(11); tm=Image.new('L',(w,h),0); rm=Image.new('L',(w,h),0)
     td,rd=ImageDraw.Draw(tm),ImageDraw.Draw(rm); P=lambda x,y:((x-X0)*K,(y+B)*K)
@@ -213,6 +213,23 @@ def direct(D,V0,Vp,af,as_,Ls,g,yy,xx):
     out=out*(1-as_[...,None])+sp*as_[...,None]
     pc=rgbf(D['panel'])[None,None,:]*np.clip(Vp/0.055,0.6,1.5)[...,None]**D.get('panelGrain',0.35)
     return out*(1-g[...,None])+pc*g[...,None]
+def leafpaper(paper,h,w,xx,yy):
+    """the cream's faint engraved tea-leaf pattern (leafpattern.py): absent just under the landscape, rising towards the
+    bottom edge, and eased away around every word and the lion (their ink boxes from TEXT_INK), so the type stays on
+    clean ground; tinted a few shades into gold, tone on tone"""
+    import leafpattern as LP
+    pm=LP.mask(None,h,w,K,X0,B)
+    ed=edge(xx[0])[None,:]
+    gr=np.clip((yy[:,:1]-ed-float(os.environ.get('PAT_IN',4)))/float(os.environ.get('PAT_SPAN',20)),0,1); gr=gr*gr*(3-2*gr)
+    ko=np.zeros((h,w),np.float32); km=Image.new('L',(w,h),0); kd=ImageDraw.Draw(km); pad=1.2
+    for g in json.load(open(os.path.join(S,'boxprev',os.environ.get('INK','ink.json')))):
+        if g['panel'] not in ('front','back','sideB'): continue
+        cv=lambda y:(y+B)*(FH+2*B)/(BD.H+2*B)-B
+        x0=PAN[g['panel']][0]+g['x0']-pad; x1=PAN[g['panel']][0]+g['x1']+pad
+        kd.rectangle([(x0-X0)*K,(cv(g['y0'])-pad+B)*K,(x1-X0)*K,(cv(g['y1'])+pad+B)*K],fill=255)
+    ko=cv2.GaussianBlur(np.asarray(km).astype(np.float32)/255,(0,0),1.8*K); kn=1-np.clip(ko*1.7,0,1)
+    a=(float(os.environ.get('PAT_MAX',0.6))*pm*gr*kn)[...,None]
+    return paper*(1-a)+hx(os.environ.get('PAT_COL','#C4A46C'))*a
 def render(ramp,fr,gam,cream,D=None):
     """RS.render over the strip, then the cream below the edge; returns the strip, uint8"""
     h,w=canvas(X1-X0-2*B,FH)[0].shape[:2]                                                         # the paint canvas's own size
@@ -241,6 +258,7 @@ def render(ramp,fr,gam,cream,D=None):
     cm=np.clip((yy[:,:1]-edge(xx[0])[None,:])*K/1.2+0.5,0,1)                                         # the cream, crisp edge
     if SIDE_PLUM: cm=cm*~((xx>=PAN['sideA'][0])&(xx<=PAN['sideA'][1]))                               # no cream on that side: the front's ends at the fold
     paper=hx(cream)*(1+0.012*np.random.default_rng(3).normal(0,1,(h,w)))[...,None]
+    if os.environ.get('PATTERN','1')!='0': paper=leafpaper(paper,h,w,xx,yy)
     return (out*(1-cm[...,None])+paper*cm[...,None]).clip(0,255).astype(np.uint8)
 def lid(ramp,gam,D=None):
     """the lid: the sky continued over the top, dark, a low glow behind the emblem; the same grain (art-directed: the

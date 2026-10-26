@@ -178,7 +178,10 @@ function build(boxKey) {
     const body = (s, x, y, wMax, o = {}) => para('body', s, x, y, o.size || 2.3, wMax, o.lead || 3.2, o);
     const logo = (cx, cy, lw) => `<path d="${logoD}" fill="${INK}" fill-rule="evenodd" transform="translate(${X(cx - lw / 2)} ${Y(cy - lw * 0.52)}) scale(${n(S(lw) / LOGO_VB, 6) * (rot ? -1 : 1)})"/>`;
     const icon = (key, x, y, s, sw = 0.42) => `<g fill="none" stroke="${INK}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" transform="translate(${X(x)} ${Y(y)}) scale(${n(S(s), 5)})">${ICON[key]}</g>`;
-    const lion = (x, y, lw) => `<path id="Ceylon_Tea_lion" d="${LION.d}" fill="${INK}" fill-rule="evenodd" transform="translate(${X(x)} ${Y(y)}) scale(${n(S(lw) / LION.vw, 6)})"/>`;
+    const lion = (x, y, lw) => {   // its ink box (6..1206 x 6..890 of the SVG) joins TEXT_INK: the cream's pattern keeps clear of it
+      if (INK_BOXES) INK_BOXES.push({ panel: k, s: 'lion', x0: x + 6 * lw / LION.vw, x1: x + 1206 * lw / LION.vw, y0: y + 6 * lw / LION.vw, y1: y + 890 * lw / LION.vw });
+      return `<path id="Ceylon_Tea_lion" d="${LION.d}" fill="${INK}" fill-rule="evenodd" transform="translate(${X(x)} ${Y(y)}) scale(${n(S(lw) / LION.vw, 6)})"/>`;
+    };
     const img = (f, x, y, wmm, hmm) => `<image xlink:href="${data(f)}" x="${X(x)}" y="${Y(y)}" width="${S(wmm)}" height="${S(hmm)}" preserveAspectRatio="none"/>`;
     return { w, h, X, Y, S, text, para, rule, caps, label, body, logo, lion, icon, img };
   };
@@ -443,11 +446,16 @@ function build(boxKey) {
       // A: the stack kept, the Sinhala name above the description as one left-aligned group 5% of the width after the
       //    name, its last line on the name's baseline. B: the name on one line (TITLE_SIZE), the Sinhala name and the
       //    description under it, all on the same left edge.
-      const ALT = LONG && process.env.FRONT_ALT;
+      // The long box's front is B (locked); FRONT_ALT=A shows the other study, FRONT_ALT=centre the earlier centred group.
+      const ALT = LONG && (process.env.FRONT_ALT || 'B') !== 'centre' ? (process.env.FRONT_ALT || 'B') : null;
       if (ALT) {
         const W = F.w, x0 = 0.06 * W, rxa = W - 0.06 * W, qs = LS.body * 0.85, qp = 1.45 * qs, bb = SHAPED[k].bbox;
-        const q1 = base - qp, lbot = q1 - 0.658 * qs - qp;
-        t.push(F.text('wideR', `${pack.bags} TEA BAGS`, rxa, q1, qs, { track: 0.15, anchor: 'end' }), F.text('wideR', `NET WT. ${pack.net} g`, rxa, base, qs, { track: 0.15, anchor: 'end' }));
+        // the net contents: "50 g" bold with a 3 mm lowercase height (5(d): bold, 3 mm on a main panel over 120 cm²;
+        // Roc Grotesk Wide Bold x-height 0.494 em), "NET WT." in the light caps on its baseline; the count above
+        const nw = 3 / 0.494, nv = `${pack.net} g`, nvw = width(FONT.wideB, nv, nw, 0.1);
+        const q1 = base - 0.658 * nw - qp + 0.658 * qs, lbot = q1 - 0.658 * qs - qp;
+        t.push(F.text('wideR', `${pack.bags} TEA BAGS`, rxa, q1, qs, { track: 0.15, anchor: 'end' }), F.text('wideB', nv, rxa, base, nw, { track: 0.1, anchor: 'end' }),
+          F.text('wideR', 'NET WT.', rxa - nvw - 1.6, base, qs, { track: 0.15, anchor: 'end' }));
         t.push(F.lion(rxa - 1206 * ln / LION.vw, lbot - 890 * ln / LION.vw, ln));
         const l1 = base - 3.7, inkBot = l1 - 0.658 * TS.label - TS.label;                                   // a description line's height above it
         const sb = inkBot - bb[3] * zs, desc = (x) => [F.text('wideR', 'CEYLON BLACK TEA', x, l1, TS.label, { track: TS.ltr }), F.text('wideR', 'WITH NATURAL VANILLA', x, base, TS.label, { track: TS.ltr })];
@@ -458,8 +466,8 @@ function build(boxKey) {
           console.log(`A: name ${(x0 / W * 100).toFixed(1)}%..${((gx - 0.05 * W) / W * 100).toFixed(1)}%, group from ${gx.toFixed(1)} mm = ${(gx / W * 100).toFixed(1)}%`);
         } else {
           // TITLE_FRAC sizes the title by its width (a fraction of the panel), TITLE_GAP is the space above the Sinhala
-          const s = process.env.TITLE_FRAC ? Number(process.env.TITLE_FRAC) * W / width(FONT.title, 'Vanilla Tea', 1) : Number(process.env.TITLE_SIZE || 16);
-          const tb = sb + bb[1] * zs - Number(process.env.TITLE_GAP || 3.0), vx = x0 - 1.496 * s / 17;
+          const s = process.env.TITLE_SIZE ? Number(process.env.TITLE_SIZE) : Number(process.env.TITLE_FRAC || 0.575) * W / width(FONT.title, 'Vanilla Tea', 1);
+          const tb = sb + bb[1] * zs - Number(process.env.TITLE_GAP || 4.0), vx = x0 - 1.496 * s / 17;
           L.Name.push(F.text('title', 'Vanilla', vx, tb, s, { fill: GOLD }), F.text('title', 'Tea', vx + width(FONT.title, 'Vanilla ', s), tb, s));
           L.Name.push(shaped(F, k, zs, x0 - bb[0] * zs, sb, 1)); shapedInk('front', k, zs, x0 - bb[0] * zs, sb); t.push(...desc(x0));
           const tw = width(FONT.title, 'Vanilla Tea', s);

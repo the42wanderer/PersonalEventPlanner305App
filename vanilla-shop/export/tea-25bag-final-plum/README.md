@@ -3,17 +3,21 @@
 The long carton on its real dieline (the current 25-bag pack's), every panel: front, How to brew, back, What's
 inside, lid and base. Sheet 579.4 × 332.1 mm, 3 mm bleed on every printed edge. Same system as the 12-bag cube, given room:
 
-- **Front** (175.9 mm): three groups, every last line on the bottom margin. Left, the name (21 mm). In the centre,
-  under the valley and the tea sprig that rises from it, the common name in Sinhala (bold, 3.6 mm x-height) and
-  "Ceylon black tea with natural vanilla" in two lines of caps. Right, the lion and the net contents.
+- **Front** (175.9 mm): two groups. The product name, "Vanilla Tea" on one line at 57.5% of the width (24.4 mm),
+  with the common name in Sinhala (bold, 3.6 mm x-height) and "Ceylon black tea with natural vanilla" (two lines of
+  caps) under it, all on a 6% left edge. At the lower right on a 6% margin, the lion, "25 TEA BAGS" and the net
+  contents: **"50 g" in Roc Grotesk Wide Bold with a 3 mm lowercase height** (5(d): bold, 3 mm on a main panel over
+  120 cm²), "NET WT." in the light caps on its baseline.
 - **Back** (175.0 mm): the story as one centred block under the back's symmetric swell.
 - **What's inside** (the plain side): the Tamil name as heading, the blend and bags, the net weight in three
   languages, as on the cube.
 - **Lid**: hinged at the back, so the emblem is turned to read from the front.
 - **The landscape's edge** is one closed-form function round the box (see `curve-function.png`):
-  `y(u) = H [ Y0 + A exp(k(cos(2π(u−m)/P) − 1)) + A2 exp(k2(cos(2π(u−m2)/P) − 1)) ]`, with Y0 = 0.445,
-  A = 0.20, k = 8, m = 100.67 mm (the front's centre line, between the name and the facts), A2 = 0.04, k2 = 2,
-  m2 = the centre of the back, P = 520.56 mm. Every glyph keeps 0.04 H of clear space below it.
+  `y(u) = H [ Y0 + A exp(k(cos(2π(u−m)/P) − 1)) + A2 exp(k2(cos(2π(u−m2)/P) − 1)) ]`, with Y0 = 0.40,
+  A = 0.18, k = 4, m = 165 mm (under the logo: level over the title, sweeping down onto the lion), A2 = 0.04,
+  k2 = 2, m2 = the centre of the back, P = 520.56 mm. Every glyph keeps 0.04 H of clear space below it. The sprig,
+  peak and glow stand at m, as on the cube.
+- **The cream** carries a faint engraved tea-leaf pattern (below).
 
 | File | What it is |
 |---|---|
@@ -21,6 +25,14 @@ inside, lid and base. Sheet 579.4 × 332.1 mm, 3 mm bleed on every printed edge.
 | `vanilla-tea-25bag-plum_EDITABLE-linked.svg` + `art/` | The same, with the panel artwork as linked files in `art/`, for retouching or swapping a panel. Keep the folder next to the SVG. |
 | `vanilla-tea-25bag-plum_PROOF.pdf` | Proof at actual size. **Not for press** (see Fonts). |
 | `vanilla-tea-25bag-plum_flat-preview.jpg`, `_3d.jpg` | Previews. |
+
+## The tea-leaf pattern
+
+The cream ground on the walls carries a faint engraving of the sprig's tea leaf, two to a stem (outline, midrib,
+curved side veins; 0.14 and 0.09 mm lines), in a half-drop repeat (24 × 28 mm, alternate columns mirrored), tinted
+#C4A46C at up to 60% over the cream. It is absent just under the landscape and rises to full towards the bottom
+edge, and it eases away around every word and the lion, so the type always sits on clean ground. It is part of the
+wall artwork (`art/est-*.jpg`), under the grain, not a separate vector layer.
 
 ## Layers
 

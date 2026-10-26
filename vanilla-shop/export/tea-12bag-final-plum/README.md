@@ -10,6 +10,13 @@ Sheet 421.5 × 371.5 mm, 3 mm bleed on every printed edge.
 | `vanilla-tea-12bag-plum_PROOF.pdf` | Proof at actual size. **Not for press** (see Fonts). |
 | `vanilla-tea-12bag-plum_flat-preview.jpg`, `_3d.jpg` | Previews. |
 
+## The tea-leaf pattern
+
+The cream ground on the walls carries a faint engraving of the sprig's tea leaf, two to a stem, in a half-drop repeat
+(24 × 28 mm, alternate columns mirrored), tinted #C4A46C at up to 60% over the cream: absent just under the landscape,
+rising towards the bottom edge, and eased away around every word and the lion. It is part of the wall artwork
+(`art/est-*.jpg`), under the grain.
+
 ## Layers
 
 `Background` · `Ground` (the landscape artwork, one image per wall and one for the lid) · `Painting` · `Name`
