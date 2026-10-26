@@ -67,7 +67,9 @@ const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper:
   // The Estate: the grained tea-garden strip round the four walls on a cream ground, the lid the evening sky
   // (studies/tea/bandsystem/wrap.py writes the art into TEA_ART). Forest greens, or plum and orange.
   estate: { paper: '#F3E6BE', ink: '#142D25', art: true, light: true, estate: true },
-  estateplum: { paper: '#F3E6BE', ink: '#3B1631', art: true, light: true, estate: true } };
+  estateplum: { paper: '#F3E6BE', ink: '#3B1631', art: true, light: true, estate: true },
+  // the alternative: no cream on How to brew; its land fades into the lid's plum and the steps are set in cream on it
+  estateplumside: { paper: '#F3E6BE', ink: '#3B1631', art: true, light: true, estate: true, sidePlum: true } };
 const THEME = THEMES[process.env.TEA_THEME] ? process.env.TEA_THEME : null;
 const MM = 72 / 25.4, INK = THEME ? THEMES[THEME].ink : '#143A1D', PAPER = THEME ? THEMES[THEME].paper : '#F8E7C0';
 const GOLD = 'url(#foil)';
@@ -396,14 +398,15 @@ function build(boxKey) {
     }
     {   // right side: how to brew, a column clear of the valley at the fold, the last line on the bottom margin
       // the column sits past the boundary's trough (a quarter into the panel), the heading 3.4 mm under the rising edge
-      const F = face('sideA'), base = F.h - M, x0 = 44, is = 5, pitch = 6.0, tx = x0 + is + 2.6, t = [hd(F, 'How to brew', x0, 58.3, F.w - M - x0)];
+      const SP = THEMES[THEME].sidePlum;                                                   // on plum the column takes the 6 mm margin
+      const F = face('sideA'), base = F.h - M, x0 = SP ? M : 44, is = 5, pitch = 6.0, tx = x0 + is + 2.6, t = [hd(F, 'How to brew', x0, 58.3, F.w - M - x0)];
       const steps = [['cup', '150 ML', 'One tea bag in hot water'], ['timer', '5 MINUTES', 'Then lift the bag out'], ['ice', 'OVER ICE', 'Let it cool, pour over ice']];
       const bs = Math.min(2.3, ...steps.map(([, , d]) => (F.w - M - tx) / width(FONT.body, d, 1)));   // body fits the column
       steps.forEach(([ic, h, d], i) => {
         const y = base - 4.8 - (2 - i) * pitch;
         t.push(F.icon(ic, x0, y - 0.2, is / 10), F.text('wideR', h, tx, y + 1.9, 1.7, { track: 0.3 }), F.text('body', d, tx, y + 4.8, bs));
       });
-      L.Type.push(`<g id="Side_How_to_brew">${t.join('')}</g>`);
+      L.Type.push(`<g id="Side_How_to_brew">${SP ? cream(t.join('')) : t.join('')}</g>`);
     }
     {   // back: the line, the description, a closing line on the bottom margin
       const F = face('back'), base = F.h - M, t = [hd(F, 'Vanilla was never plain.', M, 56, F.w - 2 * M)];

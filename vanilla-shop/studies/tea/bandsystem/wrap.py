@@ -102,6 +102,7 @@ def lip_shadow(h,w):
     lip=cv2.GaussianBlur(mask((tube,mouth)),(0,0),0.5*K); src=mask((mouth,))
     sh=cv2.GaussianBlur(np.roll(src,int(0.5*K),0),(0,0),1.5*K)
     return np.clip(sh*(1-0.6*lip)*1.6,0,1)
+SIDE_PLUM=bool(os.environ.get('SIDE_PLUM'))
 def render(ramp,fr,gam,cream):
     """RS.render over the strip, then the cream below the edge; returns the strip, uint8"""
     h,w=canvas(X1-X0-2*B,FH)[0].shape[:2]                                                         # the paint canvas's own size
@@ -114,12 +115,16 @@ def render(ramp,fr,gam,cream):
     lo,hi=np.percentile(Lf[af>0.5],(3,99)); sh=np.clip((Lf-lo)/(hi-lo+1e-6),0,1)
     heart=np.exp(-(((xx-30)/17)**2+((yy-19)/15)**2))
     fv=np.clip(0.68+0.16*sh+0.22*heart-0.17*np.exp(-ins/0.8)-0.22*lip_shadow(h,w),0,1)
+    if SIDE_PLUM:                                                                                   # How to brew: the hills across its top, then the
+        g=np.clip((yy-38)/14,0,1); g=g*g*(3-2*g)*((xx>=PAN['sideA'][0])&(xx<=PAN['sideA'][1]))       # land eases into the lid's deep plum, rows and all
+        L=L*(1-g)+0.08*g
     out=H.ramp(grain(L,0.075,21)**gam,ramp)
     fg=grain(fv,0.075,23); fo=H.ramp(fg,ramp) if fr is None else H.ramp(np.clip((fg-0.56)/0.44,0,1),fr)
     out=out*(1-af[...,None])+fo*af[...,None]
     out*=(1-0.06*np.clip(nz(h,w,40*K,40*K,5),0,1))[...,None]
     out+=np.random.default_rng(5).normal(0,3.0,(h,w))[...,None]
     cm=np.clip((yy[:,:1]-edge(xx[0])[None,:])*K/1.2+0.5,0,1)                                         # the cream, crisp edge
+    if SIDE_PLUM: cm=cm*~((xx>=PAN['sideA'][0])&(xx<=PAN['sideA'][1]))                               # no cream on that side: the front's ends at the fold
     paper=hx(cream)*(1+0.012*np.random.default_rng(3).normal(0,1,(h,w)))[...,None]
     return (out*(1-cm[...,None])+paper*cm[...,None]).clip(0,255).astype(np.uint8)
 def lid(ramp,gam):
@@ -132,7 +137,7 @@ def lid(ramp,gam):
 if __name__=='__main__':
     ks=os.environ.get('PALETTES','forest plum').split()
     for k in ks:
-        d=os.path.join(S,'teasoap','estate-art',k); os.makedirs(d,exist_ok=True)
+        d=os.path.join(S,'teasoap','estate-art',k+('-sideplum' if SIDE_PLUM else '')); os.makedirs(d,exist_ok=True)
         gam=1.3 if k=='forest' else 1.0
         st=render(RS.RAMPS[k],RS.FLOWER.get(k),gam,RS.CREAM[k]); Image.fromarray(st).save(os.path.join(d,'strip.jpg'),quality=93)
         for p,(a,b) in PAN.items():
