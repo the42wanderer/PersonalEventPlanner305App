@@ -16,7 +16,7 @@ GREEN='#163F3D'; CREAM='#F4EEDF'
 LEAF=('<linearGradient id="leaf" x1="0" y1="0" x2="1" y2="0.3"><stop offset="0" stop-color="#8A6424"/><stop offset=".25" stop-color="#D9B465"/>'
       '<stop offset=".5" stop-color="#A27A30"/><stop offset=".75" stop-color="#E6C77E"/><stop offset="1" stop-color="#946B28"/></linearGradient>')
 def ss(t): t=np.clip(t,0,1); return t*t*(3-2*t)
-EDGE=np.array([(-3,38),(30,35.5),(64,48),(90.6,64)])                                           # high and calm over the name, a long sweep down to the right, easing at the corner                                           # high and calm over the name, a long sweep down to the right                                       # one cubic sweep, like a hill's shoulder
+EDGE=np.array([(-3,38),(30,35.5),(62,46.5),(90.6,58)])                                           # high and calm over the name, a long sweep down to the right, easing at the corner                                           # high and calm over the name, a long sweep down to the right                                       # one cubic sweep, like a hill's shoulder
 _t=np.linspace(0,1,600)[:,None]; _c=(1-_t)**3*EDGE[0]+3*(1-_t)**2*_t*EDGE[1]+3*(1-_t)*_t**2*EDGE[2]+_t**3*EDGE[3]
 def edge(x):
     """face-mm y of the cream's top edge: high and level under the logo, falling away smoothly to the right"""

@@ -394,7 +394,7 @@ function build(boxKey) {
       L.Type.push(`<g id="Front">${t.join('')}</g>`);
     }
     {   // right side: how to brew, a column clear of the valley at the fold, the last line on the bottom margin
-      const F = face('sideA'), base = F.h - M, x0 = 40, is = 5, pitch = 6.6, tx = x0 + is + 2.6, t = [hd(F, 'How to brew', x0, 56.5, F.w - M - x0)];
+      const F = face('sideA'), base = F.h - M, x0 = 38, is = 5, pitch = 6.6, tx = x0 + is + 2.6, t = [hd(F, 'How to brew', x0, 56.5, F.w - M - x0)];
       const steps = [['cup', '150 ML', 'One tea bag in hot water'], ['timer', '5 MINUTES', 'Then lift the bag out'], ['ice', 'OVER ICE', 'Let it cool, pour over ice']];
       const bs = Math.min(2.3, ...steps.map(([, , d]) => (F.w - M - tx) / width(FONT.body, d, 1)));   // body fits the column
       steps.forEach(([ic, h, d], i) => {

@@ -26,7 +26,7 @@ def bez(P,n=400):
 _e1=float(EF.edge(87.65)); _e0=float(EF.edge(0.0))
 _pts=np.concatenate([bez([(X0,46.5),(-50,47.6),(-18,45.0),(0,_e0)]),                         # left side: lower, sweeping up into the front
                      np.stack([np.linspace(0,87.65,300),EF.edge(np.linspace(0,87.65,300))],1),  # the front, as approved
-                     bez([(87.65,_e1),(99,_e1+1.0),(112,53),(134,46.6)]),                       # right side: a broad, shallow turn past the fold, then up                       # right side: a rounded valley past the fold, then up
+                     bez([(87.65,_e1),(100,_e1+0.6),(112,50.5),(130,46.6)]),                       # right side: a broad, shallow turn past the fold, then up                       # right side: a rounded valley past the fold, then up
                      np.array([[150,46.2],[172.22,46.3]]),
                      bez([(172.22,46.3),(200,44.4),(232,48.6),(X1,46.5)])])                     # back: a gentle shoulder
 _pts=_pts[np.argsort(_pts[:,0],kind='stable')]
@@ -55,12 +55,12 @@ def scene(h,w):
         """contour rows of tea, varied as a real estate is: the spacing changes along the hill, the rows bend a little,
         and here and there a planting patch where the rows give way to loose bushes"""
         nonlocal L; d=np.clip(ys-crest[None,:],0,None)
-        per=p0*(1+0.05*d)*np.clip(1+0.24*nz(h,1,1.2*K,1,seed+40),0.6,1.5)                         # row-to-row spacing, the same across the hill
-        ph=np.cumsum(1/np.maximum(per,0.3),axis=0)/K+0.35*nz(1,w,12*K,1,seed+41); f=ph-np.floor(ph)   # rows stay parallel, bending gently
+        per=p0*(1+0.05*d)*np.clip(1+0.45*nz(h,1,1.6*K,1,seed+40),0.5,1.9)                         # row-to-row spacing, the same across the hill
+        ph=np.cumsum(1/np.maximum(per,0.3),axis=0)/K+0.9*nz(1,w,10*K,1,seed+41); f=ph-np.floor(ph)   # rows stay parallel, bending gently
         row=np.clip(1-np.abs(f-0.35)/0.42,0,1)**0.8
         bush=0.75+0.25*np.cos(2*np.pi*(X/(per*1.2))+2.4*np.floor(ph))*(0.8+0.2*nz(h,w,1.2*K,1.2*K,seed))
-        patch=np.clip((nz(h,w,4*K,2.5*K,seed+42)-1.4)*1.5,0,1)                                    # ~8% of the slope
-        loose=np.clip(0.55+0.45*nz(h,w,0.45*K,0.4*K,seed+43),0,1)
+        patch=np.clip((nz(h,w,4.5*K,2.5*K,seed+42)-0.95)*2.0,0,1)                                  # ~17% of the slope
+        loose=np.clip(0.35+0.65*nz(h,w,0.6*K,0.5*K,seed+43),0,1)**1.4                                # rounder, darker-gapped bushes than the rows
         L=np.where(m,L+amp*(row*bush*(1-patch)+0.75*loose*patch),L)
     cA=hump([(56,33.5,30),(140,34,28),(222,33.5,30),(-50,34,28)]); mA=layer(cA,0.16,0.26,2.4,0.0,5); hedges(mA,cA,1.7,0.24,6)
     cB=hump([(6,37,20),(190,37,18),(-64,37,18)]); mB=layer(cB,0.14,0.22,2.2,0.0,7); hedges(mB,cB,1.6,0.22,8)
@@ -89,7 +89,7 @@ def foreground(h,w):
         a=np.clip(np.abs(img-bg).max(2)/30,0,1); return (img@np.array([0.3,0.59,0.11],np.float32))/255,a
     u=lambda x:x-X0                                                                                  # front mm -> strip canvas mm
     fl=lay(lambda P,c:(paint_flower(P,c,(u(11),B+9),30,2.35),paint_vbud(P,c,(u(34),B+6),-40,6)))
-    sh=lay(lambda P,c:shoot(P,c,(u(EF.FW+5),B+FH-14),-128,46,-0.35,20,('#2A3A2A','#3C5038','#5A6E4E','#8DA07A'),'#C9D6B4',9,1))
+    sh=lay(lambda P,c:shoot(P,c,(u(EF.FW+5),B+FH-21),-128,46,-0.35,20,('#2A3A2A','#3C5038','#5A6E4E','#8DA07A'),'#C9D6B4',9,1))
     return fl,sh
 def lip_shadow(h,w):
     tube,mouth,_=trumpet((11-X0,B+9),30,7.5*2.35,1.1*2.35,3.6*2.35,2.6*2.35,0.13)
@@ -107,7 +107,7 @@ def render(ramp,fr,gam,cream):
     yy,xx=np.mgrid[0:h,0:w].astype(np.float32)/K; xx+=X0; yy-=B
     as_=cv2.GaussianBlur(as_,(0,0),0.06*K); m=(as_>0.5).astype(np.uint8); ins=cv2.distanceTransform(m,cv2.DIST_L2,5)/K
     q=Ls[as_>0.5]; ln=np.clip((Ls-np.percentile(q,5))/(np.percentile(q,99)-np.percentile(q,5)+1e-6),0,1)
-    L=L*(1-as_)+(0.12+0.18*ln+0.36*np.exp(-ins/0.45))*as_                                              # a warmer midtone, a muted copper rim
+    L=L*(1-as_)+(0.20+0.22*ln+0.42*np.exp(-ins/0.5))*as_                                              # a warmer midtone, a muted copper rim
     af=cv2.GaussianBlur(af,(0,0),0.06*K); m=(af>0.5).astype(np.uint8); ins=cv2.distanceTransform(m,cv2.DIST_L2,5)/K
     lo,hi=np.percentile(Lf[af>0.5],(3,99)); sh=np.clip((Lf-lo)/(hi-lo+1e-6),0,1)
     heart=np.exp(-(((xx-30)/17)**2+((yy-19)/15)**2))
