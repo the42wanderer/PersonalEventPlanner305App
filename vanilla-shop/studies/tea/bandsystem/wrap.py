@@ -212,7 +212,7 @@ if __name__=='__main__':
     ks=os.environ.get('PALETTES','forest plum').split()
     for k in ks:
         d=os.path.join(S,'teasoap','estate-art',k+('-sideplum' if SIDE_PLUM else '')); os.makedirs(d,exist_ok=True)
-        gam={'forest':1.3,'ceylon':1.15,'evergreen':1.0,'emerald':1.15,'emeraldhoney':1.15,'apricot':1.15,'citron':1.15,'ochre':1.15,'rose':1.15,'celadon':1.15,'chartreuse':1.15,'jade':1.15,'sage':1.1}.get(k,1.0)
+        gam={'forest':1.3,'ceylon':1.15,'evergreen':1.0,'emerald':1.15,'emeraldhoney':1.15,'apricot':1.15,'citron':1.15,'citronA':1.15,'citronB':1.15,'citronC':1.15,'ochre':1.15,'rose':1.15,'celadon':1.15,'chartreuse':1.15,'jade':1.15,'sage':1.1}.get(k,1.0)
         D=getattr(RS,'DIRS',{}).get(k); rp=RS.RAMPS.get(k,RS.RAMPS['emerald'])
         st=render(rp,RS.FLOWER.get(k,RS.FLOWER['emerald']),gam,RS.CREAM.get(k,D and D['cream']),D); Image.fromarray(st).save(os.path.join(d,'strip.jpg'),quality=93)
         for p,(a,b) in PAN.items():

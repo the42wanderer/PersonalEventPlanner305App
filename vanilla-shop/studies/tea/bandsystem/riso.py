@@ -155,3 +155,10 @@ DIRS={
   'hills':[[(0,'#5E6F38'),(.5,'#728447'),(1,'#A3AF62')],[(0,'#475733'),(.5,'#5B6C3D'),(1,'#88964F')],
            [(0,'#0E2F27'),(.45,'#214A37'),(1,'#5F7B45')],[(0,'#06191A'),(.5,'#102F29'),(1,'#2F5442')],[(0,'#06191A'),(.5,'#102F29'),(1,'#2F5442')]],
   'sprig':[(0,'#0B2924'),(.5,'#285A43'),(1,'#B3C66C')],'panel':'#102F29','lidGlowCol':'#3C5A2E','cream':'#F5EFD9'}}
+
+# Jade & Citron, flower + label cream pairs (the citron landscape unchanged). Plum's flower was painted with its own
+# sunset ramp, and its cream is that sunset's last light; these do the same for green in three ways.
+for _k,_f,_c in (('citronA',['#9DBA62','#C8D683','#E3E4A6','#F5F0CE','#FFFCEB'],'#F4EED0'),   # the horizon's citron light; cream = horizon
+                 ('citronB',['#C9AE6A','#E0CB8E','#F0E3B6','#F9F2DA','#FFFDF4'],'#F6F1E2'),   # pale gold, with the gold Vanilla; ivory
+                 ('citronC',['#8FB7A0','#B8D2BF','#D9E8DA','#EFF5EE','#FFFFFB'],'#EEF1E3')):  # white, jade in the shade; celadon white
+    RAMPS[_k]=RAMPS['citron']; FLOWER[_k]=_f; INK[_k]=INK['citron']; CREAM[_k]=_c

@@ -80,6 +80,10 @@ const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper:
   // the four-way board: emerald & apricot, jade & citron, forest & ochre (ink = each one's deepest green)
   estateapricotside: { paper: '#F3E6BE', ink: '#092E26', art: true, light: true, estate: true, sidePlum: true },
   estatecitronside: { paper: '#F3E6BE', ink: '#07352F', art: true, light: true, estate: true, sidePlum: true },
+  // Jade & Citron flower + cream pairs: A the horizon's own light, B pale gold on ivory, C white on celadon white
+  estatecitronA: { paper: '#F4EED0', ink: '#07352F', art: true, light: true, estate: true, sidePlum: true },
+  estatecitronB: { paper: '#F6F1E2', ink: '#07352F', art: true, light: true, estate: true, sidePlum: true },
+  estatecitronC: { paper: '#EEF1E3', ink: '#07352F', art: true, light: true, estate: true, sidePlum: true },
   estateochreside: { paper: '#F3E6BE', ink: '#202F22', art: true, light: true, estate: true, sidePlum: true },
   // three broad directions (wrap.py DIRS): logoInk sets the front logo in ink on a light sky; panelInk sets the How to
   // brew side and the lid in ink on a pale panel
