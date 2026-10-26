@@ -149,7 +149,7 @@ function build(boxKey) {
     const label = (s, x, y, o = {}) => text('wideR', s, x, y, o.size || 1.85, { track: 0.3, opacity: 0.7, ...o });
     const body = (s, x, y, wMax, o = {}) => para('body', s, x, y, o.size || 2.3, wMax, o.lead || 3.2, o);
     const logo = (cx, cy, lw) => `<path d="${logoD}" fill="${INK}" fill-rule="evenodd" transform="translate(${X(cx - lw / 2)} ${Y(cy - lw * 0.52)}) scale(${n(S(lw) / LOGO_VB, 6) * (rot ? -1 : 1)})"/>`;
-    const icon = (key, x, y, s) => `<g fill="none" stroke="${INK}" stroke-width="0.42" stroke-linecap="round" stroke-linejoin="round" transform="translate(${X(x)} ${Y(y)}) scale(${n(S(s), 5)})">${ICON[key]}</g>`;
+    const icon = (key, x, y, s, sw = 0.42) => `<g fill="none" stroke="${INK}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" transform="translate(${X(x)} ${Y(y)}) scale(${n(S(s), 5)})">${ICON[key]}</g>`;
     const lion = (x, y, lw) => `<path id="Ceylon_Tea_lion" d="${LION.d}" fill="${INK}" fill-rule="evenodd" transform="translate(${X(x)} ${Y(y)}) scale(${n(S(lw) / LION.vw, 6)})"/>`;
     const img = (f, x, y, wmm, hmm) => `<image xlink:href="${data(f)}" x="${X(x)}" y="${Y(y)}" width="${S(wmm)}" height="${S(hmm)}" preserveAspectRatio="none"/>`;
     return { w, h, X, Y, S, text, para, rule, caps, label, body, logo, lion, icon, img };
@@ -398,9 +398,12 @@ function build(boxKey) {
       const tb = base - 0.658 * TS.body - 4.0, vb = tb - 0.78 * sz, cx = M + width(FONT.title, 'Tea', sz) + 4;
       t.push(cream(F.logo(F.w - M - 927.6 * lw / 933 + lw / 2, M - 6.3 * lw / 933 + 0.52 * lw, lw)));      // ink box from brand/vanilla-shop-logo.svg
       L.Name.push(F.text('roman', 'Vanilla', M + 0.018 * sz, vb, sz, { fill: GOLD }), F.text('title', 'Tea', M, tb, sz));
-      t.push(F.text('wideR', 'CEYLON BLACK TEA', cx, tb - 3.4, TS.label, { track: TS.ltr }), F.text('wideR', 'WITH NATURAL VANILLA', cx, tb, TS.label, { track: TS.ltr }));
       t.push(F.text('wideB', `${pack.bags} TEA BAGS  ·  NET WT. ${pack.net} g`, M, base, TS.body, { track: 0.15 }));
       t.push(F.lion(F.w - M - 1206 * ln / LION.vw, base - 890 * ln / LION.vw, ln));                         // ink box from the lion SVG
+      // the common name in Sinhala (the second language the main panel needs), bold, at exactly the 3 mm minimum
+      // x-height (Noto Serif Sinhala Bold, shaped), set as the caption beside Tea on Tea's baseline, so it reads as part
+      // of the name, not a second headline. The descriptor moves to What's inside; Tamil, the third, is on that side.
+      { const k = 'B:වැනිලා තේ', zs = 3 / 0.536; L.Name.push(shaped(F, k, zs, cx, tb, 1)); shapedInk('front', k, zs, cx, tb); }
       L.Type.push(`<g id="Front">${t.join('')}</g>`);
     }
     {   // right side: how to brew
@@ -408,17 +411,27 @@ function build(boxKey) {
       const steps = [['cup', '150 ML', 'One tea bag in hot water'], ['timer', '5 MINUTES', 'Then lift the bag out'], ['ice', 'OVER ICE', 'Let it cool, pour over ice']];
       const F = face('sideA'), base = F.h - M, t = [];
       if (SP) {
-        // one block centred between 12% margins, text left-aligned: the heading on the shared baseline, then three rows;
-        // icons in one column centred on their two lines; the step label (bold caps) over its explanation (body), the
-        // pair tight (about 1.4 mm) and the rows apart (about 3 mm), spread to the bottom margin
-        const mg = 0.12 * F.w, is = 6, gap = 3.2, lb = 1.55, eb = 4.5;
-        const tw = Math.max(...steps.map(([, h, d]) => Math.max(width(FONT.wideB, h, TS.label, TS.ltr), width(FONT.body, d, TS.body))));
+        // one block centred between 12% margins, text left-aligned. Each step two lines: the bold label inline with
+        // the English, the Sinhala under it (use instructions in two languages, at the 1.5 mm minimum). The iced step is
+        // an option, said in the words ("Or", "හෝ") and by a little more space above it. Icons a heavier stroke to sit
+        // with the bold labels, centred on their two lines. The heading has 4 mm of plum above it (wrap.py fades the
+        // land out by 41 mm on this side).
+        const SI = ['උණු වතුරට තේ බෑගයක්', 'විනාඩි 5කින් බෑගය ඉවත් කරන්න', 'හෝ නිවා අයිස් මත වත් කරන්න'], ss = 2.8;
+        const LB = ['150 ML', '5 MINUTES', 'OVER ICE'], ic = ['cup', 'timer', 'ice2'];
+        const mg = 0.12 * F.w, is = 6, gap = 3.2, lg = 2.2, Hb = 51.0, dl = 4.0, opt = 1.0;
+        const lw = (i, e) => width(FONT.wideB, LB[i], TS.label, TS.ltr) + lg + width(FONT.body, e, TS.body);
+        const room = F.w - 2 * mg - is - gap;
+        const EN = ['One tea bag in hot water', 'Then lift the bag out',
+          ['Or let it cool, pour over ice', 'Or cool it, pour over ice', 'Or cool, pour over ice'].find((e) => lw(2, e) <= room)];
+        const tw = Math.max(...EN.map((e, i) => lw(i, e)), ...SI.map((k) => SHAPED[k].advance * ss));
         const gw = Math.max(is + gap + tw, width(FONT.title, 'How to brew', TS.head)), x0 = mg + (F.w - 2 * mg - gw) / 2, tx = x0 + is + gap;
-        const r1 = HB + 3.4, r3 = base - eb, pitch = (r3 - r1) / 2;
-        t.push(F.text('title', 'How to brew', x0, HB, TS.head));
-        steps.forEach(([ic, h, d], i) => {
-          const y = r1 + i * pitch;
-          t.push(F.icon(ic, x0, y + eb / 2 - is / 2, is / 10), F.text('wideB', h, tx, y + lb, TS.label, { track: TS.ltr }), F.text('body', d, tx, y + eb, TS.body));
+        const b0 = Hb + 5.6, p = (base - dl - opt - b0) / 2;
+        t.push(F.text('title', 'How to brew', x0, Hb, TS.head));
+        EN.forEach((e, i) => {
+          const b1 = b0 + i * p + (i === 2 ? opt : 0), b2 = b1 + dl, mid = (b1 - 2.2 + b2 + 0.75) / 2;
+          const lx = tx + width(FONT.wideB, LB[i], TS.label, TS.ltr) + lg;
+          t.push(F.icon(ic[i], x0, mid - is / 2, is / 10, 0.62), F.text('wideB', LB[i], tx, b1, TS.label, { track: TS.ltr }), F.text('body', e, lx, b1, TS.body));
+          t.push(shaped(F, SI[i], ss, tx, b2, 1)); shapedInk('sideA', SI[i], ss, tx, b2);
         });
       } else {
         const x0 = 44, is = 5, pitch = 6.0, tx = x0 + is + 2.6; t.push(hd(F, 'How to brew', x0, 58.3, F.w - M - x0));
@@ -437,10 +450,17 @@ function build(boxKey) {
       t.push(F.text('title', 'Made with vanilla grown on our own farms.', M, base, 4.1));
       L.Type.push(`<g id="Back">${t.join('')}</g>`);
     }
-    {   // left side: what's inside, the heading on the shared baseline, the declarations in label and body
+    {   // left side: what's inside, the heading on the shared baseline; the common name in Tamil under it (the third
+      // language, bold, 3 mm x-height); the blend and the bags as one short paragraph; the net weight on the bottom
+      // margin with its label in English, Sinhala and Tamil (CAA Direction 71)
       const F = face('sideB'), base = F.h - M, t = [hd(F, 'What’s inside', M, HB, F.w - 2 * M)];
-      t.push(F.text('wideR', 'TEA BAGS', M, HB + 6.0, TS.label, { track: TS.ltr, opacity: 0.75 }), F.body(`${pack.bags} tagged unbleached sachet tea bags`, M, HB + 10.4, F.w - 2 * M, { size: TS.body, lead: TS.lead }).svg);
-      t.push(F.text('wideR', 'NET WEIGHT', M, base - 4.4, TS.label, { track: TS.ltr, opacity: 0.75 }), F.body(`${pack.net}g (2g x ${pack.bags})`, M, base, F.w - 2 * M, { size: TS.body }).svg);
+      { const k = 'B:வெனிலா தேயிலை', zs = 3 / 0.563; t.push(shaped(F, k, zs, M, HB + 6.6, 1)); shapedInk('sideB', k, zs, M, HB + 6.6); }
+      ['Ceylon black tea with natural vanilla,', `in ${pack.bags} tagged unbleached sachet tea bags.`].forEach((l, i) => t.push(F.text('body', l, M, HB + 11.0 + i * TS.lead, TS.body)));
+      let x = M; const ly = base - 4.8;
+      t.push(F.text('wideR', 'NET WEIGHT', x, ly, TS.label, { track: TS.ltr, opacity: 0.75 })); x += width(FONT.wideR, 'NET WEIGHT', TS.label, TS.ltr) + 2.6;
+      t.push(shaped(F, 'ශුද්ධ බර', 2.8, x, ly, 0.75)); x += SHAPED['ශුද්ධ බර'].advance * 2.8 + 2.6;
+      t.push(shaped(F, 'நிகர எடை', 2.75, x, ly, 0.75));
+      t.push(F.text('body', `${pack.net}g (2g x ${pack.bags})`, M, base, TS.body));
       L.Type.push(`<g id="Side_Whats_inside">${t.join('')}</g>`);
     }
     const Fo = face('bottom'); L.Type.push(`<g id="Base">${baseInfo(Fo, 0, Fo.w, M, 7)}</g>`);
@@ -507,6 +527,10 @@ function build(boxKey) {
     g('Dieline', B.dieline.replace(/stroke="#B[0-9A-F]{5}"/g, 'stroke="#E4007C"')) + '</svg>';
 }
 
+function shapedInk(panel, key, sz, x, y) {       // ink box of a HarfBuzz-shaped string (brand/shaped-labels.json)
+  const bb = SHAPED[key].bbox;
+  if (INK_BOXES && bb) INK_BOXES.push({ panel, s: key, x0: x + bb[0] * sz, x1: x + bb[2] * sz, y0: y + bb[1] * sz, y1: y + bb[3] * sz });
+}
 function shaped(F, s, sz, x, y, op = 0.8) {
   const gl = SHAPED[s];
   if (!gl) throw new Error('Label not shaped: ' + s);
@@ -517,6 +541,7 @@ function shaped(F, s, sz, x, y, op = 0.8) {
 const ICON = {
   cup: '<path d="M1.6 4.2H7.2V6.6C7.2 8.2 6 9.2 4.4 9.2S1.6 8.2 1.6 6.6Z"/><path d="M7.2 5H8C8.9 5 9.2 5.6 9.2 6.2S8.9 7.4 8 7.4H7.1"/><path d="M3.4 1.2c-.6.7.6 1.2 0 2M5.4 1.2c-.6.7.6 1.2 0 2"/>',
   timer: '<circle cx="5" cy="5.6" r="3.5"/><path d="M5 5.6V3.5M5 5.6L6.6 6.6M4 1H6M5 1V2.1"/>',
+  ice2: '<path d="M2 1.6H8L7.2 9.2H2.8Z"/><rect x="3.5" y="4.3" width="1.8" height="1.8"/><rect x="4.9" y="6.3" width="1.8" height="1.8"/>',   // simpler, for 6 mm
   ice: '<path d="M2 1.6H8L7.2 9.2H2.8Z"/><rect x="3.3" y="4.6" width="1.6" height="1.6" transform="rotate(-12 4.1 5.4)"/><rect x="5.1" y="5.9" width="1.6" height="1.6" transform="rotate(10 5.9 6.7)"/><path d="M3 3.4H7"/>',
   tea: '<path d="M5 9.4V4.6"/><path d="M5 6.4C3 6.4 1.8 5 1.8 3.2C3.8 3.2 5 4.4 5 6.4Z"/><path d="M5 5.4C7 5.4 8.2 4 8.2 2.2C6.2 2.2 5 3.4 5 5.4Z"/><path d="M5 4.6C4.6 3.4 4.8 2 5.6 1"/>',
   pod: '<path d="M2.2 8.8C3.2 6 5.6 3 8.4 1.4C8.8 3.6 7.2 6.8 3.6 8.8Z"/><path d="M2.2 8.8L1.4 9.4M3.4 7.2C4.8 5.6 6.2 4 7.6 2.8"/>',

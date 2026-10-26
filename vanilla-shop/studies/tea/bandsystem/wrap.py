@@ -116,7 +116,7 @@ def render(ramp,fr,gam,cream):
     heart=np.exp(-(((xx-30)/17)**2+((yy-19)/15)**2))
     fv=np.clip(0.68+0.16*sh+0.22*heart-0.17*np.exp(-ins/0.8)-0.22*lip_shadow(h,w),0,1)
     if SIDE_PLUM:                                                                                   # How to brew: the hills across its top, then the
-        g=np.clip((yy-38)/14,0,1); g=g*g*(3-2*g)*((xx>=PAN['sideA'][0])&(xx<=PAN['sideA'][1]))       # land eases into the lid's deep plum, rows and all
+        g=np.clip((yy-29)/12,0,1); g=g*g*(3-2*g)*((xx>=PAN['sideA'][0])&(xx<=PAN['sideA'][1]))       # land eases into the lid's deep plum, rows and all
         L=L*(1-g)+0.08*g
     out=H.ramp(grain(L,0.075,21)**gam,ramp)
     fg=grain(fv,0.075,23); fo=H.ramp(fg,ramp) if fr is None else H.ramp(np.clip((fg-0.56)/0.44,0,1),fr)

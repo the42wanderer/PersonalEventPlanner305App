@@ -59,3 +59,26 @@ packer's licence from the Board; check the licence covers these packs and any mi
 - The 12-bag cube uses the 25-bag wording with its own count and weight, and needs its own GTIN.
 - Main panels still to check against 4(1) and 5(a), 5(d): the common name in bold and in two or three languages,
   and net contents in bold at the Schedule II height (3 mm on the long box).
+
+## The Estate 12-bag carton (October 2026, `TEA_THEME=estateplumside`)
+
+How it meets the rules above, after the regulatory review of 26 October 2026 (Gazette 2494/47, CAA Direction 71):
+
+- Common name in two languages on the main panel, the third elsewhere: Sinhala "වැනිලා තේ" beside "Tea" on the front,
+  Tamil "வெனிலா தேயிலை" under "What's inside" on the left side; both bold (Noto Serif Sinhala / Tamil Bold, shaped
+  with HarfBuzz into brand/shaped-labels.json) at exactly 3 mm x-height.
+- Net contents on the front in bold at the 1.5 mm Schedule III height ("12 TEA BAGS · NET WT. 24 g", Roc Grotesk Wide
+  Bold 3.05 mm: lowercase g sets the size). On the left side the net weight is labelled in English, Sinhala ("ශුද්ධ බර")
+  and Tamil ("நிகர எடை") for Direction 71; the batch block on the base was already trilingual.
+- How to brew in English and Sinhala (use instructions in two languages), every line at the 1.5 mm minimum.
+
+Still to settle before print:
+
+- English common name. If "Vanilla Tea" is the common name it must be bold, in one type and size for both words
+  (today: gold upright "Vanilla", plum italic "Tea", Instrument Serif has no bold). If it is treated as the trade name,
+  the common name must be at least 1/3 of its letter height. Ask the FCAU which reading applies; the design can follow
+  either.
+- Claims: "natural vanilla" (regulation 13(8) and the flavouring regulations) and "Made with vanilla grown on our own
+  farms" (traceability) need evidence or rewording.
+- Ceylon Tea lion: confirm the Tea Board's approval covers this flavoured tea and pack.
+- Translations: written for this pack; have a native Sinhala and Tamil reader check them on a printed proof.
