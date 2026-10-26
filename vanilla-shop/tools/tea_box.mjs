@@ -427,7 +427,9 @@ function build(boxKey) {
       const k = 'B:වැනිලා තේ', zs = 3 / 0.536, tb = base + SHAPED[k].bbox[1] * zs - 2.0, vb = tb - 0.78 * sz;
       const lg = F.logo(F.w - M - 927.6 * lw / 933 + lw / 2, M - 6.3 * lw / 933 + 0.52 * lw, lw);
       t.push(THEMES[THEME].logoInk ? lg : cream(lg));      // ink box from brand/vanilla-shop-logo.svg
-      L.Name.push(F.text('roman', 'Vanilla', M + 0.018 * sz, vb, sz, { fill: GOLD }), F.text('title', 'Tea', M, tb, sz));
+      // Vanilla upright (the default) or, with vItalic, in the italic of Tea, its ink edge on Tea's (1.496 vs 0.867 at 17)
+      const vIt = THEMES[THEME].vItalic || process.env.VANILLA_ITALIC;
+      L.Name.push(vIt ? F.text('title', 'Vanilla', M - (1.496 - 0.867) * sz / 17, vb, sz, { fill: GOLD }) : F.text('roman', 'Vanilla', M + 0.018 * sz, vb, sz, { fill: GOLD }), F.text('title', 'Tea', M, tb, sz));
       L.Name.push(shaped(F, k, zs, M - SHAPED[k].bbox[0] * zs, base, 1)); shapedInk('front', k, zs, M - SHAPED[k].bbox[0] * zs, base);
       const c1 = base - 0.658 * TS.body - 2.3;                                                           // two lines, 2.3 mm apart
       t.push(F.text('wideB', `${pack.bags} TEA BAGS`, rx, c1, TS.body, { track: 0.15, anchor: 'end' }), F.text('wideB', `NET WT. ${pack.net} g`, rx, base, TS.body, { track: 0.15, anchor: 'end' }));
