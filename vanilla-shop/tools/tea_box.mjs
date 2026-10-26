@@ -383,26 +383,31 @@ function build(boxKey) {
     const M = 6, CREAM = PAPER, cream = (s) => s.replaceAll(`fill="${INK}"`, `fill="${CREAM}"`).replaceAll(`stroke="${INK}"`, `stroke="${CREAM}"`);
     const hd = (F, s, x, y, wMax) => F.text('title', s, x, y, Math.min(7, wMax / width(FONT.title, s, 1)));
     {   // front: logo in the top-right corner; Vanilla over Tea, the facts beneath, the lion on the last baseline
-      const F = face('front'), base = F.h - M, t = [], sz = 17, d1 = base - 3.3, tb = d1 - 1.03 - 3.6, vb = tb - 0.78 * sz, lw = 15, ln = 8.4;
+      // the small lines at 1.75 mm, tracked tighter so they hold their own under the name; the gaps tightened to match,
+      // so the name keeps its place under the curve
+      const F = face('front'), base = F.h - M, t = [], sz = 17, cs = 1.75, d1 = base - 3.7, tb = d1 - 0.71 * cs - 3.2, vb = tb - 0.78 * sz, lw = 15, ln = 8.4;
       t.push(cream(F.logo(F.w - M - 927.6 * lw / 933 + lw / 2, M - 6.3 * lw / 933 + 0.52 * lw, lw)));      // ink box from brand/vanilla-shop-logo.svg
       L.Name.push(F.text('roman', 'Vanilla', M + 0.018 * sz, vb, sz, { fill: GOLD }), F.text('title', 'Tea', M, tb, sz));
-      t.push(F.text('wideR', 'CEYLON BLACK TEA WITH NATURAL VANILLA', M, d1, 1.45, { track: 0.3 }));
-      t.push(F.text('wideR', `${pack.bags} TEA BAGS  ·  NET WT. ${pack.net} g`, M, base, 1.45, { track: 0.3 }));
+      t.push(F.text('wideR', 'CEYLON BLACK TEA WITH NATURAL VANILLA', M, d1, cs, { track: 0.16 }));
+      t.push(F.text('wideR', `${pack.bags} TEA BAGS  ·  NET WT. ${pack.net} g`, M, base, cs, { track: 0.16 }));
       t.push(F.lion(F.w - M - 1206 * ln / LION.vw, base - 890 * ln / LION.vw, ln));                         // ink box from the lion SVG
       L.Type.push(`<g id="Front">${t.join('')}</g>`);
     }
     {   // right side: how to brew, a column clear of the valley at the fold, the last line on the bottom margin
-      const F = face('sideA'), base = F.h - M, x0 = 36, is = 5, pitch = 6.6, tx = x0 + is + 3, t = [hd(F, 'How to brew', x0, 56, F.w - M - x0)];
-      [['cup', '150 ML', 'One tea bag in hot water'], ['timer', '5 MINUTES', 'Then lift the bag out'], ['ice', 'OVER ICE', 'Let it cool, pour over ice']].forEach(([ic, h, d], i) => {
+      const F = face('sideA'), base = F.h - M, x0 = 40, is = 5, pitch = 6.6, tx = x0 + is + 2.6, t = [hd(F, 'How to brew', x0, 56.5, F.w - M - x0)];
+      const steps = [['cup', '150 ML', 'One tea bag in hot water'], ['timer', '5 MINUTES', 'Then lift the bag out'], ['ice', 'OVER ICE', 'Let it cool, pour over ice']];
+      const bs = Math.min(2.3, ...steps.map(([, , d]) => (F.w - M - tx) / width(FONT.body, d, 1)));   // body fits the column
+      steps.forEach(([ic, h, d], i) => {
         const y = base - 4.8 - (2 - i) * pitch;
-        t.push(F.icon(ic, x0, y - 0.2, is / 10), F.text('wideR', h, tx, y + 1.9, 1.7, { track: 0.3 }), F.text('body', d, tx, y + 4.8, 2.3));
+        t.push(F.icon(ic, x0, y - 0.2, is / 10), F.text('wideR', h, tx, y + 1.9, 1.7, { track: 0.3 }), F.text('body', d, tx, y + 4.8, bs));
       });
       L.Type.push(`<g id="Side_How_to_brew">${t.join('')}</g>`);
     }
     {   // back: the line, the description, a closing line on the bottom margin
       const F = face('back'), base = F.h - M, t = [hd(F, 'Vanilla was never plain.', M, 56, F.w - 2 * M)];
-      t.push(F.body('The delicate sweetness of natural vanilla unfolds through warm, comforting notes and a smooth, mellow aroma.', M, 62.6, F.w - 2 * M - 8, { size: 2.6, lead: 3.7 }).svg);
-      t.push(F.text('title', 'Made with vanilla grown on our own farms.', M, base, 3.6));
+      // a narrow paragraph broken by phrase; a clear pause; then the own-farms line on the bottom margin as the takeaway
+      ['The delicate sweetness of natural vanilla', 'unfolds through warm, comforting notes', 'and a smooth, mellow aroma.'].forEach((l, i) => t.push(F.text('body', l, M, 61.4 + i * 3.75, 2.75)));
+      t.push(F.text('title', 'Made with vanilla grown on our own farms.', M, base, 4.1));
       L.Type.push(`<g id="Back">${t.join('')}</g>`);
     }
     {   // left side: what's inside, the declarations at the 1.5 mm minimum (DECL), the net weight on the bottom margin
