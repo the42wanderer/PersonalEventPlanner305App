@@ -1,17 +1,19 @@
 # Vanilla Tea, 25 bags: final artwork (Plum)
 
-The long carton on its real dieline (the current 25-bag pack's), every panel: front, How to brew, back, end panel,
-lid and base. Sheet 579.4 × 332.1 mm, 3 mm bleed on every printed edge. Same system as the 12-bag cube, given room:
+The long carton on its real dieline (the current 25-bag pack's), every panel: front, How to brew, back, What's
+inside, lid and base. Sheet 579.4 × 332.1 mm, 3 mm bleed on every printed edge. Same system as the 12-bag cube, given room:
 
-- **Front** (175.9 mm): the name a step up (19 mm), the facts and lion a little larger.
-- **Back** (175.0 mm): two columns on one baseline, the story on the left and what's inside on the right (the Tamil
-  name as its heading, the blend, the net weight in three languages); both last lines on the bottom margin.
-- **End panel** (the plain side): logo and name centred, for a box shelved end-on.
+- **Front** (175.9 mm): three groups, every last line on the bottom margin. Left, the name (21 mm). In the centre,
+  under the valley and the tea sprig that rises from it, the common name in Sinhala (bold, 3.6 mm x-height) and
+  "Ceylon black tea with natural vanilla" in two lines of caps. Right, the lion and the net contents.
+- **Back** (175.0 mm): the story as one centred block under the back's symmetric swell.
+- **What's inside** (the plain side): the Tamil name as heading, the blend and bags, the net weight in three
+  languages, as on the cube.
 - **Lid**: hinged at the back, so the emblem is turned to read from the front.
 - **The landscape's edge** is one closed-form function round the box (see `curve-function.png`):
-  `y(u) = H [ Y0 + A exp(k(cos(2π(u−m)/P) − 1)) + A2 exp(k2(cos(2π(u−m2)/P) − 1)) ]`, with Y0 = 0.425,
-  A = 0.19, k = 4, m = 140 mm (the valley, inside the front), A2 = 0.06, k2 = 1.2, m2 = the centre of the back,
-  P = 520.56 mm. Every glyph keeps 0.04 H of clear space below it.
+  `y(u) = H [ Y0 + A exp(k(cos(2π(u−m)/P) − 1)) + A2 exp(k2(cos(2π(u−m2)/P) − 1)) ]`, with Y0 = 0.445,
+  A = 0.20, k = 8, m = 100.67 mm (the front's centre line, between the name and the facts), A2 = 0.04, k2 = 2,
+  m2 = the centre of the back, P = 520.56 mm. Every glyph keeps 0.04 H of clear space below it.
 
 | File | What it is |
 |---|---|
@@ -24,7 +26,7 @@ lid and base. Sheet 579.4 × 332.1 mm, 3 mm bleed on every printed edge. Same sy
 
 `Background` · `Ground` (the landscape artwork, one image per wall and one for the lid) · `Painting` · `Name`
 (Vanilla / Tea / the Sinhala name) · `Weave` · `Texture` (fine grain over the artwork, 25%) · `Type_and_Icons` (grouped
-per panel: `Front`, `Side_How_to_brew`, `Back`, `Side_End_panel`, `Base`, `Lid`) · `Sinhala_Tamil_live_text`
+per panel: `Front`, `Side_How_to_brew`, `Back`, `Side_Whats_inside`, `Base`, `Lid`) · `Sinhala_Tamil_live_text`
 (hidden, see below) · `Barcode` · `Lid_ring_path` · `Dieline` (magenta; not to print).
 
 ## Fonts
@@ -36,8 +38,8 @@ Install these before opening, or Illustrator will substitute them. All English t
 | Instrument Serif Italic (`InstrumentSerif-Italic`) | Vanilla, Tea, the headings | Google Fonts (OFL). Also in the repo: `fonts/instrument-serif-italic.ttf` |
 | Roc Grotesk (`RocGrotesk-Regular`) | Body text | Adobe Fonts |
 | Roc Grotesk Wide (`RocGroteskWide-Regular`, `-Light`, `-Bold`) | Labels, 12 TEA BAGS, NET WT., brew steps | Adobe Fonts |
-| Noto Serif Sinhala Bold (`NotoSerifSinhala-Bold`) | වැනිලා තේ (front) | Google Fonts (OFL). Also `fonts/noto-serif-sinhala.ttf` |
-| Noto Serif Tamil Bold (`NotoSerifTamil-Bold`) | வெனிலா தேயிலை (back, right column) | Google Fonts (OFL). Also `fonts/noto-serif-tamil.ttf` |
+| Noto Serif Sinhala Bold (`NotoSerifSinhala-Bold`) | වැනිලා තේ (front, centre) | Google Fonts (OFL). Also `fonts/noto-serif-sinhala.ttf` |
+| Noto Serif Tamil Bold (`NotoSerifTamil-Bold`) | வெனிலா தேயிலை (What's inside) | Google Fonts (OFL). Also `fonts/noto-serif-tamil.ttf` |
 | Noto Sans Sinhala Medium / Noto Sans Tamil Medium | Brew steps, net weight labels, base | Google Fonts (OFL). Also `fonts/noto-sans-*.ttf` |
 
 **The proof PDF was made with the free demo of Roc Grotesk**, which lacks a few characters ( · 4 ’ ( ) @ ); those

@@ -23,9 +23,9 @@ ANCHORS = [(0.0, 0.45 * H), (F + 0.25 * SA, 0.62 * H), (F + SA, 0.53 * H), (F + 
 # Y0 the level over the name and the end panel; the first bump the front's valley, deepest (Y0 + A) at MU, KAPPA its
 # width (half depth at P/(2 pi) * acos(1 - ln 2 / KAPPA) either side); the second a broad, shallow swell centred on the
 # back, so the back keeps its hills as the cube's does. Smooth everywhere, no anchors.
-VM = dict(Y0=float(os.environ.get('VM_Y0', 0.425)), A=float(os.environ.get('VM_A', 0.19)),
-          KAPPA=float(os.environ.get('VM_K', 4.0)), MU=float(os.environ.get('VM_MU', 140.0)),
-          A2=float(os.environ.get('VM_A2', 0.06)), KAPPA2=float(os.environ.get('VM_K2', 1.2)), MU2=F + SA + BK / 2)
+VM = dict(Y0=float(os.environ.get('VM_Y0', 0.445)), A=float(os.environ.get('VM_A', 0.20)),
+          KAPPA=float(os.environ.get('VM_K', 8.0)), MU=float(os.environ.get('VM_MU', 100.67)),
+          A2=float(os.environ.get('VM_A2', 0.04)), KAPPA2=float(os.environ.get('VM_K2', 2.0)), MU2=F + SA + BK / 2)
 CLEAR = 0.04 * H
 def s5(t): return t * t * t * (10 - 15 * t + 6 * t * t)
 def raw(u):
