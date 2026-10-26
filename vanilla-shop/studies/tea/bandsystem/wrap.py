@@ -132,7 +132,9 @@ def lip_shadow(h,w):
         return np.asarray(im).astype(np.float32)/255
     lip=cv2.GaussianBlur(mask((tube,mouth)),(0,0),0.5*K); src=mask((mouth,))
     sh=cv2.GaussianBlur(np.roll(src,int(0.5*K),0),(0,0),1.5*K)
-    return np.clip(sh*(1-0.6*lip)*1.6,0,1)
+    ys=np.nonzero(src.max(1)>0.5)[0]; t=((np.arange(h,dtype=np.float32)-ys[0])/(ys[-1]-ys[0]))[:,None]   # 0 at the mouth's top, 1 at its foot
+    up=np.clip((t-0.42)/0.38,0,1); up=up*up*(3-2*up)                                               # the shade reaches further up the mouth's
+    return np.clip(sh*(1-0.6*lip*(1-0.75*up))*1.6,0,1)                                              # lower part, the top stays clean
 def pramp(v,cols):
     """H.ramp, or, when the stops are (position, colour) pairs, a gradient map with the stops where they are put"""
     if not isinstance(cols[0],tuple): return H.ramp(v,cols)

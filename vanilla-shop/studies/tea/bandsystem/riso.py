@@ -131,7 +131,8 @@ if __name__=='__main__':
 RAMPS['apricot']=[(0, '#07251F'), (0.055, '#092E26'), (0.19, '#073C38'), (0.38, '#176347'), (0.52, '#9B9950'), (0.63, '#E7AE70'), (0.88, '#F8DFAC'), (1, '#F8DFAC')]
 FLOWER['apricot']=FLOWER['emerald']; INK['apricot']='#092E26'; CREAM['apricot']='#F3E6BE'
 RAMPS['citron']=[(0, '#052B26'), (0.055, '#07352F'), (0.17, '#064C45'), (0.41, '#238064'), (0.62, '#82AC63'), (0.8, '#D5D98B'), (0.94, '#F5EDC4'), (1, '#F5EDC4')]
-FLOWER['citron']=FLOWER['emerald']; INK['citron']='#07352F'; CREAM['citron']='#F3E6BE'
+FLOWER['citron']=['#8F955A','#B7B97C','#D8D7A2','#EFECCB','#FCF9E6'];   # vanilla's own pale green-ivory: cool olive shade, ivory light
+INK['citron']='#07352F'; CREAM['citron']='#F3E6BE'
 RAMPS['ochre']=[(0, '#1A261B'), (0.055, '#202F22'), (0.2, '#344831'), (0.38, '#687747'), (0.54, '#B39A51'), (0.69, '#E3BD79'), (0.9, '#FAE4B7'), (1, '#FAE4B7')]
 FLOWER['ochre']=FLOWER['emerald']; INK['ochre']='#202F22'; CREAM['ochre']='#F3E6BE'
 
