@@ -230,6 +230,24 @@ def leafpaper(paper,h,w,xx,yy):
     ko=cv2.GaussianBlur(np.asarray(km).astype(np.float32)/255,(0,0),1.8*K); kn=1-np.clip(ko*1.7,0,1)
     a=(float(os.environ.get('PAT_MAX',0.6))*pm*gr*kn)[...,None]
     return paper*(1-a)+hx(os.environ.get('PAT_COL','#C4A46C'))*a
+def glowpaper(paper,h,w,xx,yy):
+    """the cream as the first box's golden-hour ground (tools/mesh_plate.py 'golden': one diagonal sweep at -28 degrees,
+    150 mm period, mirrored, cream-butter-apricot-rose), mixed into the cream so it stays a soft light: a little warmer
+    just under the landscape, as if the sunset spilled into it, settling towards the base. Its warm apricot band is set
+    under the sky's glow, so the light runs on from the sky into the label."""
+    ang=np.radians(-28); per=150.0
+    stops=[(0,'#FCF2DC'),(0.35,'#F8DFA6'),(0.62,'#F2C48C'),(0.85,'#ECB9A4'),(1,'#F4D2A0')]
+    gx=place([(74,)])[0][0]; ey=float(edge(np.array([gx]))[0])                                   # the glow's foot
+    off=0.62*per-(gx*np.cos(ang)+ey*np.sin(ang))
+    t=((xx*np.cos(ang)+yy*np.sin(ang)+off)/per)%2; t=np.where(t>1,2-t,t)
+    pos=np.array([s for s,_ in stops]); cols=np.array([hx(c) for _,c in stops],np.float32)
+    glow=np.stack([np.interp(t,pos,cols[:,k]) for k in range(3)],-1)
+    ed=edge(xx[0])[None,:]
+    s=float(os.environ.get('GLOW_S0',0.45))+float(os.environ.get('GLOW_S1',0.30))*np.exp(-np.clip(yy-ed,0,None)/16)
+    g=np.random.default_rng(29).normal(0,1,(h,w)).astype(np.float32)                              # the plate's own grain
+    glow=glow*(1+0.010*g)[...,None]
+    s=s[...,None]
+    return paper*(1-s)+glow*s
 def render(ramp,fr,gam,cream,D=None):
     """RS.render over the strip, then the cream below the edge; returns the strip, uint8"""
     h,w=canvas(X1-X0-2*B,FH)[0].shape[:2]                                                         # the paint canvas's own size
@@ -258,7 +276,8 @@ def render(ramp,fr,gam,cream,D=None):
     cm=np.clip((yy[:,:1]-edge(xx[0])[None,:])*K/1.2+0.5,0,1)                                         # the cream, crisp edge
     if SIDE_PLUM: cm=cm*~((xx>=PAN['sideA'][0])&(xx<=PAN['sideA'][1]))                               # no cream on that side: the front's ends at the fold
     paper=hx(cream)*(1+0.012*np.random.default_rng(3).normal(0,1,(h,w)))[...,None]
-    if os.environ.get('PATTERN','1')!='0': paper=leafpaper(paper,h,w,xx,yy)
+    if os.environ.get('PATTERN','0')!='0': paper=leafpaper(paper,h,w,xx,yy)
+    if os.environ.get('CREAM_GLOW','1')!='0': paper=glowpaper(paper,h,w,xx,yy)
     return (out*(1-cm[...,None])+paper*cm[...,None]).clip(0,255).astype(np.uint8)
 def lid(ramp,gam,D=None):
     """the lid: the sky continued over the top, dark, a low glow behind the emblem; the same grain (art-directed: the

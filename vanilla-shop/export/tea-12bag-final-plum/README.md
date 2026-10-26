@@ -10,12 +10,12 @@ Sheet 421.5 × 371.5 mm, 3 mm bleed on every printed edge.
 | `vanilla-tea-12bag-plum_PROOF.pdf` | Proof at actual size. **Not for press** (see Fonts). |
 | `vanilla-tea-12bag-plum_flat-preview.jpg`, `_3d.jpg` | Previews. |
 
-## The tea-leaf pattern
+## The cream: golden-hour light
 
-The cream ground on the walls carries a faint engraving of the sprig's tea leaf, two to a stem, in a half-drop repeat
-(24 × 28 mm, alternate columns mirrored), tinted #C4A46C at up to 60% over the cream: absent just under the landscape,
-rising towards the bottom edge, and eased away around every word and the lion. It is part of the wall artwork
-(`art/est-*.jpg`), under the grain.
+The cream ground on the walls carries the first box's golden-hour ground (`tools/mesh_plate.py`, preset `golden`):
+one diagonal sweep at −28°, 150 mm period, cream → butter → apricot → rose (#FCF2DC, #F8DFA6, #F2C48C, #ECB9A4,
+#F4D2A0), mixed into the cream at 45%, rising to 75% just under the landscape as if the sunset's light spilled into
+it, its apricot band set under the sky's glow. It is part of the wall artwork (`art/est-*.jpg`), under the grain.
 
 ## Layers
 
