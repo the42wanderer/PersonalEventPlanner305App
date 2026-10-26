@@ -437,9 +437,38 @@ function build(boxKey) {
       const k = 'B:වැනිලා තේ', zs = (LONG ? LS.si : 3) / 0.536, tb = LONG ? base : base + SHAPED[k].bbox[1] * zs - 2.0, vb = tb - 0.78 * sz;
       const lg = F.logo(F.w - M - 927.6 * lw / 933 + lw / 2, M - 6.3 * lw / 933 + 0.52 * lw, lw);
       t.push(THEMES[THEME].logoInk ? lg : cream(lg));      // ink box from brand/vanilla-shop-logo.svg
+      // FRONT_ALT=A|B (long box only): two typography studies; the artwork, curve and logo stay as they are. Both: the
+      // name's and the facts' outer edges on 6% margins; the quantity in the supporting caps' regular weight, 15% under
+      // the current size, right-aligned with the lion's right edge, one small-text line between them.
+      // A: the stack kept, the Sinhala name above the description as one left-aligned group 5% of the width after the
+      //    name, its last line on the name's baseline. B: the name on one line (TITLE_SIZE), the Sinhala name and the
+      //    description under it, all on the same left edge.
+      const ALT = LONG && process.env.FRONT_ALT;
+      if (ALT) {
+        const W = F.w, x0 = 0.06 * W, rxa = W - 0.06 * W, qs = LS.body * 0.85, qp = 1.45 * qs, bb = SHAPED[k].bbox;
+        const q1 = base - qp, lbot = q1 - 0.658 * qs - qp;
+        t.push(F.text('wideR', `${pack.bags} TEA BAGS`, rxa, q1, qs, { track: 0.15, anchor: 'end' }), F.text('wideR', `NET WT. ${pack.net} g`, rxa, base, qs, { track: 0.15, anchor: 'end' }));
+        t.push(F.lion(rxa - 1206 * ln / LION.vw, lbot - 890 * ln / LION.vw, ln));
+        const l1 = base - 3.7, inkBot = l1 - 0.658 * TS.label - TS.label;                                   // a description line's height above it
+        const sb = inkBot - bb[3] * zs, desc = (x) => [F.text('wideR', 'CEYLON BLACK TEA', x, l1, TS.label, { track: TS.ltr }), F.text('wideR', 'WITH NATURAL VANILLA', x, base, TS.label, { track: TS.ltr })];
+        if (ALT === 'A') {
+          L.Name.push(F.text('title', 'Vanilla', x0 - 1.496 * sz / 17, base - 0.78 * sz, sz, { fill: GOLD }), F.text('title', 'Tea', x0 - 0.867 * sz / 17, base, sz));
+          const gx = x0 + (44.353 - 1.496) * sz / 17 + 0.05 * W;
+          L.Name.push(shaped(F, k, zs, gx - bb[0] * zs, sb, 1)); shapedInk('front', k, zs, gx - bb[0] * zs, sb); t.push(...desc(gx));
+          console.log(`A: name ${(x0 / W * 100).toFixed(1)}%..${((gx - 0.05 * W) / W * 100).toFixed(1)}%, group from ${gx.toFixed(1)} mm = ${(gx / W * 100).toFixed(1)}%`);
+        } else {
+          const s = Number(process.env.TITLE_SIZE || 16), tb = sb + bb[1] * zs - 3.0, vx = x0 - 1.496 * s / 17;
+          L.Name.push(F.text('title', 'Vanilla', vx, tb, s, { fill: GOLD }), F.text('title', 'Tea', vx + width(FONT.title, 'Vanilla ', s), tb, s));
+          L.Name.push(shaped(F, k, zs, x0 - bb[0] * zs, sb, 1)); shapedInk('front', k, zs, x0 - bb[0] * zs, sb); t.push(...desc(x0));
+          const tw = width(FONT.title, 'Vanilla Tea', s);
+          console.log(`B: title ${s} mm, ${tw.toFixed(1)} mm wide = ${(tw / W * 100).toFixed(1)}%, baseline ${tb.toFixed(1)} mm`);
+        }
+        L.Type.push(`<g id="Front">${t.join('')}</g>`);
+      }
       // Vanilla in the italic of Tea, its ink edge on Tea's (1.496 vs 0.867 at 17); vUpright keeps the roman
       const vIt = !THEMES[THEME].vUpright;
-      L.Name.push(vIt ? F.text('title', 'Vanilla', M - (1.496 - 0.867) * sz / 17, vb, sz, { fill: GOLD }) : F.text('roman', 'Vanilla', M + 0.018 * sz, vb, sz, { fill: GOLD }), F.text('title', 'Tea', M, tb, sz));
+      if (!ALT) L.Name.push(vIt ? F.text('title', 'Vanilla', M - (1.496 - 0.867) * sz / 17, vb, sz, { fill: GOLD }) : F.text('roman', 'Vanilla', M + 0.018 * sz, vb, sz, { fill: GOLD }), F.text('title', 'Tea', M, tb, sz));
+      if (!ALT) {
       const fs = LONG ? LS.body : TS.body, c1 = base - 0.658 * fs - 2.3 * fs / TS.body;                // two lines, 2.3 mm apart (at 3.05)
       t.push(F.text('wideB', `${pack.bags} TEA BAGS`, rx, c1, fs, { track: 0.15, anchor: 'end' }), F.text('wideB', `NET WT. ${pack.net} g`, rx, base, fs, { track: 0.15, anchor: 'end' }));
       const lb = c1 - 0.658 * fs - 2.4 * fs / TS.body;                                                             // the lion stands above them
@@ -457,6 +486,7 @@ function build(boxKey) {
         console.log('front centre line', cm.toFixed(2), 'mm (name ink to', nameR.toFixed(1), ', facts from', factsL.toFixed(1) + ')');
       }
       L.Type.push(`<g id="Front">${t.join('')}</g>`);
+      }
     }
     {   // right side: how to brew
       const SP = THEMES[THEME].sidePlum;
