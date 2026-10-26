@@ -19,11 +19,11 @@ def raw(u):
         m = (u >= xa[i]) & (u <= xa[i + 1]); t = (u[m] - xa[i]) / (xa[i + 1] - xa[i])
         y[m] = ya[i] + (ya[i + 1] - ya[i]) * s5(t)
     return y
-def lift(ink_json):
+def lift(ink_json,skip=()):
     """the smallest uniform raise that gives every glyph in the cream 0.04H of clear space under the boundary"""
     need = 0.0
     for g in json.load(open(ink_json)):
-        if g['panel'] not in ORIGIN: continue
+        if g['panel'] not in ORIGIN or g['panel'] in skip: continue
         u = ORIGIN[g['panel']] + np.linspace(g['x0'], g['x1'], 24)
         need = max(need, CLEAR - (g['y0'] - raw(u).max()))
     return max(0.0, need)

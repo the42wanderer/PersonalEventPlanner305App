@@ -19,10 +19,12 @@ await import(path.join(root, 'dieline-long.js'));
 const FONT = {
   title: { ps: 'InstrumentSerif-Italic', file: path.join(root, 'fonts', 'instrument-serif-italic.ttf') },
   roman: { ps: 'InstrumentSerif-Regular', file: path.join(root, 'fonts', 'instrument-serif.ttf') },
+  wideB: { ps: 'RocGroteskWide-Bold', file: 'roc-wide-bold.otf' },                     // bold labels: net contents, brewing steps
   wide: CFONT.wide, wideR: CFONT.wideR, body: CFONT.body,
 };
 FONT.title.ot = opentype.loadSync(FONT.title.file);
 FONT.roman.ot = opentype.loadSync(FONT.roman.file);
+FONT.wideB.ot = opentype.loadSync(path.join(process.env.CANDLE_FONTS, FONT.wideB.file));
 const width = (f, s, sz, track = 0) => {
   const g = f.ot.stringToGlyphs(s), k = sz / f.ot.unitsPerEm;
   return g.reduce((w, gl) => w + gl.advanceWidth * k, 0) + track * Math.max(0, g.length - 1);
@@ -194,7 +196,7 @@ function build(boxKey) {
   }
   // A panel heading in the serif italic sitting on a rule, at the height of the front's top bar, so the bars
   // read as one band round the box.
-  const head = (F, s, x0, x1, right) => F.text('title', s, x0, 10.9, 6) + F.rule(x0, 12.8, x1, 12.8) + (right ? F.caps(right, x1, 10.4, { anchor: 'end', size: 1.85 }) : '');
+  const head = (F, s, x0, x1, right, hs = 6) => F.text('title', s, x0, 10.9, hs) + F.rule(x0, 12.8, x1, 12.8) + (right ? F.caps(right, x1, 10.4, { anchor: 'end', size: 1.85 }) : '');
 
   // ---- front
   if (!EST) {
@@ -361,21 +363,21 @@ function build(boxKey) {
     return t.join('');
   };
   // Batch block (Sinhala, English, Tamil), barcode, distributor.
-  const baseInfo = (F, ox, w) => {
-    const t = [], r = ox + w - 8;
-    t.push(head(F, 'Vanilla Tea', ox + 8, r, 'BATCH DETAILS'));
+  const baseInfo = (F, ox, w, m = 8, hs = 6) => {   // m: side margin, hs: heading size (the Estate: 6 and 7)
+    const t = [], r = ox + w - m;
+    t.push(head(F, 'Vanilla Tea', ox + m, r, 'BATCH DETAILS', hs));
     [['කා.අ.', 'B.N.', 'தொகுதி இல'], ['නි.දි.', 'MFD.', 'பொ.செ திகதி'],
       ['කා.ඉ.දි.', 'EXP.', 'மு.திகதி'], ['උ.සි.මි.රු.', 'MRP. Rs.', 'விலைரூபா']].forEach(([si, en, ta], i) => {
       // English label on the line with the stamp line; Sinhala and Tamil together underneath.
       const y = 20.2 + i * 7.4, wsi = SHAPED[si].advance * 2.2;
-      t.push(F.text('wideR', en, ox + 8, y, DECL.caps, { track: 0.25 }), shaped(F, si, 2.2, ox + 8, y + 3.6), shaped(F, ta, 2.0, ox + 8 + wsi + 2, y + 3.6));
-      t.push(`<path d="M${F.X(ox + 21)} ${F.Y(y + 0.4)}H${F.X(ox + 42)}" stroke="${INK}" stroke-opacity=".6" stroke-width="${F.S(0.15)}" stroke-dasharray="${F.S(0.4)} ${F.S(0.4)}" fill="none"/>`);
+      t.push(F.text('wideR', en, ox + m, y, DECL.caps, { track: 0.25 }), shaped(F, si, 2.2, ox + m, y + 3.6), shaped(F, ta, 2.0, ox + m + wsi + 2, y + 3.6));
+      t.push(`<path d="M${F.X(ox + m + 13)} ${F.Y(y + 0.4)}H${F.X(ox + m + 34)}" stroke="${INK}" stroke-opacity=".6" stroke-width="${F.S(0.15)}" stroke-dasharray="${F.S(0.4)} ${F.S(0.4)}" fill="none"/>`);
     });
     L.Barcode.push(barcode(F, GTIN, r, 46));
     // Name and address are mandatory (1.5 mm); web, email and hotline are extra and set smaller.
-    t.push(F.rule(ox + 8, 50.6, r, 50.6), F.body(DISTRIBUTOR.intro, ox + 8, 55.2, w - 16, { size: DECL.body }).svg);
-    t.push(F.body(`${DISTRIBUTOR.name}\n${DISTRIBUTOR.address}`, ox + 8, 59.6, w - 16, { size: DECL.body, lead: DECL.lead }).svg);
-    t.push(F.body(`${DISTRIBUTOR.web}\n${DISTRIBUTOR.email}\n${DISTRIBUTOR.hotline}`, ox + 8, 73, w - 16, { size: 2.2, lead: 3.0 }).svg);
+    t.push(F.rule(ox + m, 50.6, r, 50.6), F.body(DISTRIBUTOR.intro, ox + m, 55.2, w - 2 * m, { size: DECL.body }).svg);
+    t.push(F.body(`${DISTRIBUTOR.name}\n${DISTRIBUTOR.address}`, ox + m, 59.6, w - 2 * m, { size: DECL.body, lead: DECL.lead }).svg);
+    t.push(F.body(`${DISTRIBUTOR.web}\n${DISTRIBUTOR.email}\n${DISTRIBUTOR.hotline}`, ox + m, 73, w - 2 * m, { size: 2.2, lead: 3.0 }).svg);
     return t.join('');
   };
 
@@ -385,34 +387,38 @@ function build(boxKey) {
   function estatePanels() {
     const M = 6, CREAM = PAPER, cream = (s) => s.replaceAll(`fill="${INK}"`, `fill="${CREAM}"`).replaceAll(`stroke="${INK}"`, `stroke="${CREAM}"`);
     const hd = (F, s, x, y, wMax) => F.text('title', s, x, y, Math.min(7, wMax / width(FONT.title, s, 1)));
-    {   // front: logo in the top-right corner; Vanilla over Tea, the facts beneath, the lion on the last baseline
-      // the small lines at 1.75 mm, tracked tighter so they hold their own under the name; the gaps tightened to match,
-      // so the name keeps its place under the curve
-      const F = face('front'), base = F.h - M, t = [], sz = 17, cs = 1.75, d1 = base - 3.7, tb = d1 - 0.71 * cs - 3.2, vb = tb - 0.78 * sz, lw = 15, ln = 8.4;
+    // One type system for every panel (the council's three steps, plus labels): display 17 (the name), heading 7
+    // (serif italic, every panel), body 3.05 (Roc Grotesk, the legal 1.5 mm x-height), label 2.3 caps (Roc Grotesk
+    // Wide, 1.5 mm caps; bold where it carries the net contents or a brewing step). Headings share one baseline round
+    // the walls (HB). Exceptions, named: the back's closing line (serif italic 4.1), the base's optional contact lines.
+    const TS = { head: 7, body: DECL.body, lead: DECL.lead, label: DECL.caps, ltr: 0.3 }, HB = 54.6;
+    {   // front: logo in the top-right corner; Vanilla over Tea; the descriptor as a caption beside Tea; the net contents
+      // in bold at the legal height (lowercase g: 1.5 mm x-height) on the bottom margin, the lion on the same baseline
+      const F = face('front'), base = F.h - M, t = [], sz = 17, lw = 15, ln = 8.4;
+      const tb = base - 0.658 * TS.body - 4.0, vb = tb - 0.78 * sz, cx = M + width(FONT.title, 'Tea', sz) + 4;
       t.push(cream(F.logo(F.w - M - 927.6 * lw / 933 + lw / 2, M - 6.3 * lw / 933 + 0.52 * lw, lw)));      // ink box from brand/vanilla-shop-logo.svg
       L.Name.push(F.text('roman', 'Vanilla', M + 0.018 * sz, vb, sz, { fill: GOLD }), F.text('title', 'Tea', M, tb, sz));
-      t.push(F.text('wideR', 'CEYLON BLACK TEA WITH NATURAL VANILLA', M, d1, cs, { track: 0.16 }));
-      t.push(F.text('wideR', `${pack.bags} TEA BAGS  ·  NET WT. ${pack.net} g`, M, base, cs, { track: 0.16 }));
+      t.push(F.text('wideR', 'CEYLON BLACK TEA', cx, tb - 3.4, TS.label, { track: TS.ltr }), F.text('wideR', 'WITH NATURAL VANILLA', cx, tb, TS.label, { track: TS.ltr }));
+      t.push(F.text('wideB', `${pack.bags} TEA BAGS  ·  NET WT. ${pack.net} g`, M, base, TS.body, { track: 0.15 }));
       t.push(F.lion(F.w - M - 1206 * ln / LION.vw, base - 890 * ln / LION.vw, ln));                         // ink box from the lion SVG
       L.Type.push(`<g id="Front">${t.join('')}</g>`);
     }
-    {   // right side: how to brew, a column clear of the valley at the fold, the last line on the bottom margin
-      // the column sits past the boundary's trough (a quarter into the panel), the heading 3.4 mm under the rising edge
+    {   // right side: how to brew
       const SP = THEMES[THEME].sidePlum;
       const steps = [['cup', '150 ML', 'One tea bag in hot water'], ['timer', '5 MINUTES', 'Then lift the bag out'], ['ice', 'OVER ICE', 'Let it cool, pour over ice']];
       const F = face('sideA'), base = F.h - M, t = [];
       if (SP) {
-        // the guide as one block centred between 12% margins (text still left-aligned): the heading, then three rows,
-        // icons in one column centred on their two lines, the label (cap) over its explanation; rows spread evenly
-        // from under the heading to the bottom margin. Sizes about 1.2x the cream-panel version.
-        const mg = 0.12 * F.w, is = 6, gap = 3.2, ls = 2.8, lt = 0.25, bs = 2.6, lb = 2.0, eb = 4.8, hs = 7, hb = 54.6;   // label and explanation tight; rows apart
-        const tw = Math.max(...steps.map(([, h, d]) => Math.max(width(FONT.wideR, h, ls, lt), width(FONT.body, d, bs))));
-        const gw = Math.max(is + gap + tw, width(FONT.title, 'How to brew', hs)), x0 = mg + (F.w - 2 * mg - gw) / 2, tx = x0 + is + gap;
-        const r1 = hb + 3.2, r3 = base - eb, pitch = (r3 - r1) / 2;
-        t.push(F.text('title', 'How to brew', x0, hb, hs));
+        // one block centred between 12% margins, text left-aligned: the heading on the shared baseline, then three rows;
+        // icons in one column centred on their two lines; the step label (bold caps) over its explanation (body), the
+        // pair tight (about 1.4 mm) and the rows apart (about 3 mm), spread to the bottom margin
+        const mg = 0.12 * F.w, is = 6, gap = 3.2, lb = 1.55, eb = 4.5;
+        const tw = Math.max(...steps.map(([, h, d]) => Math.max(width(FONT.wideB, h, TS.label, TS.ltr), width(FONT.body, d, TS.body))));
+        const gw = Math.max(is + gap + tw, width(FONT.title, 'How to brew', TS.head)), x0 = mg + (F.w - 2 * mg - gw) / 2, tx = x0 + is + gap;
+        const r1 = HB + 3.4, r3 = base - eb, pitch = (r3 - r1) / 2;
+        t.push(F.text('title', 'How to brew', x0, HB, TS.head));
         steps.forEach(([ic, h, d], i) => {
           const y = r1 + i * pitch;
-          t.push(F.icon(ic, x0, y + eb / 2 - is / 2, is / 10), F.text('wideR', h, tx, y + lb, ls, { track: lt }), F.text('body', d, tx, y + eb, bs));
+          t.push(F.icon(ic, x0, y + eb / 2 - is / 2, is / 10), F.text('wideB', h, tx, y + lb, TS.label, { track: TS.ltr }), F.text('body', d, tx, y + eb, TS.body));
         });
       } else {
         const x0 = 44, is = 5, pitch = 6.0, tx = x0 + is + 2.6; t.push(hd(F, 'How to brew', x0, 58.3, F.w - M - x0));
@@ -424,20 +430,20 @@ function build(boxKey) {
       }
       L.Type.push(`<g id="Side_How_to_brew">${SP ? cream(t.join('')) : t.join('')}</g>`);
     }
-    {   // back: the line, the description, a closing line on the bottom margin
-      const F = face('back'), base = F.h - M, t = [hd(F, 'Vanilla was never plain.', M, 56, F.w - 2 * M)];
-      // a narrow paragraph broken by phrase; a clear pause; then the own-farms line on the bottom margin as the takeaway
-      ['The delicate sweetness of natural vanilla', 'unfolds through warm, comforting notes', 'and a smooth, mellow aroma.'].forEach((l, i) => t.push(F.text('body', l, M, 61.4 + i * 3.75, 2.75)));
+    {   // back: the heading on the shared baseline; the paragraph in body, broken by phrase; a clear pause; the
+      // own-farms line on the bottom margin as the takeaway
+      const F = face('back'), base = F.h - M, t = [hd(F, 'Vanilla was never plain.', M, HB, F.w - 2 * M)];
+      ['The delicate sweetness of natural vanilla', 'unfolds through warm, comforting notes', 'and a smooth, mellow aroma.'].forEach((l, i) => t.push(F.text('body', l, M, HB + 6.4 + i * TS.lead, TS.body)));
       t.push(F.text('title', 'Made with vanilla grown on our own farms.', M, base, 4.1));
       L.Type.push(`<g id="Back">${t.join('')}</g>`);
     }
-    {   // left side: what's inside, the declarations at the 1.5 mm minimum (DECL), the net weight on the bottom margin
-      const F = face('sideB'), base = F.h - M, t = [hd(F, 'What’s inside', M, 56, F.w - 2 * M)];
-      t.push(F.text('wideR', 'TEA BAGS', M, 61.6, DECL.caps, { track: 0.3, opacity: 0.75 }), F.body(`${pack.bags} tagged unbleached sachet tea bags`, M, 66, F.w - 2 * M, { size: DECL.body, lead: DECL.lead }).svg);
-      t.push(F.text('wideR', 'NET WEIGHT', M, base - 4.4, DECL.caps, { track: 0.3, opacity: 0.75 }), F.body(`${pack.net}g (2g x ${pack.bags})`, M, base, F.w - 2 * M, { size: DECL.body }).svg);
+    {   // left side: what's inside, the heading on the shared baseline, the declarations in label and body
+      const F = face('sideB'), base = F.h - M, t = [hd(F, 'What’s inside', M, HB, F.w - 2 * M)];
+      t.push(F.text('wideR', 'TEA BAGS', M, HB + 6.0, TS.label, { track: TS.ltr, opacity: 0.75 }), F.body(`${pack.bags} tagged unbleached sachet tea bags`, M, HB + 10.4, F.w - 2 * M, { size: TS.body, lead: TS.lead }).svg);
+      t.push(F.text('wideR', 'NET WEIGHT', M, base - 4.4, TS.label, { track: TS.ltr, opacity: 0.75 }), F.body(`${pack.net}g (2g x ${pack.bags})`, M, base, F.w - 2 * M, { size: TS.body }).svg);
       L.Type.push(`<g id="Side_Whats_inside">${t.join('')}</g>`);
     }
-    const Fo = face('bottom'); L.Type.push(`<g id="Base">${baseInfo(Fo, 0, Fo.w)}</g>`);
+    const Fo = face('bottom'); L.Type.push(`<g id="Base">${baseInfo(Fo, 0, Fo.w, M, 7)}</g>`);
     {   // lid: the emblem ring and the logo in cream on the sky
       const F = face('top'), cx = F.w / 2, cy = F.h / 2, r = 22, ring = 'SAVOR THE CALM · AUTHENTIC CEYLON VANILLA TEA · ';
       const track = (2 * Math.PI * r - width(FONT.wide, ring, 2.5)) / ring.length;
@@ -565,7 +571,11 @@ for (const k of keys) {
   fs.writeFileSync(path.join(dir, `vanilla-tea-${k}_EDITABLE.svg`), svg);
   if (INK_BOXES) fs.writeFileSync(process.env.TEXT_INK, JSON.stringify(INK_BOXES));
   if (process.env.PREVIEW_DIR) {
-    const ff = Object.values(FONT).map((f) => `@font-face{font-family:'${f.ps}';src:url(file://${path.isAbsolute(f.file) ? f.file : path.join(process.env.CANDLE_FONTS, f.file)})}`).join('');
+    let ff = Object.values(FONT).map((f) => `@font-face{font-family:'${f.ps}';src:url(file://${path.isAbsolute(f.file) ? f.file : path.join(process.env.CANDLE_FONTS, f.file)})}`).join('');
+    // Proofs only: the demo copies of Roc Grotesk lack · 4 ’ ( ) @ (the Adobe fonts have them), so the preview and its
+    // PDF borrow just those characters from the repo's open fonts; the SVG keeps the real font names untouched.
+    const stand = { wide: 'archivo-expanded-light.ttf', wideR: 'archivo-expanded-regular.ttf', wideB: 'archivo-expanded-medium.ttf', body: 'geist-regular.ttf' };
+    ff += Object.entries(stand).filter(([k]) => FONT[k]).map(([k, f]) => `@font-face{font-family:'${FONT[k].ps}';src:url(file://${path.join(root, 'fonts', f)});unicode-range:U+0028-0029,U+0034,U+0040,U+00B7,U+2019}`).join('');
     fs.writeFileSync(path.join(process.env.PREVIEW_DIR, `tea-${k}.html`), `<html><head><meta charset="utf-8"><style>${ff}html,body{margin:0}</style></head><body>${svg}</body></html>`);
   }
   console.log('wrote', k, Math.round(svg.length / 1e5) / 10, 'MB');

@@ -27,7 +27,7 @@ def bez(P,n=400):
 # no anchor on the front/side fold), raised by the least amount that keeps 0.04H above the real type. Used only as a
 # mask: the landscape is not warped to it. Strip x is box mm with the front at 0 and the other side at negative x.
 import boundary as BD
-BD.DELTA=BD.lift(os.path.join(S,'boxprev','ink.json'))
+BD.DELTA=BD.lift(os.path.join(S,'boxprev',os.environ.get('INK','ink.json')),('sideA',) if os.environ.get('SIDE_PLUM') else ())   # on the plum side no text sits under the edge
 def edge(x):
     x=np.asarray(x,float); u=np.where(x<0,x+BD.P,x)
     yp=BD.y(u)                                                                                     # panel mm (height H)
@@ -90,7 +90,7 @@ def foreground(h,w):
         a=np.clip(np.abs(img-bg).max(2)/30,0,1); return (img@np.array([0.3,0.59,0.11],np.float32))/255,a
     u=lambda x:x-X0                                                                                  # front mm -> strip canvas mm
     fl=lay(lambda P,c:(paint_flower(P,c,(u(11),B+9),30,2.35),paint_vbud(P,c,(u(34),B+6),-40,6)))
-    sh=lay(lambda P,c:shoot(P,c,(u(78),B+72),-100,46,                                             # two leaves and a bud, upright, between flower and logo; only the stem meets the edge
+    sh=lay(lambda P,c:shoot(P,c,(u(80),B+72),-100,46,                                             # two leaves and a bud, upright, between flower and logo; only the stem meets the edge
                               -0.35,15,('#2A3A2A','#3C5038','#5A6E4E','#8DA07A'),'#C9D6B4',9,1))
     return fl,sh
 def lip_shadow(h,w):
