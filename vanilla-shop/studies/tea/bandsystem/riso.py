@@ -134,3 +134,23 @@ RAMPS['citron']=[(0, '#052B26'), (0.055, '#07352F'), (0.17, '#064C45'), (0.41, '
 FLOWER['citron']=FLOWER['emerald']; INK['citron']='#07352F'; CREAM['citron']='#F3E6BE'
 RAMPS['ochre']=[(0, '#1A261B'), (0.055, '#202F22'), (0.2, '#344831'), (0.38, '#687747'), (0.54, '#B39A51'), (0.69, '#E3BD79'), (0.9, '#FAE4B7'), (1, '#FAE4B7')]
 FLOWER['ochre']=FLOWER['emerald']; INK['ochre']='#202F22'; CREAM['ochre']='#F3E6BE'
+
+# Three broad art directions, by region rather than by tone: 'sky' is a gradient top to bottom (art mm; the horizon is
+# near 27-30), 'hills' one ramp per layer (far range, second range, mid hill, near hill, front fields) over that layer's
+# own light, 'sprig' the tea shoot, 'panel' the How to brew side and the lid. The orchid keeps FLOWER['emerald'].
+DIRS={
+ 'rose':{   # emerald sky, a broad dusty-rose band (a third of the sky), pale peach at the horizon; rose-brown far hills
+  'sky':[(-3,'#0B3229'),(2.5,'#103F35'),(6,'#2E4A42'),(9,'#7D6C66'),(12,'#B8877F'),(14,'#C58F88'),(20.5,'#CC9789'),(25,'#F3CFAC'),(30,'#F7DCBC')],
+  'hills':[[(0,'#6E4C4A'),(.5,'#9A746C'),(1,'#D2A994')],[(0,'#4C3B3B'),(.5,'#6F5752'),(1,'#A68578')],
+           [(0,'#0A2A22'),(.45,'#1C5444'),(1,'#7E9E80')],[(0,'#061E18'),(.5,'#134437'),(1,'#447A64')],[(0,'#061E18'),(.5,'#134437'),(1,'#447A64')]],
+  'sprig':[(0,'#0B2E25'),(.5,'#2C6250'),(1,'#A9C2A8')],'panel':'#0F3B31','lidGlowCol':'#5E5A52','cream':'#F3E6BE'},
+ 'celadon':{   # a light landscape: pale celadon sky, ivory horizon, sage far hills, the dark forest only in front
+  'sky':[(-3,'#B6CCA6'),(6,'#C3D5B2'),(14,'#CCDABA'),(21,'#DFE3C6'),(26,'#F2E9CD'),(30,'#F6EFD8')],'skyLight':0.9,
+  'hills':[[(0,'#86A07A'),(.5,'#97B089'),(1,'#C3D2B0')],[(0,'#6E8C67'),(.5,'#819D77'),(1,'#AFC29D')],
+           [(0,'#365F4A'),(.45,'#517A5E'),(1,'#9DB792')],[(0,'#12352A'),(.5,'#214F3A'),(1,'#527E61')],[(0,'#12352A'),(.5,'#214F3A'),(1,'#527E61')]],
+  'sprig':[(0,'#163C2E'),(.5,'#36654B'),(1,'#A3BE9A')],'panel':'#CBDABB','panelGrain':0.12,'lidGlowCol':'#E6EAD2','cream':'#F3E6BE'},
+ 'chartreuse':{   # a bold yellow-green sky over the whole upper art, butter yellow at the horizon, olive middle hills, ink-green front
+  'sky':[(-3,'#A9BE3F'),(6,'#B7C94B'),(15,'#C2CF57'),(20,'#D8D97C'),(24.5,'#EFE0A0'),(30,'#F3E7B4')],'skyLight':1.0,
+  'hills':[[(0,'#5E6F38'),(.5,'#728447'),(1,'#A3AF62')],[(0,'#475733'),(.5,'#5B6C3D'),(1,'#88964F')],
+           [(0,'#0E2F27'),(.45,'#214A37'),(1,'#5F7B45')],[(0,'#06191A'),(.5,'#102F29'),(1,'#2F5442')],[(0,'#06191A'),(.5,'#102F29'),(1,'#2F5442')]],
+  'sprig':[(0,'#0B2924'),(.5,'#285A43'),(1,'#B3C66C')],'panel':'#102F29','lidGlowCol':'#3C5A2E','cream':'#F5EFD9'}}

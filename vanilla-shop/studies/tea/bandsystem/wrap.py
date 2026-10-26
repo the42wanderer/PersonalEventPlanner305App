@@ -70,8 +70,9 @@ def scene(h,w):
         r=np.full(xs.shape,99.0,np.float32)
         for c,top,hw in cs: r=np.minimum(r,top+(np.abs(xs-c)/hw)**1.8*(99-top)/6)
         return r
+    global REG; REG=np.zeros((h,w),np.uint8); rid=[0]
     def layer(crest,tone,rim,fall,mist=0.0,seed=0):
-        nonlocal L; m=ys>=crest[None,:]; d=np.clip(ys-crest[None,:],0,None)
+        nonlocal L; m=ys>=crest[None,:]; d=np.clip(ys-crest[None,:],0,None); rid[0]+=1; REG[np.broadcast_to(m,(h,w))]=rid[0]
         L=np.where(m,tone+rim*np.exp(-d/fall)+0.025*nz(h,w,8*K,2*K,seed),L)
         if mist: L=L+mist*np.exp(-((ys-crest[None,:]-2.4)/2.4)**2)*np.clip(0.6+0.5*nz(h,w,16*K,1.5*K,seed+1),0,1.2)
         return m
@@ -96,11 +97,12 @@ def scene(h,w):
     cN=edge(xs)-8.5; mN=layer(cN,0.10,0.24,3.0,0.0,9); hedges(mN,cN,2.1,0.24,10)
     rng=np.random.default_rng(11); tm=Image.new('L',(w,h),0); rm=Image.new('L',(w,h),0)
     td,rd=ImageDraw.Draw(tm),ImageDraw.Draw(rm); P=lambda x,y:((x-X0)*K,(y+B)*K)
+    tms={3:Image.new('L',(w,h),0),4:Image.new('L',(w,h),0),5:Image.new('L',(w,h),0)}                # the trees, by the hill they stand on
     def clump(x0,crest,s):
-        j=int(np.clip((x0-X0)*K,0,w-1)); y0=crest[j]+0.3
+        j=int(np.clip((x0-X0)*K,0,w-1)); y0=crest[j]+0.3; tq=ImageDraw.Draw(tms[3 if crest is cA else 4 if crest is cB else 5])
         for q in range(rng.integers(8,13)):
             cx,cy=x0+rng.uniform(-1.3,1.3)*s,y0-s*rng.uniform(0.25,1.25); r=s*rng.uniform(0.3,0.5)
-            td.ellipse([*P(cx-r,cy-r*0.85),*P(cx+r,cy+r*0.85)],fill=255)
+            td.ellipse([*P(cx-r,cy-r*0.85),*P(cx+r,cy+r*0.85)],fill=255); tq.ellipse([*P(cx-r,cy-r*0.85),*P(cx+r,cy+r*0.85)],fill=255)
             rd.ellipse([*P(cx-r+0.12*s,cy-r*0.85),*P(cx+r+0.12*s,cy+r*0.85)],fill=255)
     for x0,s in ((36,0.9),(41,1.1),(45,0.8),(62,1.0),(67,0.8),(74,1.2)): clump(x0,cA,s)                     # the front's own trees first
     for x0,s in ((3,1.0),(10,0.8),(16,1.1)): clump(x0,cB,s)
@@ -111,6 +113,7 @@ def scene(h,w):
     for x0,dy,s in ((-66,3.5,0.8),(-38,5.0,0.7),(-12,4.0,0.9),(120,4.5,0.8),(141,3.0,0.7),(163,5.0,0.9),(188,4.0,0.8),
                     (207,5.5,0.7),(226,3.5,0.9),(252,4.5,0.8)): clump(x0,cN+dy,s)                          # shade trees standing in the rows
     t=np.asarray(tm).astype(np.float32)/255; r=np.asarray(rm).astype(np.float32)/255
+    for q in (3,4,5): REG[np.asarray(tms[q])>127]=q
     return np.clip(L*(1-t)+0.06*t+0.16*np.clip(r-t,0,1),0,1)
 def foreground(h,w):
     def lay(fn):
@@ -136,25 +139,53 @@ def pramp(v,cols):
     pos=np.array([p for p,_ in cols]); rgb=np.array([hx(c) for _,c in cols]); v=np.clip(v,0,1)
     return np.stack([np.interp(v,pos,rgb[:,i]) for i in range(3)],-1)
 SIDE_PLUM=bool(os.environ.get('SIDE_PLUM'))
-def render(ramp,fr,gam,cream):
+def rgbf(c): return np.array(hx(c),np.float32)
+def rramp(t,stops):
+    pos=np.array([p for p,_ in stops]); rgb=np.array([hx(c) for _,c in stops])
+    return np.stack([np.interp(np.clip(t,0,1),pos,rgb[:,i]) for i in range(3)],-1).astype(np.float32)
+def direct(D,V0,Vp,af,as_,Ls,g,yy,xx):
+    """art direction by region: the sky a colour gradient top to bottom (y in art mm), lit by the drawing's own light
+    (its grain, cloud and glow kept as a brightness ratio against the sky's mean at that height); each hill layer its own
+    ramp over its own range of light (rows, rims and shade kept); the trees with their hill; the sprig its own ramp;
+    the How to brew side easing into its panel colour, the panel keeping the grain"""
+    h,w=V0.shape; R=REG
+    sk=(R==0)&(af<0.3); rows=np.array([np.median(V0[i][sk[i]]) if sk[i].sum()>20 else np.nan for i in range(h)])
+    rows=np.where(np.isnan(rows),np.nanmax(rows),rows)
+    ratio=np.clip(1+D.get('skyLight',1.3)*(V0-rows[:,None]),0.6,1.45)                             # the grain and glow at their own strength
+    ysky=np.array([p for p,_ in D['sky']]); cy=rramp((yy[:,0]-ysky[0])/(ysky[-1]-ysky[0]),[((p-ysky[0])/(ysky[-1]-ysky[0]),c) for p,c in D['sky']])
+    out=np.zeros((h,w,3),np.float32); wsum=np.zeros((h,w),np.float32)
+    def put(mask,col):
+        nonlocal out,wsum; m=cv2.GaussianBlur(mask.astype(np.float32),(0,0),0.12*K); out+=m[...,None]*col; wsum+=m
+    put(R==0,cy[:,None,:]*ratio[...,None])
+    for r in range(1,6):
+        mk=R==r; q=V0[mk&(af<0.3)&(as_<0.3)]; lo,hi=np.percentile(q,(2,98)); put(mk,rramp((V0-lo)/(hi-lo+1e-6),D['hills'][r-1]))
+    out/=np.maximum(wsum,1e-6)[...,None]
+    q=Ls[as_>0.5]; lo,hi=np.percentile(q,(3,99)); sp=rramp((Ls-lo)/(hi-lo+1e-6),D['sprig'])
+    out=out*(1-as_[...,None])+sp*as_[...,None]
+    pc=rgbf(D['panel'])[None,None,:]*np.clip(Vp/0.055,0.6,1.5)[...,None]**D.get('panelGrain',0.35)
+    return out*(1-g[...,None])+pc*g[...,None]
+def render(ramp,fr,gam,cream,D=None):
     """RS.render over the strip, then the cream below the edge; returns the strip, uint8"""
     h,w=canvas(X1-X0-2*B,FH)[0].shape[:2]                                                         # the paint canvas's own size
     L=cv2.GaussianBlur(scene(h,w),(0,0),0.12*K); (Lf,af),(Ls,as_)=foreground(h,w)
     yy,xx=np.mgrid[0:h,0:w].astype(np.float32)/K; xx+=X0; yy-=B
     as_=cv2.GaussianBlur(as_,(0,0),0.06*K); m=(as_>0.5).astype(np.uint8); ins=cv2.distanceTransform(m,cv2.DIST_L2,5)/K
     q=Ls[as_>0.5]; ln=np.clip((Ls-np.percentile(q,5))/(np.percentile(q,99)-np.percentile(q,5)+1e-6),0,1)
-    L=L*(1-as_)+(0.20+0.22*ln+0.42*np.exp(-ins/0.5))*as_                                              # a warmer midtone, a muted copper rim
+    sprL=0.20+0.22*ln+0.42*np.exp(-ins/0.5); L=L*(1-as_)+sprL*as_                                              # a warmer midtone, a muted copper rim
     af=cv2.GaussianBlur(af,(0,0),0.06*K); m=(af>0.5).astype(np.uint8); ins=cv2.distanceTransform(m,cv2.DIST_L2,5)/K
     lo,hi=np.percentile(Lf[af>0.5],(3,99)); sh=np.clip((Lf-lo)/(hi-lo+1e-6),0,1)
     heart=np.exp(-(((xx-30)/17)**2+((yy-19)/15)**2))
     fv=np.clip(0.68+0.16*sh+0.22*heart-0.17*np.exp(-ins/0.8)-0.22*lip_shadow(h,w),0,1)
+    if D is not None: V0=grain(L,0.075,21)**gam
+    g=np.zeros_like(L)
     if SIDE_PLUM:                                                                                   # How to brew: the hills across its top, then the
         g=np.clip((yy-29)/12,0,1); g=g*g*(3-2*g)*((xx>=PAN['sideA'][0])&(xx<=PAN['sideA'][1]))       # land eases into the lid's deep plum, rows and all
         L=L*(1-g)+0.08*g
     V=grain(L,0.075,21)**gam
     if os.environ.get('DUMP'): np.savez_compressed(os.environ['DUMP'],V=V.astype(np.float16),af=af.astype(np.float16),xx=xx[0],yy=yy[:,0])
-    out=pramp(V,ramp)
+    out=pramp(V,ramp) if D is None else None
     fg=grain(fv,0.075,23); fo=pramp(fg,ramp) if fr is None else H.ramp(np.clip((fg-0.56)/0.44,0,1),fr)
+    if D is not None: out=direct(D,V0,V,af,as_,grain(sprL,0.075,24),g,yy,xx)
     out=out*(1-af[...,None])+fo*af[...,None]
     out*=(1-0.06*np.clip(nz(h,w,40*K,40*K,5),0,1))[...,None]
     out+=np.random.default_rng(5).normal(0,3.0,(h,w))[...,None]
@@ -162,21 +193,28 @@ def render(ramp,fr,gam,cream):
     if SIDE_PLUM: cm=cm*~((xx>=PAN['sideA'][0])&(xx<=PAN['sideA'][1]))                               # no cream on that side: the front's ends at the fold
     paper=hx(cream)*(1+0.012*np.random.default_rng(3).normal(0,1,(h,w)))[...,None]
     return (out*(1-cm[...,None])+paper*cm[...,None]).clip(0,255).astype(np.uint8)
-def lid(ramp,gam):
-    """the lid: the sky continued over the top, dark, a low glow behind the emblem; the same grain"""
+def lid(ramp,gam,D=None):
+    """the lid: the sky continued over the top, dark, a low glow behind the emblem; the same grain (art-directed: the
+    brewing panel's colour, the glow a little of the sky's)"""
     W,Hh=LID; h=int(round((Hh+2*B)*K)); w=int(round((W+2*B)*K))
     yy,xx=np.mgrid[0:h,0:w].astype(np.float32)/K-B
     L=0.07+0.12*np.exp(-(((xx-W/2)/30)**2+((yy-Hh/2)/30)**2))+0.03*np.clip(nz(h,w,22*K,1.6*K,31),0,None)
-    out=pramp(grain(L,0.075,33)**gam,ramp); out+=np.random.default_rng(6).normal(0,3.0,(h,w))[...,None]
+    Vl=grain(L,0.075,33)**gam
+    if D is None: out=pramp(Vl,ramp)
+    else:
+        gl=np.clip((L-0.07)/0.12,0,1)[...,None]*D.get('lidGlow',0.25); pc=rgbf(D['panel'])*np.clip(Vl/0.055,0.6,1.5)[...,None]**D.get('panelGrain',0.35)
+        out=pc*(1-gl)+rgbf(D['lidGlowCol'])*gl
+    out+=np.random.default_rng(6).normal(0,3.0,(h,w))[...,None]
     return out.clip(0,255).astype(np.uint8)
 if __name__=='__main__':
     ks=os.environ.get('PALETTES','forest plum').split()
     for k in ks:
         d=os.path.join(S,'teasoap','estate-art',k+('-sideplum' if SIDE_PLUM else '')); os.makedirs(d,exist_ok=True)
-        gam={'forest':1.3,'ceylon':1.15,'evergreen':1.0,'emerald':1.15,'emeraldhoney':1.15,'apricot':1.15,'citron':1.15,'ochre':1.15,'jade':1.15,'sage':1.1}.get(k,1.0)
-        st=render(RS.RAMPS[k],RS.FLOWER.get(k),gam,RS.CREAM[k]); Image.fromarray(st).save(os.path.join(d,'strip.jpg'),quality=93)
+        gam={'forest':1.3,'ceylon':1.15,'evergreen':1.0,'emerald':1.15,'emeraldhoney':1.15,'apricot':1.15,'citron':1.15,'ochre':1.15,'rose':1.15,'celadon':1.15,'chartreuse':1.15,'jade':1.15,'sage':1.1}.get(k,1.0)
+        D=getattr(RS,'DIRS',{}).get(k); rp=RS.RAMPS.get(k,RS.RAMPS['emerald'])
+        st=render(rp,RS.FLOWER.get(k,RS.FLOWER['emerald']),gam,RS.CREAM.get(k,D and D['cream']),D); Image.fromarray(st).save(os.path.join(d,'strip.jpg'),quality=93)
         for p,(a,b) in PAN.items():
             c0,c1=int(round((a-B-X0)*K)),int(round((b+B-X0)*K)); c0=max(c0,0); c1=min(c1,st.shape[1])
             Image.fromarray(st[:,c0:c1]).save(os.path.join(d,f'est-{p}.jpg'),quality=95)
-        Image.fromarray(lid(RS.RAMPS[k],gam)).save(os.path.join(d,'est-lid.jpg'),quality=95)
+        Image.fromarray(lid(rp,gam,D)).save(os.path.join(d,'est-lid.jpg'),quality=95)
         print('ok',k,st.shape)

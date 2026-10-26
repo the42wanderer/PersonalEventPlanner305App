@@ -81,6 +81,11 @@ const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper:
   estateapricotside: { paper: '#F3E6BE', ink: '#092E26', art: true, light: true, estate: true, sidePlum: true },
   estatecitronside: { paper: '#F3E6BE', ink: '#07352F', art: true, light: true, estate: true, sidePlum: true },
   estateochreside: { paper: '#F3E6BE', ink: '#202F22', art: true, light: true, estate: true, sidePlum: true },
+  // three broad directions (wrap.py DIRS): logoInk sets the front logo in ink on a light sky; panelInk sets the How to
+  // brew side and the lid in ink on a pale panel
+  estaterose: { paper: '#F3E6BE', ink: '#103F35', art: true, light: true, estate: true, sidePlum: true },
+  estateceladon: { paper: '#F3E6BE', ink: '#214F3A', art: true, light: true, estate: true, sidePlum: true, logoInk: true, panelInk: true },
+  estatechartreuse: { paper: '#F5EFD9', ink: '#102F29', art: true, light: true, estate: true, sidePlum: true, logoInk: true },
   estateemeraldhoneyside: { paper: '#F3E6BE', ink: '#0D2E1D', art: true, light: true, estate: true, sidePlum: true },   // emerald, horizon warmed to pale honey
   estatejadeside: { paper: '#F3E6BE', ink: '#14382A', art: true, light: true, estate: true, sidePlum: true },
   estatesageside: { paper: '#F2EED6', ink: '#26372F', art: true, light: true, estate: true, sidePlum: true },
@@ -194,10 +199,14 @@ function build(boxKey) {
   }
   if (EST) {
     // the four walls cut from one continuous strip (3 mm bleed each side), so the picture runs across the folds; the
-    // lid's dark sky drawn over the front's top bleed and 3 mm past its other edges
+    // lid drawn over its own panel, bleeding 3 mm only past the edges no wall shares
     for (const k of ['front', 'sideA', 'back', 'sideB']) { const F = face(k); L.Ground.push(`<g clip-path="url(#clip-${k})">${F.img(ART(`est-${k}.jpg`), -3, -3, F.w + 6, F.h + 6)}</g>`); }
-    const F = face('top'), p = P.top.panel;
-    defs += `<clipPath id="clip-lid-art"><rect x="${n(p.x - 3 * MM)}" y="${n(p.y - 3 * MM)}" width="${n(p.w + 6 * MM)}" height="${n(p.h + 6 * MM)}"/></clipPath>`;
+    // the lid's bleed stops at any edge it shares with a wall (its hinge on the front), so its sky never prints on a wall
+    const F = face('top'), p = P.top.panel, near = (a, b) => Math.abs(a - b) < 0.5 * MM;
+    const walls = ['front', 'sideA', 'back', 'sideB'].map((k) => P[k].panel), across = (q) => q.x < p.x + p.w && q.x + q.w > p.x, along = (q) => q.y < p.y + p.h && q.y + q.h > p.y;
+    const bl = { t: walls.some((q) => across(q) && near(q.y + q.h, p.y)) ? 0 : 3 * MM, b: walls.some((q) => across(q) && near(q.y, p.y + p.h)) ? 0 : 3 * MM,
+      l: walls.some((q) => along(q) && near(q.x + q.w, p.x)) ? 0 : 3 * MM, r: walls.some((q) => along(q) && near(q.x, p.x + p.w)) ? 0 : 3 * MM };
+    defs += `<clipPath id="clip-lid-art"><rect x="${n(p.x - bl.l)}" y="${n(p.y - bl.t)}" width="${n(p.w + bl.l + bl.r)}" height="${n(p.h + bl.t + bl.b)}"/></clipPath>`;
     L.Ground.push(`<g clip-path="url(#clip-lid-art)">${F.img(ART('est-lid.jpg'), -3, -3, F.w + 6, F.h + 6)}</g>`);
   }
   if (ART && !EST) { const F = face('front'); L.Ground.push(`<g clip-path="url(#clip-front)">${F.img(ART(THEMES[THEME].split ? `${boxKey}${THEMES[THEME].suffix || ''}${THEMES[THEME].blot ? '' : '-split'}-front.png` : `${boxKey}-${THEME}.png`), -3, -3, F.w + 6, F.h + 6)}</g>`); }
@@ -412,7 +421,8 @@ function build(boxKey) {
       // contents in bold at the legal 1.5 mm (lowercase g sets the size), the last line on the same bottom baseline.
       const F = face('front'), base = F.h - M, t = [], sz = 17, lw = 15, ln = 8.4, rx = F.w - M;
       const k = 'B:වැනිලා තේ', zs = 3 / 0.536, tb = base + SHAPED[k].bbox[1] * zs - 2.0, vb = tb - 0.78 * sz;
-      t.push(cream(F.logo(F.w - M - 927.6 * lw / 933 + lw / 2, M - 6.3 * lw / 933 + 0.52 * lw, lw)));      // ink box from brand/vanilla-shop-logo.svg
+      const lg = F.logo(F.w - M - 927.6 * lw / 933 + lw / 2, M - 6.3 * lw / 933 + 0.52 * lw, lw);
+      t.push(THEMES[THEME].logoInk ? lg : cream(lg));      // ink box from brand/vanilla-shop-logo.svg
       L.Name.push(F.text('roman', 'Vanilla', M + 0.018 * sz, vb, sz, { fill: GOLD }), F.text('title', 'Tea', M, tb, sz));
       L.Name.push(shaped(F, k, zs, M - SHAPED[k].bbox[0] * zs, base, 1)); shapedInk('front', k, zs, M - SHAPED[k].bbox[0] * zs, base);
       const c1 = base - 0.658 * TS.body - 2.3;                                                           // two lines, 2.3 mm apart
@@ -455,7 +465,7 @@ function build(boxKey) {
           t.push(F.icon(ic, x0, y - 0.2, is / 10), F.text('wideR', h, tx, y + 1.9, 1.7, { track: 0.3 }), F.text('body', d, tx, y + 4.8, bs));
         });
       }
-      L.Type.push(`<g id="Side_How_to_brew">${SP ? cream(t.join('')) : t.join('')}</g>`);
+      L.Type.push(`<g id="Side_How_to_brew">${SP && !THEMES[THEME].panelInk ? cream(t.join('')) : t.join('')}</g>`);
     }
     {   // back: the heading on the shared baseline; the paragraph in body, broken by phrase; a clear pause; the
       // own-farms line on the bottom margin as the takeaway
@@ -484,7 +494,8 @@ function build(boxKey) {
       const track = (2 * Math.PI * r - width(FONT.wide, ring, 2.5)) / ring.length;
       ringPath = `M${F.X(cx - r)} ${F.Y(cy)}A${F.S(r)} ${F.S(r)} 0 1 1 ${F.X(cx + r)} ${F.Y(cy)}A${F.S(r)} ${F.S(r)} 0 1 1 ${F.X(cx - r)} ${F.Y(cy)}`;
       defs += `<path id="ring" d="${ringPath}"/>`;
-      L.Type.push(cream(`<g id="Lid"><circle cx="${F.X(cx)}" cy="${F.Y(cy)}" r="${F.S(25.6)}" fill="none" stroke="${INK}" stroke-opacity=".5" stroke-width="${F.S(0.18)}"/>` +
+      const onLid = THEMES[THEME].panelInk ? (s) => s : cream;
+      L.Type.push(onLid(`<g id="Lid"><circle cx="${F.X(cx)}" cy="${F.Y(cy)}" r="${F.S(25.6)}" fill="none" stroke="${INK}" stroke-opacity=".5" stroke-width="${F.S(0.18)}"/>` +
         `<circle cx="${F.X(cx)}" cy="${F.Y(cy)}" r="${F.S(18.6)}" fill="none" stroke="${INK}" stroke-opacity=".5" stroke-width="${F.S(0.18)}"/>` +
         `<text font-family="'${FONT.wide.ps}'" font-size="${F.S(2.5)}" letter-spacing="${F.S(track)}" fill="${INK}"><textPath xlink:href="#ring">${esc(ring)}</textPath></text>` +
         F.logo(cx, cy, 19) + '</g>'));
