@@ -30,6 +30,18 @@ def tea_leaf(p0,ang,L,W,bend,rng):
     half=np.vstack([Ls,sp[::-1]]) if shadeL else np.vstack([Rs,sp[::-1]])
     return np.vstack([Ls,Rs[::-1]]),sp,half,d,nrm,u,prof
 build2.tealeaf=tea_leaf                                                       # the sprig's shoot() draws with this
+def tea_shoot(P,img,p0,ang,L,bend,lmax,cols,vein,seed,flip=1):
+    """build2.shoot with the tip changed: no bud cluster, the stem ends in a pair of the same tea leaves"""
+    import math
+    rng=np.random.default_rng(seed); sp=foliage2.arc(p0,ang,L,bend,n=6); n=len(sp); d=np.gradient(sp,axis=0)
+    P.over(img,build2.draw.ribbon(sp,lambda t:lmax*0.03*(1-0.5*t)+0.05),cols[0],1.0,0)
+    side=flip
+    for i,t in enumerate((0.2,0.42,0.62,0.8)):
+        j=int(t*(n-1)); da=math.degrees(math.atan2(d[j][1],d[j][0])); Ls=lmax*(1-0.4*t)*rng.uniform(0.85,1.05)
+        c=cols[(i+seed)%len(cols)]; build2.flatleaf(P,img,tuple(sp[j]),da+side*rng.uniform(38,58),Ls,Ls*0.3,side*0.25,c,build2.mix(c,'#0E2A22',0.3),vein,rng); side=-side
+    da=math.degrees(math.atan2(d[-1][1],d[-1][0]))
+    for sg,f in ((1,0.62),(-1,0.54)):                                            # the pair at the tip, a little smaller
+        Ls=lmax*f; c=cols[-1]; build2.flatleaf(P,img,tuple(sp[-1]),da+sg*22,Ls,Ls*0.3,sg*0.2,c,build2.mix(c,'#0E2A22',0.25),vein,rng)
 nz,grain=RS.nz,RS.grain
 FH=EF.FH
 # panel spans in box millimetres along the walls, measured from the cube dieline (research/source 2.pdf)
@@ -106,7 +118,7 @@ def foreground(h,w):
         a=np.clip(np.abs(img-bg).max(2)/30,0,1); return (img@np.array([0.3,0.59,0.11],np.float32))/255,a
     u=lambda x:x-X0                                                                                  # front mm -> strip canvas mm
     fl=lay(lambda P,c:(paint_flower(P,c,(u(11),B+9),30,2.35),paint_vbud(P,c,(u(34),B+6),-40,6)))
-    sh=lay(lambda P,c:shoot(P,c,(u(80),B+72),-100,46,                                             # two leaves and a bud, upright, between flower and logo; only the stem meets the edge
+    sh=lay(lambda P,c:tea_shoot(P,c,(u(80),B+72),-100,46,                                             # two leaves and a bud, upright, between flower and logo; only the stem meets the edge
                               -0.35,15,('#2A3A2A','#3C5038','#5A6E4E','#8DA07A'),'#C9D6B4',9,1))
     return fl,sh
 def lip_shadow(h,w):
@@ -154,7 +166,7 @@ if __name__=='__main__':
     ks=os.environ.get('PALETTES','forest plum').split()
     for k in ks:
         d=os.path.join(S,'teasoap','estate-art',k+('-sideplum' if SIDE_PLUM else '')); os.makedirs(d,exist_ok=True)
-        gam=1.3 if k=='forest' else 1.0
+        gam={'forest':1.3,'ceylon':1.15}.get(k,1.0)
         st=render(RS.RAMPS[k],RS.FLOWER.get(k),gam,RS.CREAM[k]); Image.fromarray(st).save(os.path.join(d,'strip.jpg'),quality=93)
         for p,(a,b) in PAN.items():
             c0,c1=int(round((a-B-X0)*K)),int(round((b+B-X0)*K)); c0=max(c0,0); c1=min(c1,st.shape[1])
