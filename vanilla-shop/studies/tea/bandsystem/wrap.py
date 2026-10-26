@@ -171,7 +171,7 @@ if __name__=='__main__':
     ks=os.environ.get('PALETTES','forest plum').split()
     for k in ks:
         d=os.path.join(S,'teasoap','estate-art',k+('-sideplum' if SIDE_PLUM else '')); os.makedirs(d,exist_ok=True)
-        gam={'forest':1.3,'ceylon':1.15,'evergreen':1.0,'emerald':1.15,'jade':1.15,'sage':1.1}.get(k,1.0)
+        gam={'forest':1.3,'ceylon':1.15,'evergreen':1.0,'emerald':1.15,'emeraldhoney':1.15,'jade':1.15,'sage':1.1}.get(k,1.0)
         st=render(RS.RAMPS[k],RS.FLOWER.get(k),gam,RS.CREAM[k]); Image.fromarray(st).save(os.path.join(d,'strip.jpg'),quality=93)
         for p,(a,b) in PAN.items():
             c0,c1=int(round((a-B-X0)*K)),int(round((b+B-X0)*K)); c0=max(c0,0); c1=min(c1,st.shape[1])

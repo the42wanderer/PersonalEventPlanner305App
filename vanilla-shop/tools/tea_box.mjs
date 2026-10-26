@@ -77,6 +77,7 @@ const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper:
   estatebrewside: { paper: '#F3E6BE', ink: '#2E1A10', art: true, light: true, estate: true, sidePlum: true },
   // greens: deep emerald with golden light; bottle green to jade; misty highland sage
   estateemeraldside: { paper: '#F3E6BE', ink: '#0D2E1D', art: true, light: true, estate: true, sidePlum: true },
+  estateemeraldhoneyside: { paper: '#F3E6BE', ink: '#0D2E1D', art: true, light: true, estate: true, sidePlum: true },   // emerald, horizon warmed to pale honey
   estatejadeside: { paper: '#F3E6BE', ink: '#14382A', art: true, light: true, estate: true, sidePlum: true },
   estatesageside: { paper: '#F2EED6', ink: '#26372F', art: true, light: true, estate: true, sidePlum: true },
   // evergreen: emerald developed - evergreen dark, a short chartreuse, honey and cream at the horizon
