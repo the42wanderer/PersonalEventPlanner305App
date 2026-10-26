@@ -101,7 +101,12 @@ const GOLD = 'url(#foil)';
 const ART = THEME && THEMES[THEME].art ? (f) => path.join(process.env.TEA_ART, f) : null;
 const R = (x0, y0, x1, y1) => ({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
 const G = (f) => path.join(root, 'plates', 'generated', f);
-const data = (f) => `data:image/${f.endsWith('png') ? 'png' : 'jpeg'};base64,` + fs.readFileSync(f).toString('base64');
+// LINK_ART=<dir>: the artwork as linked files in <dir>/art (for retouching), instead of embedded in the SVG
+const data = (f) => {
+  if (!process.env.LINK_ART) return `data:image/${f.endsWith('png') ? 'png' : 'jpeg'};base64,` + fs.readFileSync(f).toString('base64');
+  const d = path.join(process.env.LINK_ART, 'art'); fs.mkdirSync(d, { recursive: true }); fs.copyFileSync(f, path.join(d, path.basename(f)));
+  return `art/${path.basename(f)}`;
+};
 // All product and legal text is copied verbatim from the pack currently sold (Vanilla_Tea_P.pdf, 25 bags);
 // nothing is added. The 12-bag cube uses the same wording with its own count and weight.
 const DISTRIBUTOR = { intro: 'Marketed and Distributed by:', name: 'Agro Ventures Exports (Pvt) Ltd,', address: 'No.48, Sir Marcus Fernando Mawatha,\nColombo 07.', web: 'www.agroventuresexports.com', email: 'info@agroventuresexports.com', hotline: 'Hot Line: 011 2 187 287' };
@@ -440,7 +445,7 @@ function build(boxKey) {
     {   // right side: how to brew
       const SP = THEMES[THEME].sidePlum;
       const steps = [['cup', '150 ML', 'One tea bag in hot water'], ['timer', '5 MINUTES', 'Then lift the bag out'], ['ice', 'OVER ICE', 'Let it cool, pour over ice']];
-      const F = face('sideA'), base = F.h - M, t = [];
+      const F = face('sideA'), base = F.h - M, t = [], l0 = LIVE.length;
       if (SP) {
         // one block centred between 12% margins, text left-aligned. Each step two lines: the bold label inline with
         // the English, the Sinhala under it (use instructions in two languages, at the 1.5 mm minimum). The iced step is
@@ -472,6 +477,7 @@ function build(boxKey) {
         });
       }
       L.Type.push(`<g id="Side_How_to_brew">${SP && !THEMES[THEME].panelInk ? cream(t.join('')) : t.join('')}</g>`);
+      if (SP && !THEMES[THEME].panelInk) for (let i = l0; i < LIVE.length; i++) LIVE[i] = cream(LIVE[i]);   // their live twins too
     }
     {   // back: the heading on the shared baseline; the paragraph in body, broken by phrase; a clear pause; the
       // own-farms line on the bottom margin as the takeaway
@@ -554,7 +560,7 @@ function build(boxKey) {
     `<title>The Vanilla Shop: Natural Vanilla Tea, ${pack.bags} bags</title><defs>${defs}</defs>` +
     g('Background', L.Background.join('')) + g('Ground', L.Ground.join('')) + g('Painting', L.Painting.join('')) + g('Name', L.Name.join('')) + g('Weave', L.Weave.join('')) +
     g('Texture', `<rect width="${B.sheet.w}" height="${B.sheet.h}" fill="url(#grain)" opacity="${EST ? '.25' : '.55'}" clip-path="url(#clip-all)"/>`) +
-    g('Type_and_Icons', L.Type.join('')) + g('Barcode', L.Barcode.join('')) +
+    g('Type_and_Icons', L.Type.join('')) + `<g id="Sinhala_Tamil_live_text" style="display:none">${LIVE.join('')}</g>` + g('Barcode', L.Barcode.join('')) +
     g('Lid_ring_path', `<path d="${ringPath}" fill="none" stroke="none"/>`) +
     g('Dieline', B.dieline.replace(/stroke="#B[0-9A-F]{5}"/g, 'stroke="#E4007C"')) + '</svg>';
 }
@@ -563,9 +569,15 @@ function shapedInk(panel, key, sz, x, y) {       // ink box of a HarfBuzz-shaped
   const bb = SHAPED[key].bbox;
   if (INK_BOXES && bb) INK_BOXES.push({ panel, s: key, x0: x + bb[0] * sz, x1: x + bb[2] * sz, y0: y + bb[1] * sz, y1: y + bb[3] * sz });
 }
+// Sinhala and Tamil print as HarfBuzz-shaped outlines (exact on any machine); each also gets a live twin in the same
+// place, in the font it was shaped from, on a hidden layer, so the words stay editable where the fonts are installed
+const LIVE = [];
 function shaped(F, s, sz, x, y, op = 0.8) {
   const gl = SHAPED[s];
   if (!gl) throw new Error('Label not shaped: ' + s);
+  const txt = s.replace(/^B:/, ''), ta = /[\u0B80-\u0BFF]/.test(txt);
+  const ps = s.startsWith('B:') ? (ta ? 'NotoSerifTamil-Bold' : 'NotoSerifSinhala-Bold') : (ta ? 'NotoSansTamil-Medium' : 'NotoSansSinhala-Medium');
+  LIVE.push(`<text xml:lang="${ta ? 'ta' : 'si'}" x="${F.X(x)}" y="${F.Y(y)}" font-family="'${ps}'" font-size="${n(F.S(sz), 3)}" fill="${INK}" opacity="${op}">${esc(txt)}</text>`);
   return `<path d="${gl.d}" fill="${INK}" opacity="${op}" transform="translate(${F.X(x)} ${F.Y(y)}) scale(${n(F.S(sz), 5)})"/>`;
 }
 
@@ -625,7 +637,7 @@ const keys = process.argv[2] ? [process.argv[2]] : Object.keys(BOXES);
 for (const k of keys) {
   const svg = build(k), dir = path.join(root, 'export', THEME ? `tea-${THEME}` : 'tea', k);
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, `vanilla-tea-${k}_EDITABLE.svg`), svg);
+  fs.writeFileSync(process.env.OUT_SVG || path.join(dir, `vanilla-tea-${k}_EDITABLE.svg`), svg);
   if (INK_BOXES) fs.writeFileSync(process.env.TEXT_INK, JSON.stringify(INK_BOXES));
   if (process.env.PREVIEW_DIR) {
     let ff = Object.values(FONT).map((f) => `@font-face{font-family:'${f.ps}';src:url(file://${path.isAbsolute(f.file) ? f.file : path.join(process.env.CANDLE_FONTS, f.file)})}`).join('');
