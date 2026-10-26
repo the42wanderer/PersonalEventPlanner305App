@@ -77,6 +77,10 @@ const THEMES = { green: { paper: '#1F3B2B', ink: '#F3E6C8' }, espresso: { paper:
   estatebrewside: { paper: '#F3E6BE', ink: '#2E1A10', art: true, light: true, estate: true, sidePlum: true },
   // greens: deep emerald with golden light; bottle green to jade; misty highland sage
   estateemeraldside: { paper: '#F3E6BE', ink: '#0D2E1D', art: true, light: true, estate: true, sidePlum: true },
+  // the four-way board: emerald & apricot, jade & citron, forest & ochre (ink = each one's deepest green)
+  estateapricotside: { paper: '#F3E6BE', ink: '#092E26', art: true, light: true, estate: true, sidePlum: true },
+  estatecitronside: { paper: '#F3E6BE', ink: '#07352F', art: true, light: true, estate: true, sidePlum: true },
+  estateochreside: { paper: '#F3E6BE', ink: '#202F22', art: true, light: true, estate: true, sidePlum: true },
   estateemeraldhoneyside: { paper: '#F3E6BE', ink: '#0D2E1D', art: true, light: true, estate: true, sidePlum: true },   // emerald, horizon warmed to pale honey
   estatejadeside: { paper: '#F3E6BE', ink: '#14382A', art: true, light: true, estate: true, sidePlum: true },
   estatesageside: { paper: '#F2EED6', ink: '#26372F', art: true, light: true, estate: true, sidePlum: true },

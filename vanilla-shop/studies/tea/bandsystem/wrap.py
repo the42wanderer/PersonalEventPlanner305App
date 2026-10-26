@@ -151,7 +151,9 @@ def render(ramp,fr,gam,cream):
     if SIDE_PLUM:                                                                                   # How to brew: the hills across its top, then the
         g=np.clip((yy-29)/12,0,1); g=g*g*(3-2*g)*((xx>=PAN['sideA'][0])&(xx<=PAN['sideA'][1]))       # land eases into the lid's deep plum, rows and all
         L=L*(1-g)+0.08*g
-    out=pramp(grain(L,0.075,21)**gam,ramp)
+    V=grain(L,0.075,21)**gam
+    if os.environ.get('DUMP'): np.savez_compressed(os.environ['DUMP'],V=V.astype(np.float16),af=af.astype(np.float16),xx=xx[0],yy=yy[:,0])
+    out=pramp(V,ramp)
     fg=grain(fv,0.075,23); fo=pramp(fg,ramp) if fr is None else H.ramp(np.clip((fg-0.56)/0.44,0,1),fr)
     out=out*(1-af[...,None])+fo*af[...,None]
     out*=(1-0.06*np.clip(nz(h,w,40*K,40*K,5),0,1))[...,None]
@@ -171,7 +173,7 @@ if __name__=='__main__':
     ks=os.environ.get('PALETTES','forest plum').split()
     for k in ks:
         d=os.path.join(S,'teasoap','estate-art',k+('-sideplum' if SIDE_PLUM else '')); os.makedirs(d,exist_ok=True)
-        gam={'forest':1.3,'ceylon':1.15,'evergreen':1.0,'emerald':1.15,'emeraldhoney':1.15,'jade':1.15,'sage':1.1}.get(k,1.0)
+        gam={'forest':1.3,'ceylon':1.15,'evergreen':1.0,'emerald':1.15,'emeraldhoney':1.15,'apricot':1.15,'citron':1.15,'ochre':1.15,'jade':1.15,'sage':1.1}.get(k,1.0)
         st=render(RS.RAMPS[k],RS.FLOWER.get(k),gam,RS.CREAM[k]); Image.fromarray(st).save(os.path.join(d,'strip.jpg'),quality=93)
         for p,(a,b) in PAN.items():
             c0,c1=int(round((a-B-X0)*K)),int(round((b+B-X0)*K)); c0=max(c0,0); c1=min(c1,st.shape[1])
