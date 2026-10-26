@@ -185,9 +185,10 @@ function build(boxKey) {
 
   // ---- grounds: paper colour on every panel and flap; the painted golden ground on the four walls
   for (const [k, { region }] of Object.entries(P)) L.Background.push(`<rect x="${region.x}" y="${region.y}" width="${n(region.w)}" height="${n(region.h)}" fill="${PAPER}"/>`);
+  const first = ['front', 'sideA', 'back', 'sideB'].reduce((a, k) => (P[k].panel.x < P[a].panel.x ? k : a));   // the leftmost wall bleeds past its outer edge
   for (const k of ['front', 'sideA', 'back', 'sideB']) {
     const F = face(k), r = P[k].region, p = P[k].panel;
-    defs += `<clipPath id="clip-${k}"><rect x="${n(Math.min(r.x, p.x) - (k === 'front' ? 3 * MM : 0))}" y="${n(p.y - 3 * MM)}" width="${n(Math.max(r.w, p.w) + (k === 'front' ? 3 * MM : 0))}" height="${n(p.h + 6 * MM)}"/></clipPath>`;
+    defs += `<clipPath id="clip-${k}"><rect x="${n(Math.min(r.x, p.x) - (k === first ? 3 * MM : 0))}" y="${n(p.y - 3 * MM)}" width="${n(Math.max(r.w, p.w) + (k === first ? 3 * MM : 0))}" height="${n(p.h + 6 * MM)}"/></clipPath>`;
     if (!THEME) L.Ground.push(`<g clip-path="url(#clip-${k})">${F.img(G(`v6-ground-golden${boxKey === 'long' ? '-long' : ''}-${k}.jpg`), -3, -3, F.w + 6, F.h + 6)}</g>`);
   }
 
@@ -424,21 +425,25 @@ function build(boxKey) {
     // Wide, 1.5 mm caps; bold where it carries the net contents or a brewing step). Headings share one baseline round
     // the walls (HB). Exceptions, named: the back's closing line (serif italic 4.1), the base's optional contact lines.
     const TS = { head: 7, body: DECL.body, lead: DECL.lead, label: DECL.caps, ltr: 0.3 }, HB = 54.6;
+    // The 25-bag carton has twice the width on front and back and the same height: the same system, given room. The
+    // name a step up (20), the facts and the back's text a little larger; the back two columns on one baseline (the
+    // story, and what's inside with the Tamil name), the plain side an end panel for a box shelved end-on.
+    const LONG = boxKey === 'long', LS = { name: 19, si: 3.3, body: 3.3, lead: 4.7, head: 8.5, HB: 51.0, ln: 10 };
     {   // front: two groups under the curve. Left, the name as one stack: Vanilla, Tea, and the common name in Sinhala on
       // its own line (the second language the main panel needs; bold, exactly 3 mm x-height, Noto Serif Sinhala Bold),
       // its baseline on the bottom margin. Right, the facts as a column on the right margin: the lion, then the net
       // contents in bold at the legal 1.5 mm (lowercase g sets the size), the last line on the same bottom baseline.
-      const F = face('front'), base = F.h - M, t = [], sz = 17, lw = 15, ln = 8.4, rx = F.w - M;
-      const k = 'B:වැනිලා තේ', zs = 3 / 0.536, tb = base + SHAPED[k].bbox[1] * zs - 2.0, vb = tb - 0.78 * sz;
+      const F = face('front'), base = F.h - M, t = [], sz = LONG ? LS.name : 17, lw = 15, ln = LONG ? LS.ln : 8.4, rx = F.w - M;
+      const k = 'B:වැනිලා තේ', zs = (LONG ? LS.si : 3) / 0.536, tb = base + SHAPED[k].bbox[1] * zs - 2.0 * sz / 17, vb = tb - 0.78 * sz;
       const lg = F.logo(F.w - M - 927.6 * lw / 933 + lw / 2, M - 6.3 * lw / 933 + 0.52 * lw, lw);
       t.push(THEMES[THEME].logoInk ? lg : cream(lg));      // ink box from brand/vanilla-shop-logo.svg
       // Vanilla in the italic of Tea, its ink edge on Tea's (1.496 vs 0.867 at 17); vUpright keeps the roman
       const vIt = !THEMES[THEME].vUpright;
       L.Name.push(vIt ? F.text('title', 'Vanilla', M - (1.496 - 0.867) * sz / 17, vb, sz, { fill: GOLD }) : F.text('roman', 'Vanilla', M + 0.018 * sz, vb, sz, { fill: GOLD }), F.text('title', 'Tea', M, tb, sz));
       L.Name.push(shaped(F, k, zs, M - SHAPED[k].bbox[0] * zs, base, 1)); shapedInk('front', k, zs, M - SHAPED[k].bbox[0] * zs, base);
-      const c1 = base - 0.658 * TS.body - 2.3;                                                           // two lines, 2.3 mm apart
-      t.push(F.text('wideB', `${pack.bags} TEA BAGS`, rx, c1, TS.body, { track: 0.15, anchor: 'end' }), F.text('wideB', `NET WT. ${pack.net} g`, rx, base, TS.body, { track: 0.15, anchor: 'end' }));
-      const lb = c1 - 0.658 * TS.body - 2.4;                                                             // the lion stands above them
+      const fs = LONG ? LS.body : TS.body, c1 = base - 0.658 * fs - 2.3 * fs / TS.body;                // two lines, 2.3 mm apart (at 3.05)
+      t.push(F.text('wideB', `${pack.bags} TEA BAGS`, rx, c1, fs, { track: 0.15, anchor: 'end' }), F.text('wideB', `NET WT. ${pack.net} g`, rx, base, fs, { track: 0.15, anchor: 'end' }));
+      const lb = c1 - 0.658 * fs - 2.4 * fs / TS.body;                                                             // the lion stands above them
       t.push(F.lion(rx - 1206 * ln / LION.vw, lb - 890 * ln / LION.vw, ln));                               // ink box from the lion SVG
       L.Type.push(`<g id="Front">${t.join('')}</g>`);
     }
@@ -479,14 +484,42 @@ function build(boxKey) {
       L.Type.push(`<g id="Side_How_to_brew">${SP && !THEMES[THEME].panelInk ? cream(t.join('')) : t.join('')}</g>`);
       if (SP && !THEMES[THEME].panelInk) for (let i = l0; i < LIVE.length; i++) LIVE[i] = cream(LIVE[i]);   // their live twins too
     }
-    {   // back: the heading on the shared baseline; the paragraph in body, broken by phrase; a clear pause; the
+    if (LONG) {
+      // back, two columns on the 6 mm margins with the panel's centre as the gutter: left the story (heading, the
+      // paragraph broken by phrase, the own-farms line on the bottom margin), right what's inside (the Tamil name as its
+      // heading on the same baseline, the blend and the bags, the net weight in three languages, its value on the same
+      // bottom margin). Both headings and both last lines share a baseline, so the panel reads as one spread.
+      const F = face('back'), base = F.h - M, t = [], c2 = F.w / 2 + 4, HBL = LS.HB;
+      t.push(F.text('title', 'Vanilla was never plain.', M, HBL, LS.head));
+      ['The delicate sweetness of natural vanilla', 'unfolds through warm, comforting notes', 'and a smooth, mellow aroma.'].forEach((l, i) => t.push(F.text('body', l, M, HBL + 7.6 + i * LS.lead, LS.body)));
+      t.push(F.text('title', 'Made with vanilla grown on our own farms.', M, base, 4.8));
+      { const k = 'B:வெனிலா தேயிலை', zs = 3.2 / 0.563; t.push(shaped(F, k, zs, c2, HBL, 1)); shapedInk('back', k, zs, c2, HBL); }
+      ['Ceylon black tea with natural vanilla,', `in ${pack.bags} tagged unbleached sachet tea bags.`].forEach((l, i) => t.push(F.text('body', l, c2, HBL + 7.6 + i * LS.lead, LS.body)));
+      let x = c2; const ly = base - 5.4;
+      t.push(F.text('wideR', 'NET WEIGHT', x, ly, TS.label, { track: TS.ltr, opacity: 0.75 })); x += width(FONT.wideR, 'NET WEIGHT', TS.label, TS.ltr) + 2.8;
+      t.push(shaped(F, 'ශුද්ධ බර', 2.8, x, ly, 0.75)); x += SHAPED['ශුද්ධ බර'].advance * 2.8 + 2.8;
+      t.push(shaped(F, 'நிகர எடை', 2.75, x, ly, 0.75));
+      t.push(F.text('body', `${pack.net}g (2g x ${pack.bags})`, c2, base, LS.body));
+      L.Type.push(`<g id="Back">${t.join('')}</g>`);
+    }
+    if (LONG) {
+      // the plain side as an end panel: the logo centred in the sky as on the front, the name centred in the cream, the
+      // count on the bottom margin; what the shelf shows when the box stands end-on
+      const F = face('sideB'), base = F.h - M, t = [], cx = F.w / 2, lw = 15, sz = 14;
+      t.push(cream(F.logo(cx, M - 6.3 * lw / 933 + 0.52 * lw, lw)));
+      const tb = base - 7.2, vb = tb - 0.78 * sz;
+      L.Name.push(F.text('title', 'Vanilla', cx, vb, sz, { fill: GOLD, anchor: 'middle' }), F.text('title', 'Tea', cx, tb, sz, { anchor: 'middle' }));
+      t.push(F.text('wideB', `${pack.bags} TEA BAGS`, cx, base, TS.label, { track: TS.ltr, anchor: 'middle' }));
+      L.Type.push(`<g id="Side_End_panel">${t.join('')}</g>`);
+    }
+    if (!LONG) {   // back: the heading on the shared baseline; the paragraph in body, broken by phrase; a clear pause; the
       // own-farms line on the bottom margin as the takeaway
       const F = face('back'), base = F.h - M, t = [hd(F, 'Vanilla was never plain.', M, HB, F.w - 2 * M)];
       ['The delicate sweetness of natural vanilla', 'unfolds through warm, comforting notes', 'and a smooth, mellow aroma.'].forEach((l, i) => t.push(F.text('body', l, M, HB + 6.4 + i * TS.lead, TS.body)));
       t.push(F.text('title', 'Made with vanilla grown on our own farms.', M, base, 4.1));
       L.Type.push(`<g id="Back">${t.join('')}</g>`);
     }
-    {   // left side: what's inside, the heading on the shared baseline; the common name in Tamil under it (the third
+    if (!LONG) {   // left side: what's inside, the heading on the shared baseline; the common name in Tamil under it (the third
       // language, bold, 3 mm x-height); the blend and the bags as one short paragraph; the net weight on the bottom
       // margin with its label in English, Sinhala and Tamil (CAA Direction 71)
       // the product's name in Tamil is this side's heading, on the shared baseline: the side reads as the name panel
@@ -501,8 +534,8 @@ function build(boxKey) {
       L.Type.push(`<g id="Side_Whats_inside">${t.join('')}</g>`);
     }
     const Fo = face('bottom'); L.Type.push(`<g id="Base">${baseInfo(Fo, 0, Fo.w, M, 7)}</g>`);
-    {   // lid: the emblem ring and the logo in cream on the sky
-      const F = face('top'), cx = F.w / 2, cy = F.h / 2, r = 22, ring = 'SAVOR THE CALM · AUTHENTIC CEYLON VANILLA TEA · ';
+    {   // lid: the emblem ring and the logo in cream on the sky (turned when the lid hinges at the back, as on the long box)
+      const F = face('top', B.lidTurn), cx = F.w / 2, cy = F.h / 2, r = 22, ring = 'SAVOR THE CALM · AUTHENTIC CEYLON VANILLA TEA · ';
       const track = (2 * Math.PI * r - width(FONT.wide, ring, 2.5)) / ring.length;
       ringPath = `M${F.X(cx - r)} ${F.Y(cy)}A${F.S(r)} ${F.S(r)} 0 1 1 ${F.X(cx + r)} ${F.Y(cy)}A${F.S(r)} ${F.S(r)} 0 1 1 ${F.X(cx - r)} ${F.Y(cy)}`;
       defs += `<path id="ring" d="${ringPath}"/>`;
