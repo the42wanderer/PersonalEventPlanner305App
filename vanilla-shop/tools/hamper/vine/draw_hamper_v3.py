@@ -229,7 +229,8 @@ def face(fam,file,style='normal',weight=400):
  b=base64.b64encode((FONTS/file).read_bytes()).decode()
  return f"@font-face{{font-family:'{fam}';font-style:{style};font-weight:{weight};src:url(data:font/ttf;base64,{b})}}"
 # Brand type: Instrument Serif Italic for the title (OFL, in fonts/); the brand mark above it.
-# The face is embedded so the SVG renders anywhere; in Illustrator install the font and the text stays live.
+# Each line is one live text object, named by the font's PostScript name (as on the tea boxes) so Illustrator finds
+# it once installed; the face is also embedded so the SVG renders anywhere.
 import re
 def logo():
  # the brand mark (brand/vanilla-shop-logo.svg) in champagne gold, centred above the cartouche
@@ -241,12 +242,12 @@ def flourish(y,d):
  # a hairline swag with a diamond, above (d=-1, arching up) and below (d=1) the title, the pair centred on the oval
  return (p(f'M683 {y} C705 {y+5*d} 720 {y+9*d} 730 {y} C740 {y+9*d} 755 {y+5*d} 777 {y}','none',G,1.7)
          +p(f'M730 {y-6} L735 {y} L730 {y+6} L725 {y}Z',G,'none',0))
-css=face('Instrument Serif','instrument-serif-italic.ttf','italic')
+css=face('InstrumentSerif-Italic','instrument-serif-italic.ttf')
 types=f'''<defs><style>{css}</style></defs>
 {logo()}
 <g id="editable-type" fill="{I}" text-anchor="middle">
-<text x="730" y="464.5" font-family="Instrument Serif" font-style="italic" font-size="92">The Christmas</text>
-<text x="730" y="544.5" font-family="Instrument Serif" font-style="italic" font-size="92">Collection</text>
+<text x="730" y="464.5" font-family="'InstrumentSerif-Italic'" font-size="92">The Christmas</text>
+<text x="730" y="544.5" font-family="'InstrumentSerif-Italic'" font-size="92">Collection</text>
 </g>
 <g id="centre-flourish">{flourish(363,-1)}{flourish(577,1)}</g>'''
 (OUT/'christmas-vine-v3-typeset.svg').write_text(base+types+'</svg>')
