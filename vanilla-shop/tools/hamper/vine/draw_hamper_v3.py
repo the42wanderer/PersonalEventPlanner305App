@@ -177,7 +177,7 @@ left.append(place(star_anise(),96,92,12,.92))
 left.append(place(star_anise(),402,872,-8,.62))
 left.append(place(star_anise(False),60,686,20,.5))
 # v3: stars of several sizes in the open band between the frame and the centre
-left.append(''.join(sparkle(x,y,r) for x,y,r in [(408,232,13),(560,190,7),(372,610,9),(512,680,6),(620,640,4),(470,300,4),(338,360,5),(650,232,4)]))
+left.append(''.join(sparkle(x,y,r) for x,y,r in [(408,232,13),(560,190,7),(372,610,9),(512,680,6),(620,640,4),(470,300,4),(338,360,5),(610,250,4)]))
 left.append(''.join(f'<circle cx="{x}" cy="{y}" r="2" fill="{G}"/>' for x,y in [(452,262),(596,214),(398,662),(560,700),(355,300),(610,600)]))
 left=''.join(left)
 
@@ -206,9 +206,9 @@ def border():
  return out
 def cartouche():
  out=''
- for rx,ry,w in ((300,212,1.4),(290,202,0.8)):
-  out+=f'<ellipse cx="730" cy="440" rx="{rx}" ry="{ry}" fill="none" stroke="{G}" stroke-width="{w}"/>'
- for x,y in ((730,228),(730,652),(430,440),(1030,440)):
+ for rx,ry,w in ((300,196,1.4),(290,186,0.8)):
+  out+=f'<ellipse cx="730" cy="470" rx="{rx}" ry="{ry}" fill="none" stroke="{G}" stroke-width="{w}"/>'
+ for x,y in ((730,274),(730,666),(430,470),(1030,470)):
   out+=f'<circle cx="{x}" cy="{y}" r="9" fill="{R}"/>'+sparkle(x,y,8)
  return out
 
@@ -232,18 +232,18 @@ def face(fam,file,style='normal',weight=400):
 # The face is embedded so the SVG renders anywhere; in Illustrator install the font and the text stays live.
 import re
 def logo():
- # the brand mark (brand/vanilla-shop-logo.svg) in champagne gold, centred at the top of the cartouche
+ # the brand mark (brand/vanilla-shop-logo.svg) in champagne gold, centred above the cartouche
  src=(FONTS.parent/'brand'/'vanilla-shop-logo.svg').read_text()
  d=re.search(r' d="([^"]+)"',src).group(1); vw,vh=[float(v) for v in re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"',src).groups()]
- h=134; sc=h/vh; w=vw*sc
- return f'<g id="logo"><path d="{d}" fill="{G}" fill-rule="evenodd" transform="translate({730-w/2:.2f} 254) scale({sc:.5f})"/></g>'
+ h=122; sc=h/vh; w=vw*sc
+ return f'<g id="logo"><path d="{d}" fill="{G}" fill-rule="evenodd" transform="translate({730-w/2:.2f} 138) scale({sc:.5f})"/></g>'
 css=face('Instrument Serif','instrument-serif-italic.ttf','italic')
 types=f'''<defs><style>{css}</style></defs>
 {logo()}
 <g id="editable-type" fill="{I}" text-anchor="middle">
-<text x="730" y="492" font-family="Instrument Serif" font-style="italic" font-size="92">The Christmas</text>
-<text x="730" y="572" font-family="Instrument Serif" font-style="italic" font-size="92">Collection</text>
+<text x="730" y="441" font-family="Instrument Serif" font-style="italic" font-size="92">The Christmas</text>
+<text x="730" y="521" font-family="Instrument Serif" font-style="italic" font-size="92">Collection</text>
 </g>
-<g id="centre-flourish">{p('M683 606 C705 611 720 615 730 606 C740 615 755 611 777 606','none',G,1.7)}{p('M730 600 L735 606 L730 612 L725 606Z',G,'none',0)}</g>'''
+<g id="centre-flourish">{p('M683 563 C705 568 720 572 730 563 C740 572 755 568 777 563','none',G,1.7)}{p('M730 557 L735 563 L730 569 L725 563Z',G,'none',0)}</g>'''
 (OUT/'christmas-vine-v3-typeset.svg').write_text(base+types+'</svg>')
 print('V3 created.')
