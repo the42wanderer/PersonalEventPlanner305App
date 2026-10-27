@@ -206,9 +206,9 @@ def border():
  return out
 def cartouche():
  out=''
- for rx,ry,w in ((262,196,1.4),(252,186,0.8)):
-  out+=f'<ellipse cx="730" cy="436" rx="{rx}" ry="{ry}" fill="none" stroke="{G}" stroke-width="{w}"/>'
- for x,y in ((730,240),(730,632),(468,436),(992,436)):
+ for rx,ry,w in ((300,212,1.4),(290,202,0.8)):
+  out+=f'<ellipse cx="730" cy="440" rx="{rx}" ry="{ry}" fill="none" stroke="{G}" stroke-width="{w}"/>'
+ for x,y in ((730,228),(730,652),(430,440),(1030,440)):
   out+=f'<circle cx="{x}" cy="{y}" r="9" fill="{R}"/>'+sparkle(x,y,8)
  return out
 
@@ -228,15 +228,22 @@ FONTS=Path(__file__).resolve().parents[3]/'fonts'
 def face(fam,file,style='normal',weight=400):
  b=base64.b64encode((FONTS/file).read_bytes()).decode()
  return f"@font-face{{font-family:'{fam}';font-style:{style};font-weight:{weight};src:url(data:font/ttf;base64,{b})}}"
-# Brand type: Instrument Serif Italic for the name, Archivo Expanded Light for the tracked capitals (both OFL, in fonts/).
-# The faces are embedded so the SVG renders anywhere; in Illustrator install the two fonts and the text stays live.
-css=face('Instrument Serif','instrument-serif-italic.ttf','italic')+face('Archivo Expanded','archivo-expanded-light.ttf','normal',300)
+# Brand type: Instrument Serif Italic for the title (OFL, in fonts/); the brand mark above it.
+# The face is embedded so the SVG renders anywhere; in Illustrator install the font and the text stays live.
+import re
+def logo():
+ # the brand mark (brand/vanilla-shop-logo.svg) in champagne gold, centred at the top of the cartouche
+ src=(FONTS.parent/'brand'/'vanilla-shop-logo.svg').read_text()
+ d=re.search(r' d="([^"]+)"',src).group(1); vw,vh=[float(v) for v in re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"',src).groups()]
+ h=134; sc=h/vh; w=vw*sc
+ return f'<g id="logo"><path d="{d}" fill="{G}" fill-rule="evenodd" transform="translate({730-w/2:.2f} 254) scale({sc:.5f})"/></g>'
+css=face('Instrument Serif','instrument-serif-italic.ttf','italic')
 types=f'''<defs><style>{css}</style></defs>
+{logo()}
 <g id="editable-type" fill="{I}" text-anchor="middle">
-<text x="730" y="320" font-family="Archivo Expanded" font-weight="300" font-size="14" letter-spacing="6">THE VANILLA SHOP</text>
-<text x="730" y="446" font-family="Instrument Serif" font-style="italic" font-size="112">Christmas</text>
-<text x="730" y="500" font-family="Archivo Expanded" font-weight="300" font-size="13" letter-spacing="8">COLLECTION</text>
+<text x="730" y="492" font-family="Instrument Serif" font-style="italic" font-size="92">The Christmas</text>
+<text x="730" y="572" font-family="Instrument Serif" font-style="italic" font-size="92">Collection</text>
 </g>
-<g id="centre-flourish">{p('M683 545 C705 550 720 554 730 545 C740 554 755 550 777 545','none',G,1.7)}{p('M730 539 L735 545 L730 551 L725 545Z',G,'none',0)}</g>'''
+<g id="centre-flourish">{p('M683 606 C705 611 720 615 730 606 C740 615 755 611 777 606','none',G,1.7)}{p('M730 600 L735 606 L730 612 L725 606Z',G,'none',0)}</g>'''
 (OUT/'christmas-vine-v3-typeset.svg').write_text(base+types+'</svg>')
 print('V3 created.')
