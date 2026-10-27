@@ -237,13 +237,17 @@ def logo():
  d=re.search(r' d="([^"]+)"',src).group(1); vw,vh=[float(v) for v in re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"',src).groups()]
  h=122; sc=h/vh; w=vw*sc
  return f'<g id="logo"><path d="{d}" fill="{G}" fill-rule="evenodd" transform="translate({730-w/2:.2f} 138) scale({sc:.5f})"/></g>'
+def flourish(y,d):
+ # a hairline swag with a diamond, above (d=-1, arching up) and below (d=1) the title, the pair centred on the oval
+ return (p(f'M683 {y} C705 {y+5*d} 720 {y+9*d} 730 {y} C740 {y+9*d} 755 {y+5*d} 777 {y}','none',G,1.7)
+         +p(f'M730 {y-6} L735 {y} L730 {y+6} L725 {y}Z',G,'none',0))
 css=face('Instrument Serif','instrument-serif-italic.ttf','italic')
 types=f'''<defs><style>{css}</style></defs>
 {logo()}
 <g id="editable-type" fill="{I}" text-anchor="middle">
-<text x="730" y="441" font-family="Instrument Serif" font-style="italic" font-size="92">The Christmas</text>
-<text x="730" y="521" font-family="Instrument Serif" font-style="italic" font-size="92">Collection</text>
+<text x="730" y="464.5" font-family="Instrument Serif" font-style="italic" font-size="92">The Christmas</text>
+<text x="730" y="544.5" font-family="Instrument Serif" font-style="italic" font-size="92">Collection</text>
 </g>
-<g id="centre-flourish">{p('M683 563 C705 568 720 572 730 563 C740 572 755 568 777 563','none',G,1.7)}{p('M730 557 L735 563 L730 569 L725 563Z',G,'none',0)}</g>'''
+<g id="centre-flourish">{flourish(363,-1)}{flourish(577,1)}</g>'''
 (OUT/'christmas-vine-v3-typeset.svg').write_text(base+types+'</svg>')
 print('V3 created.')
