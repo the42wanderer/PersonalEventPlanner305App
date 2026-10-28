@@ -189,20 +189,25 @@ orn=p('M730 800 V822 M721 829 H739 V838 H721Z','none',G,1.6)
 orn+=p('M730 838 C703 850 704 868 730 880 C756 868 757 850 730 838Z',G,'none',0)
 orn+=p('M730 843 C717 855 717 865 730 875 C743 865 743 855 730 843Z M710 859 H750','none',R,1.3)
 
-def ground_pattern():
+def ground_pattern(W=1460,H=908,x0=0,y0=0):
+ """tone-on-tone sparkles and dots in a half-drop grid; extends over the bleed when x0/y0 are negative"""
  out=''
- for j,y in enumerate(range(24,908,46)):
-  for x in range(24+(23 if j%2 else 0),1460,46):
+ for j,y in enumerate(range(24+y0-(24+y0)//46*46-46,int(H)+46,46)):
+  for x in range(24+x0-(24+x0)//46*46-46+(23 if j%2 else 0),int(W)+46,46):
    out+=sparkle(x,y,4.2,'#7A2834') if (x//46+j)%2==0 else f'<circle cx="{x}" cy="{y}" r="1.4" fill="#7A2834"/>'
  return out
-def border():
- o,i=26,36; out=''
+def border(W=1460,H=908,o=26,i=36,mid=True):
+ """the fine gold double rule with a sparkle at each corner (and a pair at top and bottom centre)"""
+ out=''
  for d,w in ((o,1.8),(i,0.9)):
-  out+=f'<rect x="{d}" y="{d}" width="{1460-2*d}" height="{908-2*d}" fill="none" stroke="{G}" stroke-width="{w}"/>'
- for cx,cy in ((31,31),(1429,31),(31,877),(1429,877)):
-  out+=f'<circle cx="{cx}" cy="{cy}" r="9" fill="{R}"/>'+sparkle(cx,cy,9)+f'<circle cx="{cx}" cy="{cy}" r="1.6" fill="{R}"/>'
- for cx,cy,a in ((730,26,0),(730,882,0)):
-  out+=f'<rect x="{cx-24}" y="{cy-6}" width="48" height="12" fill="{R}"/>'+sparkle(cx-14,cy,4)+sparkle(cx+14,cy,4)+f'<circle cx="{cx}" cy="{cy}" r="2.2" fill="{G}"/>'
+  out+=f'<rect x="{d}" y="{d}" width="{W-2*d:.2f}" height="{H-2*d:.2f}" fill="none" stroke="{G}" stroke-width="{w}"/>'
+ c=(o+i)/2-0
+ for cx,cy in ((c,c),(W-c,c),(c,H-c),(W-c,H-c)):
+  out+=f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="9" fill="{R}"/>'+sparkle(round(cx,2),round(cy,2),9)+f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="1.6" fill="{R}"/>'
+ if mid:
+  for cx,cy in ((W/2,o),(W/2,H-o)):
+   cx=round(cx,2); cy=round(cy,2)
+   out+=f'<rect x="{cx-24}" y="{cy-6}" width="48" height="12" fill="{R}"/>'+sparkle(cx-14,cy,4)+sparkle(cx+14,cy,4)+f'<circle cx="{cx}" cy="{cy}" r="2.2" fill="{G}"/>'
  return out
 def cartouche():
  out=''
@@ -212,43 +217,54 @@ def cartouche():
   out+=f'<circle cx="{x}" cy="{y}" r="9" fill="{R}"/>'+sparkle(x,y,8)
  return out
 
-base=f'''<svg xmlns="http://www.w3.org/2000/svg" width="365mm" height="227mm" viewBox="0 0 1460 908">
-<title>The Vanilla Shop — Christmas vine, v3</title>
-<desc>Original editable vector artwork, revised from the first sparse study. Custom botanical curves, filled leaves, attached evergreen sprays, redesigned orchid lips and ribbon overlaps. Nominal lid size only; no bleed or manufacturing dieline.</desc>
-<g id="background">{p('M0 0H1460V908H0Z',R,'none',0)}</g>
-<g id="ground-pattern">{ground_pattern()}</g>
-<g id="border">{border()}</g>
-<g id="cartouche">{cartouche()}</g>
-<g id="botanical-frame">{group(left,id='left-botanical')}{group(mirror(left),id='right-botanical')}</g>
-<g id="seasonal-ornaments">{star}{orn}</g>
-'''
-(OUT/'christmas-vine-v3-artwork.svg').write_text(base+'</svg>')
-import base64
+import base64, re
 FONTS=Path(__file__).resolve().parents[3]/'fonts'
 def face(fam,file,style='normal',weight=400):
  b=base64.b64encode((FONTS/file).read_bytes()).decode()
  return f"@font-face{{font-family:'{fam}';font-style:{style};font-weight:{weight};src:url(data:font/ttf;base64,{b})}}"
+def logo_mark(cx,top,h,fill=G,id='logo'):
+ """the brand mark (brand/vanilla-shop-logo.svg), h units tall, centred on cx"""
+ src=(FONTS.parent/'brand'/'vanilla-shop-logo.svg').read_text()
+ d=re.search(r' d="([^"]+)"',src).group(1); vw,vh=[float(v) for v in re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"',src).groups()]
+ sc=h/vh; w=vw*sc
+ return f'<g id="{id}"><path d="{d}" fill="{fill}" fill-rule="evenodd" transform="translate({cx-w/2:.2f} {top:.2f}) scale({sc:.5f})"/></g>'
+def flourish(y,d,cx=730):
+ # a hairline swag with a diamond, above (d=-1, arching up) and below (d=1) a title
+ return (p(f'M{cx-47} {y} C{cx-25} {y+5*d} {cx-10} {y+9*d} {cx} {y} C{cx+10} {y+9*d} {cx+25} {y+5*d} {cx+47} {y}','none',G,1.7)
+         +p(f'M{cx} {y-6} L{cx+5} {y} L{cx} {y+6} L{cx-5} {y}Z',G,'none',0))
 # Brand type: Instrument Serif Italic for the title (OFL, in fonts/); the brand mark above it.
 # Each line is one live text object, named by the font's PostScript name (as on the tea boxes) so Illustrator finds
 # it once installed; the face is also embedded so the SVG renders anywhere.
-import re
-def logo():
- # the brand mark (brand/vanilla-shop-logo.svg) in champagne gold, centred above the cartouche
- src=(FONTS.parent/'brand'/'vanilla-shop-logo.svg').read_text()
- d=re.search(r' d="([^"]+)"',src).group(1); vw,vh=[float(v) for v in re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"',src).groups()]
- h=122; sc=h/vh; w=vw*sc
- return f'<g id="logo"><path d="{d}" fill="{G}" fill-rule="evenodd" transform="translate({730-w/2:.2f} 138) scale({sc:.5f})"/></g>'
-def flourish(y,d):
- # a hairline swag with a diamond, above (d=-1, arching up) and below (d=1) the title, the pair centred on the oval
- return (p(f'M683 {y} C705 {y+5*d} 720 {y+9*d} 730 {y} C740 {y+9*d} 755 {y+5*d} 777 {y}','none',G,1.7)
-         +p(f'M730 {y-6} L735 {y} L730 {y+6} L725 {y}Z',G,'none',0))
-css=face('InstrumentSerif-Italic','instrument-serif-italic.ttf')
-types=f'''<defs><style>{css}</style></defs>
-{logo()}
-<g id="editable-type" fill="{I}" text-anchor="middle">
-<text x="730" y="464.5" font-family="'InstrumentSerif-Italic'" font-size="92">The Christmas</text>
-<text x="730" y="544.5" font-family="'InstrumentSerif-Italic'" font-size="92">Collection</text>
-</g>
-<g id="centre-flourish">{flourish(363,-1)}{flourish(577,1)}</g>'''
-(OUT/'christmas-vine-v3-typeset.svg').write_text(base+types+'</svg>')
-print('V3 created.')
+CSS=face('InstrumentSerif-Italic','instrument-serif-italic.ttf')
+
+# The design is drawn on a 1460 x 908 grid (4 units per mm at 365 x 227 mm). For the final lid, 14.5 x 9 in
+# (368.3 x 228.6 mm), the drawing is scaled uniformly to the height and centred; the ground, pattern and border are
+# drawn at the true size, with 3 mm bleed.
+MM=4; IN=25.4*MM
+TOP_W,TOP_H=14.5*IN,9*IN; BLEED=3*MM
+def art(with_type=True):
+ a=(f'<g id="cartouche">{cartouche()}</g>'
+    f'<g id="botanical-frame">{group(left,id="left-botanical")}{group(mirror(left),id="right-botanical")}</g>'
+    f'<g id="seasonal-ornaments">{star}{orn}</g>')
+ if with_type:
+  a+=(logo_mark(730,138,122)+f'<g id="editable-type" fill="{I}" text-anchor="middle">'
+      f'<text x="730" y="464.5" font-family="\'InstrumentSerif-Italic\'" font-size="92">The Christmas</text>'
+      f'<text x="730" y="544.5" font-family="\'InstrumentSerif-Italic\'" font-size="92">Collection</text></g>'
+      f'<g id="centre-flourish">{flourish(363,-1)}{flourish(577,1)}</g>')
+ return a
+def top_body(with_type=True,W=TOP_W,H=TOP_H,b=BLEED):
+ k=H/908; dx=(W-1460*k)/2
+ return (f'<g id="background"><rect x="{-b}" y="{-b}" width="{W+2*b:.2f}" height="{H+2*b:.2f}" fill="{R}"/></g>'
+         f'<g id="ground-pattern">{ground_pattern(W+b,H+b,-int(b),-int(b))}</g>'
+         f'<g id="border">{border(W,H)}</g>'
+         f'<g id="design" transform="translate({dx:.3f} 0) scale({k:.6f})">{art(with_type)}</g>')
+def svg(W,H,body,title,b=BLEED):
+ return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{(W+2*b)/MM:.2f}mm" height="{(H+2*b)/MM:.2f}mm" viewBox="{-b} {-b} {W+2*b:.2f} {H+2*b:.2f}">'
+         f'<title>{title}</title><defs><style>{CSS}</style></defs>{body}'
+         f'<g id="trim" style="display:none"><rect width="{W:.2f}" height="{H:.2f}" fill="none" stroke="#EC008C" stroke-width="0.5"/></g></svg>')
+
+if __name__=='__main__':
+ t='The Vanilla Shop: Christmas hamper lid top, 14.5 x 9 in, 3 mm bleed'
+ (OUT/'christmas-vine-v3-artwork.svg').write_text(svg(TOP_W,TOP_H,top_body(False),t))
+ (OUT/'christmas-vine-v3-typeset.svg').write_text(svg(TOP_W,TOP_H,top_body(True),t))
+ print('V3 created.')
