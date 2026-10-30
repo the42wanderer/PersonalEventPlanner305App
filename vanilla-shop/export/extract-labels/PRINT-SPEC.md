@@ -15,6 +15,28 @@ over 400 dpi at these sizes.
 `cutlines/` holds one matching file per label, with only the cut line in magenta in the same position as the artwork.
 Use it to make the die, or redraw the die from your own template.
 
+## Editable files: open these, not the PDFs
+
+`editable/` holds one SVG master per label. **Open them in Illustrator with File > Open**, then save as `.ai`. Don't
+edit the print PDFs: opening a PDF in Illustrator breaks its text into fragments and garbles the Sinhala and Tamil.
+
+In the masters:
+- **English text is live.** Each line is one text object, so it stays one object when opened, not split word by
+  word. Install the fonts listed below first, or Illustrator will substitute them.
+- **Alignment:** centred and right-aligned lines are placed by their left edge, so they open exactly in place. After
+  editing one, re-centre it by eye or with the Align panel.
+- **Sinhala and Tamil print as outlines,** shaped correctly. Illustrator's default text engine cannot shape these
+  scripts, which is why they aren't live.
+  - Each has a **live twin** in the hidden layer `Sinhala_Tamil_live_text`: same font, size and position.
+  - To change the wording:
+    1. Show that layer.
+    2. Turn on Paragraph > World-Ready Paragraph Composer.
+    3. Edit the text.
+    4. Check it against the outline.
+    5. Delete the outline.
+- **The artwork and certification marks are embedded,** so the file is self-contained.
+- **The cut line** is in the `Dieline` layer, in magenta. It does not print.
+
 ## Sizes
 
 | Label | Trim size | Status |
