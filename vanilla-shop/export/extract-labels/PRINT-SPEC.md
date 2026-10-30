@@ -36,6 +36,37 @@ scaled from it by volume and checked against a photo of all three. The details a
 - **The neck seal is the same for all three bottle sizes,** like the current one. If the 100 ml and 200 ml necks are
   narrower, shorten its arms.
 
+## Languages (Sri Lanka's labelling regulations, in force 1 July 2026)
+
+As on the tea boxes: the product's name in English and Sinhala on the front card, in Tamil on the colour side, and
+the dates labelled in all three. `previews/` shows every label.
+
+| Where | Text | Size |
+|---|---|---|
+| Front card, under the English name | වැනිලා සාරය (Nos. 01, 02) · වැනිලා සිරප් (No. 03), Noto Serif Sinhala Bold | Letters 3 mm high |
+| Colour side | வெனிலா சாறு (Nos. 01, 02) · வெனிலா சிரப் (No. 03), Noto Serif Tamil Bold | Letters 3 mm high |
+| MFD and EXP | Labelled නි.දි. / பொ.செ திகதி and කා.ඉ.දි. / மு.திகதி, as on the tea pack on sale; dates in bold | Figures 1.5 mm high |
+
+"3 mm" is measured on the letters with no strokes above or below (in Sinhala ය, න, ස; in Tamil வ, ம), as the rule
+measures lowercase letters.
+
+The 3 mm minimum does not shrink with the label, so the smaller sizes are re-set:
+- **500 ml:** the Sinhala name on one line under "Vanilla Extract". The English is a little smaller to make room, and
+  the lower rule is gone.
+- **200 ml:** the Sinhala name in two lines, the logo smaller, "Premium quality" and the rules removed. The Tamil
+  name is on one line under the story.
+- **100 ml:** the same front, without the corner marks. The logo moves to the colour side, and the Tamil name, in two
+  lines, takes the story's place.
+
+**Before printing:**
+- Have a native Sinhala and Tamil reader check the names on a printed proof. The translations are ours.
+- Ask the Food Control Administration Unit whether "with alcohol" / "alcohol-free" is part of the common name. If it
+  is, it needs translating too.
+- Two points are still open, as on the tea boxes:
+  - The regulations ask for the common name and the net contents in bold. "Vanilla Extract" and "500 ml" are in
+    Instrument Serif Italic, which has no bold.
+  - The 100 ml English name is at the 3 mm minimum.
+
 ## Placeholders to replace before printing
 
 - **Barcodes on the 200 and 100 ml labels** are placeholders: they repeat the 500 ml code. Each size needs its own
@@ -68,7 +99,9 @@ scaled from it by volume and checked against a photo of all three. The details a
 
 - Instrument Serif;
 - Geist;
-- Archivo Expanded (the spaced capitals).
+- Archivo Expanded (the spaced capitals);
+- Noto Serif Sinhala Bold and Noto Serif Tamil Bold (the names);
+- Noto Sans Sinhala Medium and Noto Sans Tamil Medium (the date labels).
 
 All are under the SIL Open Font License; the files are in `vanilla-shop/fonts`.
 

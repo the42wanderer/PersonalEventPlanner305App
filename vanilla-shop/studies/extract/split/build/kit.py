@@ -4,12 +4,22 @@ from PIL import ImageFont
 R='/home/user/PersonalEventPlanner305App/vanilla-shop'; CF='/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/candlefonts'
 T='/tmp/claude-0/-home-user-PersonalEventPlanner305App/0712b206-ea71-562e-9a83-45f8f096455f/scratchpad/ext/w/'
 W,H,CX=226,70,113
-FONTS={'GMono':R+'/fonts/geist-mono.ttf','G':R+'/fonts/geist-regular.ttf','GM':R+'/fonts/geist-medium.ttf','GB':R+'/fonts/geist-bold.ttf','IS':R+'/fonts/instrument-serif-italic.ttf','RW':R+'/fonts/archivo-expanded-regular.ttf','RR':CF+'/roc-regular.otf','RB':CF+'/roc-bold.otf','RWM':R+'/fonts/archivo-expanded-medium.ttf'}
+FONTS={'GMono':R+'/fonts/geist-mono.ttf','G':R+'/fonts/geist-regular.ttf','GM':R+'/fonts/geist-medium.ttf','GB':R+'/fonts/geist-bold.ttf','IS':R+'/fonts/instrument-serif-italic.ttf','RW':R+'/fonts/archivo-expanded-regular.ttf','RR':CF+'/roc-regular.otf','RB':CF+'/roc-bold.otf','RWM':R+'/fonts/archivo-expanded-medium.ttf',
+       # Sinhala and Tamil (OFL): the names in Noto Serif Bold, the small labels in Noto Sans Medium
+       'SiB':R+'/fonts/noto-serif-sinhala.ttf','TaB':R+'/fonts/noto-serif-tamil.ttf','SiS':R+'/fonts/noto-sans-sinhala.ttf','TaS':R+'/fonts/noto-sans-tamil.ttf'}
 css=''.join(f"@font-face{{font-family:{k};src:url(file://{v})}}" for k,v in FONTS.items())
 _m={}
 def width(t,f,sz,tr=0):
+    if f in ('SiB','TaB','SiS','TaS'): return hbwidth(t,f,sz)+tr*sz*max(len(t)-1,0)
     if f not in _m: _m[f]=ImageFont.truetype(FONTS[f],1000)
     return _m[f].getlength(t)/1000*sz + tr*sz*max(len(t)-1,0)
+_hb={}
+def hbwidth(t,f,sz):
+    """advance of complex-script text, shaped with HarfBuzz (vowel signs reordered, conjuncts formed)"""
+    import uharfbuzz as hb
+    if f not in _hb: face=hb.Face(hb.Blob.from_file_path(FONTS[f])); _hb[f]=(hb.Font(face),face.upem)
+    font,upm=_hb[f]; buf=hb.Buffer(); buf.add_str(t); buf.guess_segment_properties(); hb.shape(font,buf)
+    return sum(p.x_advance for p in buf.glyph_positions)/upm*sz
 logoD=re.search(r' d="([^"]+)"',open(R+'/brand/vanilla-shop-logo.svg').read()).group(1)
 def logo(cx,cy,lw,c): s=lw/933; return f'<path d="{logoD}" fill="{c}" fill-rule="evenodd" transform="translate({cx-lw/2:.2f} {cy-963*s/2:.2f}) scale({s:.5f})"/>'
 def esc(t): return t.replace('&','&amp;')

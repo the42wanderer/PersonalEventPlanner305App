@@ -83,3 +83,21 @@ Still to settle before print:
   farms" (traceability) need evidence or rewording.
 - Ceylon Tea lion: confirm the Tea Board's approval covers this flavoured tea and pack.
 - Translations: written for this pack; have a native Sinhala and Tamil reader check them on a printed proof.
+
+## The extract and syrup bottle labels (October 2026)
+
+The same rules applied to the wraps in `export/extract-labels/` (details in its `PRINT-SPEC.md`):
+
+- **Common name:**
+  - English and Sinhala on the front card; Tamil on the colour side.
+  - Noto Serif Sinhala and Tamil Bold, sized so letters without strokes above or below are 3 mm high (Sinhala body
+    0.59 em, Tamil 0.57 em).
+- **Smaller sizes:** that floor does not scale, so the 200 and 100 ml fronts stack the Sinhala name in two lines.
+  - On the 100 ml, the logo moves to the colour side and the Tamil name replaces the short story.
+- **Dates:**
+  - MFD and EXP are labelled in English, Sinhala and Tamil, with the tea pack's abbreviations.
+  - The dates are in Geist Bold, with figures 1.5 mm high (Schedule II for panels up to 120 cm²).
+- **Still open:**
+  - Bold for the English name and net volume (Instrument Serif has no bold).
+  - Whether "with alcohol" / "alcohol-free" is part of the common name.
+  - A native reader's check of the translations.
