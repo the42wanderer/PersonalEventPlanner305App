@@ -92,8 +92,10 @@ The same rules applied to the wraps in `export/extract-labels/` (details in its 
   - English and Sinhala on the front card; Tamil on the colour side.
   - Noto Serif Sinhala and Tamil Bold, sized so letters without strokes above or below are 3 mm high (Sinhala body
     0.59 em, Tamil 0.57 em).
-- **Smaller sizes:** that floor does not scale, so the 200 and 100 ml fronts stack the Sinhala name in two lines.
-  - On the 100 ml, the logo moves to the colour side and the Tamil name replaces the short story.
+- **Placement:** the Sinhala name is one line in the place of "Premium quality" on the 500 and 200 ml. Only the 100 ml
+  stacks it in two lines, because its front is narrower than the name at 3 mm; there, the logo moves to the colour
+  side and the Tamil replaces the short story.
+- **Sizing:** sizes are for the printed label, since the design is scaled by 274/226 for print.
 - **Dates:**
   - MFD and EXP are labelled in English, Sinhala and Tamil, with the tea pack's abbreviations.
   - The dates are in Geist Bold, with figures 1.5 mm high (Schedule II for panels up to 120 cm²).

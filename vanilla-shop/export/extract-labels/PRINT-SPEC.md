@@ -69,16 +69,16 @@ the dates labelled in all three. `previews/` shows every label.
 | Colour side | வெனிலா சாறு (Nos. 01, 02) · வெனிலா சிரப் (No. 03), Noto Serif Tamil Bold | Letters 3 mm high |
 | MFD and EXP | Labelled නි.දි. / பொ.செ திகதி and කා.ඉ.දි. / மு.திகதி, as on the tea pack on sale; dates in bold | Figures 1.5 mm high |
 
-"3 mm" is measured on the letters with no strokes above or below (in Sinhala ය, න, ස; in Tamil வ, ம), as the rule
-measures lowercase letters.
+"3 mm" is measured on the printed label, on the letters with no strokes above or below (in Sinhala ය, න, ස; in Tamil
+வ, ம), as the rule measures lowercase letters.
 
-The 3 mm minimum does not shrink with the label, so the smaller sizes are re-set:
-- **500 ml:** the Sinhala name on one line under "Vanilla Extract". The English is a little smaller to make room, and
-  the lower rule is gone.
-- **200 ml:** the Sinhala name in two lines, the logo smaller, "Premium quality" and the rules removed. The Tamil
-  name is on one line under the story.
-- **100 ml:** the same front, without the corner marks. The logo moves to the colour side, and the Tamil name, in two
-  lines, takes the story's place.
+The front card keeps its design. The Sinhala name is one quiet line in the place of "Premium quality", above the
+volume:
+- **500 ml:** as designed, with "Premium quality" replaced by the Sinhala name.
+- **200 ml:** the same; the card sits 3 mm further right and the nutrition column 2.5 mm, so the line fits.
+- **100 ml:** at 3 mm the Sinhala name (28 mm) is wider than the front's side of this small label (22 mm), so it
+  takes two lines. The logo moves to the colour side, and the Tamil name, in two lines, takes the story's place. If
+  the authorities allow smaller type on small containers, this can match the others.
 
 **Before printing:**
 - Have a native Sinhala and Tamil reader check the names on a printed proof. The translations are ours.

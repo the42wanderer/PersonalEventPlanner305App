@@ -19,12 +19,15 @@ PRICE={'01':{'500':'20,000','200':'8,000','100':'4,100'},'02':{'500':'17,000','2
 MFD,EXP='01/02/2025','31/01/2027'
 # Sri Lanka's labelling regulations (in force 1 July 2026; research/label-text-rules.md): the common name in bold on the
 # main panel in two languages, the third on any panel, each at least 3 mm high; the date of expiry in two languages.
-# As on the tea boxes: English then Sinhala on the front card, Tamil on the colour side. Sizes are set so the letters
-# without ascenders or descenders measure 3 mm (Noto Serif Sinhala Bold 0.59 em, Noto Serif Tamil Bold 0.57 em).
+# As on the tea boxes: English then Sinhala on the front card, Tamil on the colour side. The Sinhala name takes the
+# place of "Premium quality" as one quiet line, the card otherwise as it was. Sizes: the letters without ascenders or
+# descenders measure 3 mm on the printed label (Noto Serif Sinhala Bold 0.59 em, Noto Serif Tamil Bold 0.57 em; the
+# design is drawn at 226 x 70 mm and printed x 274/226, export.py).
 # The translations are ours: have a native Sinhala and Tamil reader check them on a printed proof.
 NAME_SI={'01':'වැනිලා සාරය','02':'වැනිලා සාරය','03':'වැනිලා සිරප්'}
 NAME_TA={'01':'வெனிலா சாறு','02':'வெனிலா சாறு','03':'வெனிலா சிரப்'}
-SI,TA=5.2,5.3
+PRINT=274/226
+SI,TA=round(3/0.59/PRINT,2),round(3/0.57/PRINT,2)              # 4.19, 4.34 design mm
 # the batch fields in Sinhala and Tamil, word for word as on the Vanilla Tea pack on sale
 DATE3=(('MFD','නි.දි.','பொ.செ திகதி'),('EXP','කා.ඉ.දි.','மு.திகதி'))
 # the old labels' panel, the same on all three (its calories line has no figure, so it is left out)
@@ -53,32 +56,28 @@ def facts(k,x0,x1,r1,rh,cz,fz,c1,c2):
             caps(a,x0,y+c1,cz,L['on2'],tr=0.25 if cz>1.2 else 0.22), txt(av,x0,y+c2,fz,on),
             caps(b,x0+(x1-x0)*0.57,y+c1,cz,L['on2'],tr=0.25 if cz>1.2 else 0.22), txt(bv,x0+(x1-x0)*0.57,y+c2,fz,on)]
     return o
-def front(k,cx,s,size):
-    """the front card, right of the bottle's centre cx, at scale s of the 500 ml card; the net volume keeps its legal size"""
+def front(k,cx,s,size,dx=0):
+    """the front card, right of the bottle's centre cx (dx: shifted right), at scale s of the 500 ml card; the net
+    volume keeps its legal size"""
     st=C[k]; L=LOOK[k]; c=L['dark']; o=[]
-    cx0,cx1=cx+5*s,cx+36*s; mx=(cx0+cx1)/2; a=3*s
-    for (bx,by,dx,dy) in (() if size=='100' else ((cx0,7*s,1,1),(cx1,7*s,-1,1),(cx0,63*s,1,-1),(cx1,63*s,-1,-1))):   # 100 ml: no room for the corners
-        o.append(f'<path d="M{bx:.2f} {by+dy*a:.2f}V{by:.2f}H{bx+dx*a:.2f}" fill="none" stroke="{c}" stroke-width="{max(0.3*s,0.22):.2f}"/>')
-    if size=='500':
-        # English, then the Sinhala name on its own line under it; the stack tightened to make room, the lower rule
-        # given up so "Premium quality" and the volume keep their places
-        o+=[logo(mx,13.4,7.8,c), rule(cx0+4,20.2,cx1-4,20.2,c,0.2,0.6),
-            txt(st['l1'],mx,30.4,11.4,c,'IS','middle'), txt(st['l2'],mx,39.6,11.4,c,'IS','middle'),
-            txt(NAME_SI[k],mx,46.6+(1.0 if k=='03' else 0),SI,c,'SiB','middle'),      # clear of Syrup's descenders
-            caps(st['kind'],mx,51.8+(0.5 if k=='03' else 0),1.85,L['deep'],'middle',0.3)]
-        o+=[txt('Premium quality',mx,55.6,2.0,c,'G','middle'), txt('500 ml',mx,61.4,5.4,c,'IS','middle')]
+    cx0,cx1=cx+dx+5*s,cx+dx+36*s; mx=(cx0+cx1)/2; a=3*s
+    for (bx,by,dx_,dy) in (() if size=='100' else ((cx0,7*s,1,1),(cx1,7*s,-1,1),(cx0,63*s,1,-1),(cx1,63*s,-1,-1))):   # 100 ml: no room for the corners
+        o.append(f'<path d="M{bx:.2f} {by+dy*a:.2f}V{by:.2f}H{bx+dx_*a:.2f}" fill="none" stroke="{c}" stroke-width="{max(0.3*s,0.22):.2f}"/>')
+    if size in ('500','200'):
+        # the card as designed; the Sinhala name on one line where "Premium quality" was, the volume under it
+        ry,sy,my={'500':(51.0,55.7,61.7),'200':(None,33.6,37.9)}[size]
+        o+=[logo(mx,14.2*s,8.4*s,c), rule(cx0+4*s,21.6*s,cx1-4*s,21.6*s,c,0.2,0.6),
+            txt(st['l1'],mx,33*s,12.4*s,c,'IS','middle'), txt(st['l2'],mx,43*s,12.4*s,c,'IS','middle'),
+            caps(st['kind'],mx,48.6*s,max(1.85*s,1.2),L['deep'],'middle',0.3 if s==1 else 0.22)]
+        if ry: o.append(rule(cx0+4,ry,cx1-4,ry,c,0.2,0.6))
+        o+=[txt(NAME_SI[k],mx,sy,SI,c,'SiB','middle'), txt(f'{size} ml',mx,my,5.4 if size=='500' else 4.0,c,'IS','middle')]
     else:
-        # 200 and 100 ml: the Sinhala name cannot shrink with the label (3 mm is the floor), so it is stacked in two
-        # lines under the English, the English set at its own 3 mm floor (Instrument Serif x-height 0.51 em);
-        # "Premium quality" and the rules give way. The logo stays on the 200 ml card; on the 100 ml it moves to
-        # the colour side.
+        # 100 ml: at 3 mm the Sinhala name (28 mm) is wider than this card's side of the label (22 mm), so it takes
+        # two lines; the logo moves to the colour side
         w1,w2=NAME_SI[k].split(' ')
-        y={'200':dict(lg=6.9,v=14.0,e=19.2,s1=25.0,s2=30.7,kd=33.7,ml=37.6),
-           '100':dict(lg=None,v=8.1,e=13.3,s1=19.0,s2=24.7,kd=27.7,ml=31.9)}[size]
-        if y['lg']: o.append(logo(mx,y['lg'],3.8,c))
-        o+=[txt(st['l1'],mx,y['v'],6.2,c,'IS','middle'), txt(st['l2'],mx,y['e'],6.2,c,'IS','middle'),
-            txt(w1,mx,y['s1'],SI,c,'SiB','middle'), txt(w2,mx,y['s2'],SI,c,'SiB','middle'),
-            caps(st['kind'],mx,y['kd'],1.2,L['deep'],'middle',0.22), txt(f'{size} ml',mx,y['ml'],4.0,c,'IS','middle')]
+        o+=[txt(st['l1'],mx,8.6,6.2,c,'IS','middle'), txt(st['l2'],mx,13.8,6.2,c,'IS','middle'),
+            txt(w1,mx,18.9,SI,c,'SiB','middle'), txt(w2,mx,23.6,SI,c,'SiB','middle'),
+            caps(st['kind'],mx,27.0,1.2,L['deep'],'middle',0.22), txt('100 ml',mx,31.7,4.0,c,'IS','middle')]
     o.append(txt(st['no'],cx-4*s,64.2*s,6.4*s,LOOK['01']['on'] if k!='02' else '#FFF6E2','IS','end'))
     return o
 def dates3(x,y,lead,sub,cz,fz,zs,zt,c,deep,vx):
@@ -146,20 +145,20 @@ def wrap_small(k,size):
         # the logo comes over from the front card; the Tamil name, stacked, takes the story's place
         o+=[logo(x0+3.2,5.0,5.6,on), txt('Savor the calm.',x0+8.4,6.6,2.5,on,'IS')]
         t1,t2=NAME_TA[k].split(' ')
-        o+=[txt(t1,x0,12.0,TA,on,'TaB'), txt(t2,x0,17.4,TA,on,'TaB')]
+        o+=[txt(t1,x0,12.2,TA,on,'TaB'), txt(t2,x0,16.9,TA,on,'TaB')]
     o+=facts(k,x0,x1,24.6,7.2,1.05,1.5,2.9,5.5) if big else facts(k,x0,x1,19.6,6.6,0.95,1.3,2.6,5.0)
-    o+=front(k,cx,s,size)
+    o+=front(k,cx,s,size,2.9 if big else 0)
     # ---- cream side
     mrp=f'MRP Rs. {PRICE[k][size]}'
     if big:
-        rx0,rx1=111,162; ax1=135.5
+        rx0,rx1=113.5,162; ax1=138
         o+=[caps('NUTRITION',rx0,5.6,1.05,L['deep'],tr=0.2), txt('PER TSP',ax1,5.6,1.15,L['deep'],'G','end')]
         y=6.6; o.append(rule(rx0,y,ax1,y,c,0.22,0.8)); y+=0.15
         for name,amt,dv in NUT:
             y+=2.15; ind=name.startswith('  '); nm=name.strip().replace('Total carbohydrate','Carbohydrate')
             o+=[txt(nm,rx0+(1.2 if ind else 0),y,1.35,c), txt(amt,rx0+18.6,y,1.35,c,'G','end'), txt(dv,ax1,y,1.35,c,'G','end'),
                 rule(rx0,y+0.62,ax1,y+0.62,c,0.1,0.35)]
-        bx0=139
+        bx0=141.5
         o+=[mark(rx1-width(mrp,'GB',1.8),4.2,width(mrp,'GB',1.8),1.9,'c'), txt(mrp,rx1,5.6,1.8,c,'GB','end')]
         b,bw=ean13(st['ean'],bx0+1.5,7.6,0.22,6.0,'#1A120C'); o+=[mark(bx0+0.3,6.6,bw+2.5,10.4)]+b
         o+=dates3(bx0,19.4,4.6,2.1,0.95,1.9,1.7,1.5,c,L['deep'],5.2)
