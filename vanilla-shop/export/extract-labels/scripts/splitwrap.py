@@ -28,6 +28,10 @@ NAME_SI={'01':'වැනිලා සාරය','02':'වැනිලා සා�
 NAME_TA={'01':'வெனிலா சாறு','02':'வெனிலா சாறு','03':'வெனிலா சிரப்'}
 PRINT=274/226
 SI,TA=round(3/0.59/PRINT,2),round(3/0.57/PRINT,2)              # 4.19, 4.34 design mm
+# 100 ml: 'legal' keeps both names at 3 mm (the Sinhala in two lines, the logo on the colour side); 'fit' sets each
+# on one line at the size its space allows (Sinhala about 2.2 mm, Tamil 2.6 mm on the print), the 100 ml otherwise
+# as designed. 'fit' needs the authorities' agreement that small containers may use smaller type.
+SMALL100='legal'
 # the batch fields in Sinhala and Tamil, word for word as on the Vanilla Tea pack on sale
 DATE3=(('MFD','නි.දි.','பொ.செ திகதி'),('EXP','කා.ඉ.දි.','மு.திகதி'))
 # the old labels' panel, the same on all three (its calories line has no figure, so it is left out)
@@ -61,7 +65,7 @@ def front(k,cx,s,size,dx=0):
     volume keeps its legal size"""
     st=C[k]; L=LOOK[k]; c=L['dark']; o=[]
     cx0,cx1=cx+dx+5*s,cx+dx+36*s; mx=(cx0+cx1)/2; a=3*s
-    for (bx,by,dx_,dy) in (() if size=='100' else ((cx0,7*s,1,1),(cx1,7*s,-1,1),(cx0,63*s,1,-1),(cx1,63*s,-1,-1))):   # 100 ml: no room for the corners
+    for (bx,by,dx_,dy) in (() if size=='100' and SMALL100!='fit' else ((cx0,7*s,1,1),(cx1,7*s,-1,1),(cx0,63*s,1,-1),(cx1,63*s,-1,-1))):   # 100 ml: no room for the corners
         o.append(f'<path d="M{bx:.2f} {by+dy*a:.2f}V{by:.2f}H{bx+dx_*a:.2f}" fill="none" stroke="{c}" stroke-width="{max(0.3*s,0.22):.2f}"/>')
     if size in ('500','200'):
         # the card as designed; the Sinhala name on one line where "Premium quality" was, the volume under it
@@ -71,13 +75,20 @@ def front(k,cx,s,size,dx=0):
             caps(st['kind'],mx,48.6*s,max(1.85*s,1.2),L['deep'],'middle',0.3 if s==1 else 0.22)]
         if ry: o.append(rule(cx0+4,ry,cx1-4,ry,c,0.2,0.6))
         o+=[txt(NAME_SI[k],mx,sy,SI,c,'SiB','middle'), txt(f'{size} ml',mx,my,5.4 if size=='500' else 4.0,c,'IS','middle')]
+    elif SMALL100=='fit':
+        # as designed, the Sinhala name on one line sized to the card's side of the label
+        z=min(SI,19.5/width(NAME_SI[k],'SiB',1))
+        o+=[logo(mx,14.2*s,8.4*s,c), rule(cx0+4*s,21.6*s,cx1-4*s,21.6*s,c,0.2,0.6),
+            txt(st['l1'],mx,33*s,12.4*s,c,'IS','middle'), txt(st['l2'],mx,43*s,12.4*s,c,'IS','middle'),
+            caps(st['kind'],mx,48.6*s,1.2,L['deep'],'middle',0.22),
+            txt(NAME_SI[k],mx,27.9,z,c,'SiB','middle'), txt('100 ml',mx,32.0,4.0,c,'IS','middle')]
     else:
-        # 100 ml: at 3 mm the Sinhala name (28 mm) is wider than this card's side of the label (22 mm), so it takes
-        # two lines; the logo moves to the colour side
+        # 100 ml at 3 mm: the Sinhala name (28 mm) is wider than this card's side of the label (22 mm), so it takes
+        # two lines, given Sinhala's own line spacing; the logo moves to the colour side
         w1,w2=NAME_SI[k].split(' ')
-        o+=[txt(st['l1'],mx,8.6,6.2,c,'IS','middle'), txt(st['l2'],mx,13.8,6.2,c,'IS','middle'),
-            txt(w1,mx,18.9,SI,c,'SiB','middle'), txt(w2,mx,23.6,SI,c,'SiB','middle'),
-            caps(st['kind'],mx,27.0,1.2,L['deep'],'middle',0.22), txt('100 ml',mx,31.7,4.0,c,'IS','middle')]
+        o+=[txt(st['l1'],mx,9.6,6.2,c,'IS','middle'), txt(st['l2'],mx,14.8,6.2,c,'IS','middle'),
+            txt(w1,mx,19.4,SI,c,'SiB','middle'), txt(w2,mx,24.6,SI,c,'SiB','middle'),
+            caps(st['kind'],mx,27.7,1.2,L['deep'],'middle',0.22), txt('100 ml',mx,32.0,4.0,c,'IS','middle')]
     o.append(txt(st['no'],cx-4*s,64.2*s,6.4*s,LOOK['01']['on'] if k!='02' else '#FFF6E2','IS','end'))
     return o
 def dates3(x,y,lead,sub,cz,fz,zs,zt,c,deep,vx):
@@ -141,6 +152,10 @@ def wrap_small(k,size):
         o.append(txt('Savor the calm.',x0,6.6,3.0,on,'IS'))
         p,ye=para(SHORT+TAIL.get(k,''),x0,10.4,x1-x0,1.55,2.1,on); o+=p
         o.append(txt(NAME_TA[k],x0,21.0,TA,on,'TaB'))                     # the name in Tamil, one line
+    elif SMALL100=='fit':
+        o.append(txt('Savor the calm.',x0,5.6,2.5,on,'IS'))
+        p,ye=para(SHORT+TAIL.get(k,''),x0,8.7,x1-x0,1.3,1.75,on); o+=p
+        o.append(txt(NAME_TA[k],x0,16.8,min(TA,(x1-x0)/width(NAME_TA[k],'TaB',1)),on,'TaB'))   # one line, to the column
     else:
         # the logo comes over from the front card; the Tamil name, stacked, takes the story's place
         o+=[logo(x0+3.2,5.0,5.6,on), txt('Savor the calm.',x0+8.4,6.6,2.5,on,'IS')]
