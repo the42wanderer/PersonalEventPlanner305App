@@ -28,6 +28,28 @@ def place(x, y, w, h):
     return f'<rect x="{x:.2f}" y="{y:.2f}" width="{w:.2f}" height="{h:.2f}" fill="#FF2BA6" opacity="0.3" rx="0.4"/>' if MASTER else ''
 DATE3 = (('MFD', 'නි.දි.', 'பொ.செ திகதி'), ('EXP', 'කා.ඉ.දි.', 'மு.திகதி'))
 
+def texture(im, kind, look):
+    """what the jar holds, as a texture over the painting: 'seeds' - a fine scatter of vanilla seeds (the paste);
+    'dust' - a fine matte dusting (the powder)"""
+    import numpy as np
+    from PIL import Image, ImageDraw, ImageFilter
+    if not kind: return im
+    rng = np.random.default_rng(7); w, h = im.size; ov = Image.new('RGBA', (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(ov)
+    if kind == 'seeds':
+        for _ in range(int(w * h / 400 * 0.09)):                               # about 9 seeds per cm²
+            x, y = rng.uniform(0, w), rng.uniform(0, h); r = rng.uniform(1.1, 2.0); e = rng.uniform(1.6, 2.6); t = rng.uniform(0, np.pi)
+            pts = [(x + r * e * np.cos(a) * np.cos(t) - r * np.sin(a) * np.sin(t), y + r * e * np.cos(a) * np.sin(t) + r * np.sin(a) * np.cos(t))
+                   for a in np.linspace(0, 2 * np.pi, 10)]
+            d.polygon(pts, fill=(20, 11, 6, int(rng.uniform(110, 190))))
+        ov = ov.filter(ImageFilter.GaussianBlur(0.5))
+    else:
+        c = tuple(int(look['dark'][i:i + 2], 16) for i in (1, 3, 5))
+        for _ in range(int(w * h / 400 * 1.6)):
+            x, y = rng.uniform(0, w), rng.uniform(0, h); r = rng.uniform(0.5, 1.3)
+            d.ellipse((x - r, y - r, x + r, y + r), fill=c + (int(rng.uniform(25, 60)),))
+        ov = ov.filter(ImageFilter.GaussianBlur(0.6))
+    return Image.alpha_composite(im.convert('RGBA'), ov).convert('RGB')
+
 def art(k, artdir):
     """the painting (jarart.py, 172 x 70 mm) scaled to the label height; its right 103 mm are the colour half and its
     left bleed; the top and bottom bleed repeat the edge rows"""
@@ -36,6 +58,7 @@ def art(k, artdir):
     im = Image.open(f'{artdir}/wart-{k}.png').convert('RGB'); s = H / 70
     im = im.resize((round(im.width * s), round(H * 20)), Image.LANCZOS)
     full = round((CX + B) * 20); im = im.crop((im.width - full, 0, im.width, im.height))
+    im = texture(im, JAR[k].get('texture'), JAR[k]['look'])
     a = np.pad(np.asarray(im), ((round(B * 20),) * 2, (0, 0), (0, 0)), mode='reflect')
     p = f'{artdir}/jart-{k}.jpg'; Image.fromarray(a).save(p, quality=94); return p
 
