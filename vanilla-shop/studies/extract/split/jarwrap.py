@@ -12,12 +12,13 @@ W, H, CX, B = 200, 42, 100, 3.0
 PAPER = '#F7EFDC'
 # 3 mm letter height for the names (Noto Serif Sinhala Bold 0.59 em, Tamil Bold 0.57 em), printed at this size
 SI, TA = round(3 / 0.59, 2), round(3 / 0.57, 2)
+# Powder in Sinhala: පිටි (as in කිරි පිටි, milk powder), not කුඩු, which is slang for heroin.
 SHORT = 'Grown in the hills of Kandy, Matale and Nuwara Eliya, where every vanilla flower is pollinated by hand.'
 JAR = {
     '04': dict(no='No. 04', l1='Vanilla', l2='Paste', kind='NATURAL VANILLA PASTE', si='වැනිලා පේස්ට්', ta='வெனிலா பேஸ்ட்',
                tail=' Made from the cured pods, seeds and all.', best='Baking and desserts',
                look=dict(dark='#3E2418', deep='#7A4A30', on='#FBEBDD', on2='#E2B999')),
-    '05': dict(no='No. 05', l1='Vanilla', l2='Powder', kind='NATURAL VANILLA POWDER', si='වැනිලා කුඩු', ta='வெனிலா தூள்',
+    '05': dict(no='No. 05', l1='Vanilla', l2='Powder', kind='NATURAL VANILLA POWDER', si='වැනිලා පිටි', ta='வெனிலா தூள்',
                tail=' The cured pods, dried and ground.', best='Drinks and baking',
                look=dict(dark='#45182D', deep='#8A3D62', on='#FBE9EF', on2='#E6B3C6')),
 }
