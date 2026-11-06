@@ -103,3 +103,12 @@ The same rules applied to the wraps in `export/extract-labels/` (details in its 
   - Bold for the English name and net volume (Instrument Serif has no bold).
   - Whether "with alcohol" / "alcohol-free" is part of the common name.
   - A native reader's check of the translations.
+
+## The 100 g tea pouch labels (November 2026)
+
+Front and back labels on the same 70 × 110 mm die (`export/handover/pouch-labels/`, built by `tools/pouch_labels.py`).
+- **Front:** English, with the Sinhala name on the card at the foot. Bold, letters 3 mm high.
+- **Back:** the Tamil name, the net weight in all three languages, the distributor, and the barcode with MRP, MFD,
+  EXP and B.N. labelled in all three languages.
+- **Still to confirm:** the back sticker's size on the pouch, bold for the net weight, and a native reader's check of
+  the translations.
